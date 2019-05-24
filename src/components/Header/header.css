@@ -1,0 +1,25 @@
+
+.dropdown-menu.show{
+    left: -50px !important;
+    top: 4px !important;
+  }
+  .roundbutton{
+    width: 50px !important;
+    height: 45px !important;
+  }
+  
+  #basic-nav-dropdown{
+    color: #FFFFFF
+  }
+  
+  
+  .dropdown-toggle::after {
+    display: inline-block !important;
+    margin-left: .255em !important;
+    vertical-align: .255em !important;
+    content: none !important;
+    border-top: .3em solid !important;
+    border-right: .3em solid transparent !important;
+    border-bottom: 0 !important;
+    border-left: .3em solid transparent !important;
+  }

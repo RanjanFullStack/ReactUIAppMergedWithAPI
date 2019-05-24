@@ -1,0 +1,9 @@
+table{
+  border-bottom: 1px solid #dee2e6;
+  border-top: 0px
+}
+
+.border-th{
+  border-bottom: 1px solid #dee2e6 !important;
+  border-top: 0px !important;
+}

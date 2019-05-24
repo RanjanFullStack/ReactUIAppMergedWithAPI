@@ -1,0 +1,45 @@
+{
+  "name": "temp",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "bootstrap": "^4.3.1",
+    "create-react-class": "^15.6.3",
+    "dateformat": "^3.0.3",
+    "dotenv": "^7.0.0",
+    "jquery": "^3.3.1",
+    "moment": "^2.24.0",
+    "react": "^16.8.4",
+    "react-addons-update": "^15.6.2",
+    "react-app-env": "^1.2.3",
+    "react-bootstrap": "^1.0.0-beta.6",
+    "react-chips": "^0.8.0",
+    "react-datetime": "^2.16.3",
+    "react-dnd": "^7.4.5",
+    "react-dnd-html5-backend": "^7.4.4",
+    "react-dom": "^16.8.4",
+    "react-globally": "^1.1.0",
+    "react-highcharts": "^16.0.2",
+	"react-numeric-input": "^2.2.3",
+    "react-router-dom": "^5.0.0",
+    "react-scripts": "2.1.8"
+  },
+  "homepage": "/beat/bflow/configurable/dev/APP/",
+  "scripts": {
+    "start": "react-app-env --env-file=.env.local start",
+    "build:dev": "react-app-env --env-file=.env.dev build",
+    "build:test": "react-app-env --env-file=.env.test build",
+    "build:demo": "react-app-env --env-file=.env.prod build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}

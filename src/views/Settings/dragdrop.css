@@ -1,0 +1,66 @@
+.App {
+    text-align: center;
+    width: 100%;
+    margin: 15px auto;
+  }
+  
+  .container-drag {
+    text-align: center;
+  }
+  
+  .wip {
+    position: absolute;
+    width: 400px;
+    height: 24vh;
+    background-color: white;
+    border: 1px solid rgba(0,0,0,.125);
+    padding-left: 25px;
+     
+  }
+  
+  .header {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    background-color: #E0E0E0;
+    width:100%;
+  }
+  
+  .task-header {
+    display: inline-block;
+    background-color: skyblue;
+    width:100%;
+  }
+  
+  .droppable {
+    position: absolute;
+    width: 545px;
+    height: 24vh;
+    background-color: white;
+    border: 1px solid rgba(0,0,0,.125);
+     padding-left: 25px;
+  }
+  
+  .draggable {
+    width: 100px;
+    height: 100px;
+    background-color: yellow;
+    margin: 5px auto;
+
+  }
+
+  .marginTop {
+    margin-top: 220px
+  }
+
+  .badge-light {
+    color: #f8f8f8 !important;
+    background-color:  #00568F !important;
+
+   
+  }
+  
+
+  .paddingtop{
+    padding-top: 10px !important
+  }

@@ -1,0 +1,129 @@
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+  }
+  
+  .login-form {
+    max-width: 1200px;
+    margin-top: 25px;
+    display: flex;
+    align-items: center;
+    border: 1px solid lightgray;
+    padding: 20px;
+    background: #fff;
+    min-height: 300px;
+    border-radius: 5px;
+  }
+  .login-container .login-responsive {
+    width: 80%;
+  }
+  @media only screen and (min-width: 768px) {
+    .login-container .login-responsive {
+      width: 25%;
+    }
+  }
+  
+  .login-form .placeholder {
+    /* flex: 0 0 80%; */
+    width: 100%;
+    /* border: 1px solid lightgray; */
+    padding: 20px;
+    border-radius: 10px;
+  }
+  
+  .login-form .login-textbox {
+    width: 100%;
+    font-size: 14px;
+    border: none;
+    border-bottom: 1px #ababab solid;
+    padding: 10px 0px;
+  }
+  
+  .login-row {
+    margin-top: 20px;
+    justify-content: center;
+  }
+  
+  .login-row [data-nep="TextBox"] {
+    width: 80%;
+  }
+  
+  .login-row [data-nep="ErrorMessage"] {
+    width: 80%;
+  }
+  
+  .login-row [data-nep="ErrorMessage"] div {
+    padding: 0px 0px !important;
+  }
+  
+  .login-button {
+    margin: 20px auto;
+    min-width: auto;
+    width: 80.5%;
+    background: #00568F !important;
+  }
+  
+  .login-container {
+    height: 100vh;
+    overflow: hidden;
+    background: url("../../assets/img/moodys_background.jpg") no-repeat; 
+    background-size: cover;
+  }
+  
+  .brand-logo {
+    height: 10%;
+    width: 100%;
+  }
+  
+  .edge-banner {
+    display: flex;
+    flex: 0 0 100%;
+    width: 100%;
+  
+    flex-flow: row wrap;
+  }
+  
+  .edge-banner .edge-title {
+    /* flex-flow: column nowrap;
+      flex: 0 0 50%; */
+    padding: 0px;
+    margin: 0px;
+    text-align: right;
+    padding-bottom: 7px;
+  }
+  
+  .edge-banner .edge-title h2 {
+    width: 100%;
+  }
+  
+  .edge-logo {
+    margin: auto auto;
+    padding: 0px;
+  }
+  
+  .edge-logo img {
+    /* flex: 1 1 auto; */
+    width: 100%;
+  }
+  
+  /* .errorMessage [data-nep="ErrorMessage"] {
+    /* margin: 0 auto 0 auto; */
+  /* margin-left: 7%; */
+  /* width: 80%; */
+  /* } */
+  
+  .errorMessage.span {
+    visibility: hidden;
+  }
+  
+  .login-textbox.error-state {
+    border: none;
+    border-bottom: 1px red solid;
+  }
+  
+  .product-logo{
+    height: 10%;
+    width: 56%;
+  }

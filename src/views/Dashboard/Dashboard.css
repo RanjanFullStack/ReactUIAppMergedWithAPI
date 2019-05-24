@@ -1,0 +1,17 @@
+.content
+{
+    padding: 30px 15px;
+    min-height: calc(100% - 123px);
+}
+
+.bf-h100{
+    height: 100px !important;
+}
+
+.bf-font-size-15 {
+    font-size: 15px !important;
+}
+
+.bf-mb-60{
+    margin-bottom: 60px;
+}

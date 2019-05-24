@@ -1,0 +1,41 @@
+selected {
+    background: "#666";
+  }
+  container {
+    display: "flex";
+    align-items: "center";
+    height: 32;
+    box-sizing: 'border-box';
+    color: "#eee";
+    font-weight: 'bold';
+    background: "#333";
+    margin: "2.5px";
+    border-radius: 16px;
+    cursor: 'default';
+  }
+  image{
+    width: 24;
+    height: 24;
+    margin: 4;
+    overflow: 'hidden';
+    border-radius: 12;
+    background: "#888";
+  }
+  text{
+    font-size: 13;
+    box-sizing: 'border-box';
+    padding: '0px 4px 0px 8px';
+  
+  }
+  remove{
+    text-align: "center";
+    cursor: "pointer";
+    font-size: 18;
+    width: 20;
+    height: 20;
+    color: "#e0e0e0";
+    border-radius: 12;
+    background: "#666";
+    margin: "0 6px";
+  }
+ 

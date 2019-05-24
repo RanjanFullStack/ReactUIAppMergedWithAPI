@@ -1,0 +1,62 @@
+variables:
+  CI: "false"
+  NODE_TLS_REJECT_UNAUTHORIZED: "0"
+
+before_script:
+  - yarn
+stages:
+  - test_stage
+  - build_stage
+  - deploy_dev_stage
+  - deploy_test_stage
+  - deploy_demo_stage
+
+cache:
+  paths:
+    - node_modules/
+
+test:
+
+  stage: test_stage
+  tags:
+   - BeatFlow-v2
+  only:
+    - master
+  script:
+    - yarn test
+
+build:
+  stage: build_stage
+  tags:
+   - BeatFlow-v2
+  only:
+    - master
+  script:
+    - yarn build
+
+deploy_dev:
+  stage: deploy_dev_stage
+  tags:
+   - BeatFlow-v2
+  only:
+    - master
+  script:
+    - yarn deploy
+
+deploy_test:
+  only:
+    - master
+  stage: deploy_test_stage
+  script:
+    - yarn deploy:test
+  when: manual
+
+deploy_demo:
+  only:
+    - master
+  stage: deploy_demo_stage
+  script:
+    - yarn deploy:demo
+  dependencies:
+    - deploy_test
+  when: manual
