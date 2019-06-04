@@ -1,129 +1,198 @@
 .login-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+}
+
+.login-form {
+  margin-top: 25px;
+  display: flex;
+  align-items: center;
+  border: 1px solid lightgray;
+  padding: 40px;
+  background: #fff;
+  height: 430px;
+  width: 400px;
+}
+.login-container .login-responsive {
+  width: 80%;
+}
+.div-login-form{
+  height: 400px;
+  margin-top: 32px;
+}
+@media only screen and (min-width: 768px) {
+  .login-container .login-responsive {
+    width: 25%;
   }
-  
-  .login-form {
-    max-width: 1200px;
+}
+
+.login-form .placeholder {
+  /* flex: 0 0 80%; */
+  width: 100%;
+  /* border: 1px solid lightgray; */
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.login-form .login-textbox {
+  width: 100%;
+  font-size: 14px;
+  border: none;
+  border-bottom: 1px #ababab solid;
+  padding: 10px 0px;
+}
+
+.login-row {
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.login-row [data-nep="TextBox"] {
+  width: 80%;
+}
+
+.login-row [data-nep="ErrorMessage"] {
+  width: 80%;
+}
+
+.login-row [data-nep="ErrorMessage"] div {
+  padding: 0px 0px !important;
+}
+
+.login-button {
+  margin: 20px auto;
+  min-width: auto;
+  width: 80.5%;
+  background: #00568F !important;
+}
+
+.login-container {
+  height: 100vh;
+  overflow: hidden;
+  background: url("../../assets/img/moodys_background.jpg") no-repeat; 
+  background-size: cover;
+}
+.brand-logo {
+  height: 10%;
+  width: 70%;
+}
+.edge-banner {
+  display: flex;
+  flex: 0 0 100%;
+  width: 100%;
+  flex-flow: row wrap;
+}
+.edge-banner .edge-title {
+  /* flex-flow: column nowrap;
+    flex: 0 0 50%; */
+  padding: 0px;
+  margin: 0px;
+  text-align: right;
+  padding-bottom: 7px;
+}
+
+.edge-banner .edge-title h2 {
+  width: 100%;
+}
+
+.edge-logo {
+  margin: auto auto;
+  padding: 0px;
+}
+
+.edge-logo img {
+  /* flex: 1 1 auto; */
+  width: 100%;
+}
+
+/* .errorMessage [data-nep="ErrorMessage"] {
+  /* margin: 0 auto 0 auto; */
+/* margin-left: 7%; */
+/* width: 80%; */
+/* } */
+
+.errorMessage.span {
+  visibility: hidden;
+}
+
+.login-textbox.error-state {
+  border: none;
+  border-bottom: 1px red solid;
+}
+
+
+.forgot-password-text{
+color: #77777d;
+font-size: 18px;
+}
+.forgot-password-desc{
+color: lightslategray;
+}
+.forgot-password-link{
+color: #00568F;
+font-size: 14px;
+float: right;
+cursor: pointer;
+}
+.div-product-logo{
+display: flex;
+justify-content: center;
+margin-bottom: 35px;
+}
+.div-product-logo > img{
+width: 76%;
+height: 86%;
+}
+.div-brand-log{
+display: flex;
+justify-content: center;
+}
+.btn-login-secondary{
+  margin: 20px auto;
+  min-width: auto;
+  width: 80.5%;
+  border-color: #adb7c1;
+  background-color: #f8f9fa;
+  color: #212529;
+}
+.div-forgot-password-form{
+  height: 450px;
+  margin-top: 32px;
+}
+.forgot-password-email{
+  margin-top: 40px;
+}
+.div-forgot-password-button{
+  padding-top: 31px;
+  border: #b5b9bd;
+}
+.reset-password-msg{
+  height: 400px;
+}
+.reset-password{
+  height: 400px;
+  width: 137%;
+}
+
+.div-reset-password-btn{
+  width: 123%;
+}
+.check-icon{
+  color: #77777d;
+}
+.password-policy-text{
+  color: #77777d;
+}
+
+.reset-password-form{
     margin-top: 25px;
     display: flex;
     align-items: center;
     border: 1px solid lightgray;
-    padding: 20px;
+    padding: 40px;
     background: #fff;
-    min-height: 300px;
-    border-radius: 5px;
-  }
-  .login-container .login-responsive {
-    width: 80%;
-  }
-  @media only screen and (min-width: 768px) {
-    .login-container .login-responsive {
-      width: 25%;
-    }
-  }
-  
-  .login-form .placeholder {
-    /* flex: 0 0 80%; */
-    width: 100%;
-    /* border: 1px solid lightgray; */
-    padding: 20px;
-    border-radius: 10px;
-  }
-  
-  .login-form .login-textbox {
-    width: 100%;
-    font-size: 14px;
-    border: none;
-    border-bottom: 1px #ababab solid;
-    padding: 10px 0px;
-  }
-  
-  .login-row {
-    margin-top: 20px;
-    justify-content: center;
-  }
-  
-  .login-row [data-nep="TextBox"] {
-    width: 80%;
-  }
-  
-  .login-row [data-nep="ErrorMessage"] {
-    width: 80%;
-  }
-  
-  .login-row [data-nep="ErrorMessage"] div {
-    padding: 0px 0px !important;
-  }
-  
-  .login-button {
-    margin: 20px auto;
-    min-width: auto;
-    width: 80.5%;
-    background: #00568F !important;
-  }
-  
-  .login-container {
-    height: 100vh;
-    overflow: hidden;
-    background: url("../../assets/img/moodys_background.jpg") no-repeat; 
-    background-size: cover;
-  }
-  
-  .brand-logo {
-    height: 10%;
-    width: 100%;
-  }
-  
-  .edge-banner {
-    display: flex;
-    flex: 0 0 100%;
-    width: 100%;
-  
-    flex-flow: row wrap;
-  }
-  
-  .edge-banner .edge-title {
-    /* flex-flow: column nowrap;
-      flex: 0 0 50%; */
-    padding: 0px;
-    margin: 0px;
-    text-align: right;
-    padding-bottom: 7px;
-  }
-  
-  .edge-banner .edge-title h2 {
-    width: 100%;
-  }
-  
-  .edge-logo {
-    margin: auto auto;
-    padding: 0px;
-  }
-  
-  .edge-logo img {
-    /* flex: 1 1 auto; */
-    width: 100%;
-  }
-  
-  /* .errorMessage [data-nep="ErrorMessage"] {
-    /* margin: 0 auto 0 auto; */
-  /* margin-left: 7%; */
-  /* width: 80%; */
-  /* } */
-  
-  .errorMessage.span {
-    visibility: hidden;
-  }
-  
-  .login-textbox.error-state {
-    border: none;
-    border-bottom: 1px red solid;
-  }
-  
-  .product-logo{
-    height: 10%;
-    width: 56%;
-  }
+    height: 487px;
+    width: 400px;
+}

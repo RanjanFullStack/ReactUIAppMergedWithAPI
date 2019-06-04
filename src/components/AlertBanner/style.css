@@ -1,6 +1,6 @@
 
 
-.alertBanner {
+.errorAlertBanner .alertBanner {
   min-width: 400px;
     height: 40px;
     vertical-align: middle;
@@ -15,35 +15,35 @@
    
 }
 
-.toppadding{
+.errorAlertBanner .toppadding{
   top:-10px !important;
 }
 
-.topforsidebar{
+.errorAlertBanner .topforsidebar{
   top:80px;
 }
 
 
-.text-size{
+.errorAlertBanner .text-size{
   font-size: 14px
 }
-.center{
+.errorAlertBanner .center{
 text-align: center
 }
 
 
-.inline {
+.errorAlertBanner .inline {
   position: relative;
   margin-bottom: 10px;
 }
 
-.middle {
+.errorAlertBanner .middle {
   display: table-cell;
   vertical-align: middle;
   width: 100%;
 }
 
-.content {
+.errorAlertBanner .content {
  
 
   margin-left: auto;
@@ -54,7 +54,7 @@ text-align: center
   
 }
 
-.close {
+.errorAlertBanner .close {
   display: table-cell;
   vertical-align: middle;
   margin-right: 22px;
@@ -65,7 +65,7 @@ text-align: center
   color: white
 }
 
-  .inline {
+.errorAlertBanner .inline {
     margin-right: 12px;
     margin-top: 10px;
     margin-bottom: 9px;

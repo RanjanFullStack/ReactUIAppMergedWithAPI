@@ -52,7 +52,9 @@ class Role extends Component {
       errorName: '',
       showErrorMesage: false,
       errorMessageType: '',
-      errorMessage: ''
+      errorMessage: '',
+      isNotifiedOnCreateRequest:false,
+      isNotifiedOnCreateRequestupdate:false,
     }
     this.searchHandler = this.searchHandler.bind(this);
     this.searchUserHandler = this.searchUserHandler.bind(this);
@@ -71,12 +73,17 @@ class Role extends Component {
 
     this.setState({ AllRolelist: responseJson })
     this.setState({ Rolelist: responseJson })
-    if (responseJson.length > 0) {
+   
+    if (responseJson.length > 0 && this.state.RoleId===0) {
       this.setState({ RoleName: responseJson[0].name })
       this.setState({ RoleId: responseJson[0].id })
       this.setState({ isRoleActive: responseJson[0].isActive })
       this.getRoleByID(responseJson[0].id);
+      this.setState({isNotifiedOnCreateRequestupdate:responseJson[0].isNotifiedOnCreateRequest})
       this.setState({ disableButton: false })
+    }
+    else if(this.state.RoleId!==0){
+      this.whileupdategetrolebyid(this.state.RoleId);
     }
     else {
       this.setState({ disableButton: true });
@@ -84,7 +91,7 @@ class Role extends Component {
 
   }
 
-  SetRoleIdandName(id, name, isActive) {
+  SetRoleIdandName(id, name, isActive,isNotified) {
     UserMappedId = [];
     MapUserWithRoles = [];
     //this.setState({FeaturesList:[]})
@@ -93,7 +100,8 @@ class Role extends Component {
     this.setState({ RoleId: id })
     this.setState({ isRoleActive: isActive })
     this.setState({ RoleValue: name })
-    this.setState({ SelectAll: false })
+    this.setState({ SelectAll: false})
+    this.setState({isNotifiedOnCreateRequestupdate:isNotified})
     //this.getFeatures();
     this.getRoleByID(id);
     this.GetUser();
@@ -128,11 +136,24 @@ class Role extends Component {
     this.setState({ FeaturesList: test });
   }
 
-  async  getRoleByID(id) {
+  async  whileupdategetrolebyid(id){
     const responseJson = await BFLOWDataService.getbyid('Role', id);
+    this.setState({ RoleName: responseJson.name })
+    this.setState({ RoleId: responseJson.id })
+    this.setState({ isRoleActive: responseJson.isActive })
+    this.getRoleByID(responseJson.id);
+    this.setState({isNotifiedOnCreateRequestupdate:responseJson.isNotifiedOnCreateRequest})
+    this.setState({ disableButton: false })
 
+  }
 
-    this.setState({ Rolelistbyid: responseJson })
+  async  getRoleByID(id) {    
+    const responseJson = await BFLOWDataService.getbyid('Role', id);
+    this.setState({ Rolelistbyid: responseJson,
+      RoleValue :responseJson.name,
+      RoleName: responseJson.name
+    })
+
   }
 
 
@@ -169,14 +190,15 @@ class Role extends Component {
 
   }
   OpenModel() {
+    this.setState({Name:""})
     this.setState({ show: true })
   }
   //Close pop
   handleClose() {
-    this.setState({ 
+    this.setState({
       show: false,
       errorName: ''
-     })
+    })
   }
 
   showFeatures(name) {
@@ -210,7 +232,7 @@ class Role extends Component {
 
 
           <i onClick={this.ShowRoleEdit.bind(this)} className="text-muted d-inline cursor-pointer"> <img src={cancelIcon} alt="cancelIcon" /></i>
-          <i disabled={this.state.Rolelist.length === 0} onClick={this.EditRole.bind(this)} className="text-muted d-inline cursor-pointer"> <img src={confirmIcon} /></i>
+          <i disabled={this.state.Rolelist.length === 0} onClick={this.EditRole.bind(this)} className="text-muted d-inline cursor-pointer"> <img src={confirmIcon} alt="confirmIcon" /></i>
         </div>
 
       )
@@ -231,6 +253,11 @@ class Role extends Component {
             <div className="d-inline float-right">
               <i className="text-muted cursor-pointer" onClick={this.ShowRoletextEdit.bind(this)} ><img src={editIcon} /></i> </div>
             <div className="d-inline float-right"></div>
+ <label className="px-1 text-secondary float-right"> | </label>
+            <label class="switch float-right mt-1" title="Is Notified On Create Request">
+                           <input type="checkbox"  checked={this.state.isNotifiedOnCreateRequestupdate}  onChange={this.updateNotifiedOnCreateReques.bind(this)} />
+                           <span class="slider round"></span>
+                        </label>
 
           </div>
         </>
@@ -256,6 +283,18 @@ class Role extends Component {
       this.setState({ errorName: NameErrMsg });
       blError = true;
     }
+  
+    return blError;
+  }
+
+  ValidateFormEditRole() {
+    let blError = false;
+    const NameErrMsg = process.env.REACT_APP_ROLE_ERROR_NAME;
+    if (this.state.RoleValue === null || this.state.RoleValue === '' || this.state.RoleValue === undefined) {
+      this.setState({ errorName: NameErrMsg });
+      blError = true;
+    }
+  
     return blError;
   }
 
@@ -266,8 +305,7 @@ class Role extends Component {
         date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
       const body = JSON.stringify({
         Name: this.state.Name,
-        CreatedBy: 1,
-        CreatedOn: date
+        IsNotifiedOnCreateRequest:this.state.isNotifiedOnCreateRequest
       });
       const response = await BFLOWDataService.post('Role', body);
       if (response.Code === false && response.Code !== undefined) {
@@ -293,9 +331,10 @@ class Role extends Component {
 
 
   async EditRole() {
-    var value = this.ValidateForm();
+    var value = this.ValidateFormEditRole();
     if (value === false) {
-      const body = JSON.stringify({ Name: this.state.RoleValue });
+      const body = JSON.stringify({ Name: this.state.RoleValue,IsNotifiedOnCreateRequest: this.state.isNotifiedOnCreateRequestupdate });
+        
       const response = await BFLOWDataService.put('Role', this.state.RoleId, body);
       if (response.Code === false && response.Code !== undefined) {
         this.setState({
@@ -311,17 +350,21 @@ class Role extends Component {
           errorMessageType: 'success',
           showtextbox: false,
           showRoleTextbox: false
+        
         });
         this.GetRole()
       }
       this.handleClose();
       this.setTimeOutForToasterMessages();
     }
+    
   }
 
-  async DeleteRole() {
-    if (window.confirm("Do you wish to delete this item?")){
-    const response = await BFLOWDataService.Delete('Role', this.state.RoleId);
+  async updateNotifiedOnCreateReques(){
+    
+    this.setState({isNotifiedOnCreateRequestupdate:!this.state.isNotifiedOnCreateRequestupdate})
+    const body = JSON.stringify({ Name: this.state.RoleValue ,IsNotifiedOnCreateRequest: !this.state.isNotifiedOnCreateRequestupdate });
+    const response = await BFLOWDataService.put('Role', this.state.RoleId, body);
     if (response.Code === false && response.Code !== undefined) {
       this.setState({
         showErrorMesage: true,
@@ -333,12 +376,37 @@ class Role extends Component {
       this.setState({
         showErrorMesage: true,
         errorMessage: response,
-        errorMessageType: 'success'
+        errorMessageType: 'success',
+        showtextbox: false,
+        showRoleTextbox: false
       });
-      this.GetRole()
+      this.GetRole();
     }
+    this.handleClose();
     this.setTimeOutForToasterMessages();
+  
   }
+
+  async DeleteRole() {
+    if (window.confirm("Do you wish to delete this item?")) {
+      const response = await BFLOWDataService.Delete('Role', this.state.RoleId);
+      if (response.Code === false && response.Code !== undefined) {
+        this.setState({
+          showErrorMesage: true,
+          errorMessage: response.Message,
+          errorMessageType: 'danger'
+        });
+      }
+      else {
+        this.setState({
+          showErrorMesage: true,
+          errorMessage: response,
+          errorMessageType: 'success'
+        });
+        this.GetRole()
+      }
+      this.setTimeOutForToasterMessages();
+    }
   }
 
   async GetUser() {
@@ -408,9 +476,9 @@ class Role extends Component {
         }
       })
     })
-    
+
     const body = JSON.stringify(MapRoleWithFeatures);
-    const response = await BFLOWDataService.put('Features',this.state.RoleId, body);
+    const response = await BFLOWDataService.put('Features', this.state.RoleId, body);
     if (response.Code === false && response.Code !== undefined) {
       this.setState({
         showErrorMesage: true,
@@ -505,16 +573,6 @@ class Role extends Component {
 
 
   }
-
-  showErrorMessage() {
-    if (this.state.showErrorMesage === true) {
-      return <Alert dismissible variant={this.state.ErrorMesageType}>
-
-        {this.state.ErrorMesage}
-      </Alert>;
-    }
-  }
-
 
   searchUserHandler(event) {
 
@@ -654,7 +712,7 @@ class Role extends Component {
 
     return (
       <>
-<AlertBanner onClose={this.handleCloseErrorMessage.bind(this)} Message={this.state.errorMessage} visible={this.state.showErrorMesage} Type={this.state.errorMessageType}>
+        <AlertBanner onClose={this.handleCloseErrorMessage.bind(this)} Message={this.state.errorMessage} visible={this.state.showErrorMesage} Type={this.state.errorMessageType}>
         </AlertBanner>
 
         {/* <div class="card w-100 border-bottom mt-2 border-top-0 border-right-0 border-left-0 rounded-0 pt-2  h-80">
@@ -683,9 +741,9 @@ class Role extends Component {
                       aria-describedby="inputGroupPrepend"
                       name="Search"
                       onChange={this.searchHandler}
-                      className="search-textbox"
+                   
                       type="text"
-                      class=" search-textbox form-control rounded-0 border-right-0 border-left-0 border-top-0" />
+                      className="search-textbox form-control rounded-0 border-right-0 border-left-0 border-top-0" style={{borderBottom:" border:1px solid #CAC9C7 !important"}} />
                     <div class="input-group-prepend">
                       <span class="search-icon input-group-text bg-white border-left-0  border-top-0" id="inputGroupPrepend">
                         <i class="fa fa-search text-muted" aria-hidden="true"></i>
@@ -704,14 +762,14 @@ class Role extends Component {
 
                   </div>
                 </nav>
-                <ul class="list-group listGroup-scroll" name="RoleList">
+                <ul class="list-group scrollbar" name="RoleList">
 
 
                   {this.state.Rolelist.map((data, key) => {
 
                     return (
                       //  <ListGroup.Item   action className="list-item-listview"><i class="fas fa-circle" style={{color: 'green', paddingRight:'10px',fontSize:'10px'}}></i>{data.name}</ListGroup.Item>
-                      <li onClick={this.SetRoleIdandName.bind(this, data.id, data.name, data.isActive)} name={data.id} id={data.id} action className={this.state.RoleId === data.id ? 'list-group-item rounded-0 pl-2 pt-3 pb-3 text-muted text-truncate  border-left-0 border-right-0 cursor-default bf-minheight-60 active' : 'list-group-item rounded-0 pl-2 pt-3 pb-3 text-muted text-truncate  border-left-0 border-right-0 cursor-default bf-minheight-60'}><i class="fas fa-circle text-success mr-2" style={{ fontSize: ".75rem" }}></i>{data.name}</li>
+                      <li onClick={this.SetRoleIdandName.bind(this, data.id, data.name, data.isActive,data.isNotifiedOnCreateRequest)} name={data.id} id={data.id} action className={this.state.RoleId === data.id ? 'list-group-item rounded-0 pl-2 pt-3 pb-3 text-muted text-truncate  border-left-0 border-right-0 cursor-default bf-minheight-60 active' : 'list-group-item rounded-0 pl-2 pt-3 pb-3 text-muted text-truncate  border-left-0 border-right-0 cursor-default bf-minheight-60'}><i class="fas fa-circle text-success mr-2" style={{ fontSize: ".75rem" }}></i>{data.name}</li>
                     );
 
                   })}
@@ -762,7 +820,7 @@ class Role extends Component {
 
 
                   </nav>
-                  <div class="card rounded-0 border-0 shadow-sm listGroup-scroll" style={{ height: '51vh' }}>
+                  <div class="card rounded-0 border-0 shadow-sm scrollbar" style={{ height: '51vh' }}>
                     <div class="card-body p-0 border-0  ">
 
                       <table class="table w-95 ml-3 mr-3 " style={{ borderbottom: "1px solid #dee2e6" }}>
@@ -817,7 +875,7 @@ class Role extends Component {
                   </div>
                   <div class="bg-white">
                     <div class="card-footer bg-white">
-                      <button type="button" class="common-button btn btn-dark float-right mr-2" name="AddMap" disabled={this.state.disableButton} onClick={this.MapUser.bind(this)}>Map</button>
+                    <button type="button" class="default-button btn btn-dark float-right mr-2 p-0" name="AddMap" disabled={this.state.disableButton} onClick={this.MapUser.bind(this)}>Map</button>
                       {/* <button  type="button"  class=" btn btn-light float-right mr-4 mb-2">Remove</button> */}
                     </div>
                   </div>
@@ -828,80 +886,80 @@ class Role extends Component {
                   eventKey="Features"
                   title="Features"
                 >
-                  <div class="container pt-2 bg-white listGroup-scroll" style={{ height: '56vh' }}>
+                  <div class="container pt-2 bg-white scrollbar" style={{ height: '56vh' }}>
 
                     <div id="accordion">
                       {this.state.FeaturesList.map((data, key) => {
                         var image = '';
-                        if(data.isDeafult===false){
-                        //  import documentgrey from '../../assets/fonts/document-grey.svg';
-                        // import effortmanagementgrey from '../../assets/fonts/effort_management-grey.svg';
-                        // import requestgrey from '../../assets/fonts/request-grey.svg';
-                        // import usermanagementgrey from '../../assets/fonts/user_management-grey.svg';
-                        // import Preperencesgrey from '../../assets/fonts/Preperences_grey.svg';
-                        // import Settingsgrey from '../../assets/fonts/Settings_grey.svg';
-                        if (data.name === "Requests") {
-                          image = request
-                        }
-                        if (data.name === "Effort Management") {
-                          image = effortmanagement
-                        }
-                        if (data.name === "Documents") {
-                          image = document
-                        }
-                        if (data.name === "User Management") {
-                          image = usermanagement
-                        }
-                        if (data.name === "Preferences") {
-                          image = Preperences
-                        }
-                        if (data.name === "Settings") {
-                          image = Settings
-                        }
+                        if (data.isDeafult === false) {
+                          //  import documentgrey from '../../assets/fonts/document-grey.svg';
+                          // import effortmanagementgrey from '../../assets/fonts/effort_management-grey.svg';
+                          // import requestgrey from '../../assets/fonts/request-grey.svg';
+                          // import usermanagementgrey from '../../assets/fonts/user_management-grey.svg';
+                          // import Preperencesgrey from '../../assets/fonts/Preperences_grey.svg';
+                          // import Settingsgrey from '../../assets/fonts/Settings_grey.svg';
+                          if (data.name === "Requests") {
+                            image = request
+                          }
+                          if (data.name === "Effort Management") {
+                            image = effortmanagement
+                          }
+                          if (data.name === "Documents") {
+                            image = document
+                          }
+                          if (data.name === "User Management") {
+                            image = usermanagement
+                          }
+                          if (data.name === "Preferences") {
+                            image = Preperences
+                          }
+                          if (data.name === "Settings") {
+                            image = Settings
+                          }
 
 
-                        return (
-                          <div className={this.state.showFeaturesView === data.name ? "card" : "card"}>
-                            <div class="card-header bg-white listGroup-scroll" onClick={this.showFeatures.bind(this, data.name)}>
-                              <a class="card-link " data-toggle="collapse"  >
-                                <i className="text-muted cursor-pointer"  ><img src={image} /></i>
-                                <label className="pl-3 text-bold-500"> {data.name}</label>
+                          return (
+                            <div className={this.state.showFeaturesView === data.name ? "card" : "card"}>
+                              <div class="card-header bg-white scrollbar" onClick={this.showFeatures.bind(this, data.name)}>
+                                <a class="card-link " data-toggle="collapse"  >
+                                  <i className="text-muted cursor-pointer"  ><img src={image} /></i>
+                                  <label className="pl-3 text-bold-500"> {data.name}</label>
 
 
-                              </a>
+                                </a>
 
-                              <i aria-controls="configuration-collapse"
-                                className={this.state.showFeaturesView === data.name ? "fas fa-angle-up float-right sidebar-list-item-arrow" : "fas fa-angle-down float-right sidebar-list-item-arrow"}
-                              />
-                            </div>
-                            <div id="collapseOne" class={this.state.showFeaturesView === data.name ? "collapse show" : "collapse"}>
-                              <div class="card-body">
-                                <ul class="list-group listGroup-scroll" name="AttributesList">
-
-
-                                  {data.features.map((featuresdata, key) => {
+                                <i aria-controls="configuration-collapse"
+                                  className={this.state.showFeaturesView === data.name ? "fas fa-angle-up float-right sidebar-list-item-arrow" : "fas fa-angle-down float-right sidebar-list-item-arrow"}
+                                />
+                              </div>
+                              <div id="collapseOne" class={this.state.showFeaturesView === data.name ? "collapse show" : "collapse"}>
+                                <div class="card-body">
+                                  <ul class="list-group scrollbar" name="AttributesList">
 
 
+                                    {data.features.map((featuresdata, key) => {
 
-                                    return (
-                                      //  <ListGroup.Item   action className="list-item-listview"><i class="fas fa-circle" style={{color: 'green', paddingRight:'10px',fontSize:'10px'}}></i>{data.name}</ListGroup.Item>
-                                      <li name={featuresdata.name} className="list-group-item rounded-0 pl-2 pt-2 pb-2 text-muted text-truncate  border-left-0 border-right-0  border-top-0 border-bottom-0 cursor-default bf-minheight-30"><label>{featuresdata.name}</label>
-                                        <label class="switch float-right">
-                                          <input type="checkbox" name={featuresdata.id} onChange={this.handlefeaturesCheck.bind(this)} checked={featuresdata.isMapped} />
-                                          <span class="slider round"></span>
-                                        </label>
-                                      </li>
-                                    );
 
-                                  })}
 
-                                </ul>
+                                      return (
+                                        //  <ListGroup.Item   action className="list-item-listview"><i class="fas fa-circle" style={{color: 'green', paddingRight:'10px',fontSize:'10px'}}></i>{data.name}</ListGroup.Item>
+                                        <li name={featuresdata.name} className="list-group-item rounded-0 pl-2 pt-2 pb-2 text-muted text-truncate  border-left-0 border-right-0  border-top-0 border-bottom-0 cursor-default bf-minheight-30"><label>{featuresdata.name}</label>
+                                          <label class="switch float-right">
+                                            <input type="checkbox" name={featuresdata.id} onChange={this.handlefeaturesCheck.bind(this)} checked={featuresdata.isMapped} />
+                                            <span class="slider round"></span>
+                                          </label>
+                                        </li>
+                                      );
 
+                                    })}
+
+                                  </ul>
+
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        )
-                                }
+                          )
+                        }
                       })}
 
                     </div>
@@ -942,6 +1000,11 @@ class Role extends Component {
                   />
                   <div className="errorMsg">{this.state.errorName}</div>
                 </div>
+                <div class="custom-control-lg custom-control custom-checkbox  pl-5">
+                                                <input type="checkbox" class="custom-control-input" id="chkIsNotifiedOnCreateRequest" name="IsNotifiedOnCreateRequest" onChange={()=>this.setState({isNotifiedOnCreateRequest:!this.state.isNotifiedOnCreateRequest})}  />
+                                                <label class="custom-control-label" for="chkIsNotifiedOnCreateRequest"></label>
+                                                <span className="text-truncate ">Is Notified On Create Request</span>
+                                             </div>
               </div>
             </form>
 

@@ -10,28 +10,35 @@ const KeyValue = React.lazy(() =>import ('../../views/Settings/KeyValue'));
 const Role = React.lazy(() =>import ( '../../views/System/Role'));
 const Status = React.lazy(() =>import ('../../views/Settings/Status'));
 const EmailNotifications = React.lazy(() =>import ( '../../views/System/EmailNotifications'));
+const AccountSettings = React.lazy(() =>import ('../../views/User/AccountSettings'));
+const DocumentRepository = React.lazy(() => import ("../../views/DocumentRepository/DocumentRepository"));
+const Reports = React.lazy(() =>import ('../../views/Reports/Reports'));
+
 const Routes = [
   {
     path: "/Dashboard",
     name: "Dashboard",
     icon: "fas fa-chart-bar sidebar-list-item-icon",
     component: Dashboard,
-    children: false
+    children: false,
+   
   },
 
   {
-    path: "/Request",
-    name: "Request",
+    path: "/Requests",
+    name: "Requests",
     icon: "fas fa-file-medical sidebar-list-item-icon",
     component: Request,
-    children: false
+    children: false,
+    
   },
   {
     path: "/master/:name",
     name: "Customization",
     icon: "fas fa-sliders-h sidebar-list-item-icon",
     component: Master,
-    Dynamic: true
+    Dynamic: true,
+   
 
   },
   {
@@ -40,8 +47,9 @@ const Routes = [
     icon: "fas fa-cogs sidebar-list-item-icon",
     component: null,
     children: true,
+   
     childrenData: [
-      { path: "/Workflow", name: "Work Flow", icon: "far fa-snowflake sidebar-list-item-icon", component: Events },
+      { path: "/Workflow", name: "Workflow", icon: "far fa-snowflake sidebar-list-item-icon", component: Events },
       { path: "/CustomFields", name: "Custom Fields", icon: "far fa-snowflake sidebar-list-item-icon", component: KeyValue },
       { path: "/CustomDates",name : "Custom Dates" ,icon:"far fa-snowflake sidebar-list-item-icon", component:Status},
       { path: "/EmailNotifications",name : "Email Notifications" ,icon:"far fa-snowflake sidebar-list-item-icon", component:EmailNotifications}
@@ -53,11 +61,41 @@ const Routes = [
     icon: "fas fa-user-friends sidebar-list-item-icon",
     component: null,
     children: true,
+  
     childrenData: [
-      { path: "/user/Timezone", name: "Timezone", icon: "far fa-snowflake sidebar-list-item-icon", component: TimeZone },
+      { path: "/user/TimeZone", name: "Time Zone", icon: "far fa-snowflake sidebar-list-item-icon", component: TimeZone },
       { path: "/user/Role", name: "Role", icon: "far fa-snowflake sidebar-list-item-icon", component: Role },
-      { path: "/user/userprofile", name: "User Profile", icon: "far fa-snowflake sidebar-list-item-icon", component: UserList }
+      { path: "/user/userprofile", name: "User Profile", icon: "far fa-snowflake sidebar-list-item-icon", component: UserList },
+      // { path: "/user/AccountSettings", name: "Change Password", icon: "far fa-snowflake sidebar-list-item-icon", component: AccountSettings }
     ]
+  },
+
+  {
+    path: "/user/AccountSettings",
+    name: "AccountSettings",
+    icon: "",
+    component: AccountSettings,
+    children: false,
+    IsInternal:true
+
+  },
+
+  {
+    path: "/Reports",
+    name: "Reports",
+    icon: "fas fa-chart-bar sidebar-list-item-icon",
+    component: Reports,
+    children: false,
+
+
+  },
+  {
+    path: "/DocumentRepository",
+    name: "Document Repository",
+    icon: "fa fa-folder sidebar-list-item-icon",
+    component: DocumentRepository,
+    children: false,
+   
   }
 ];
 

@@ -1,9 +1,7 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+ 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
  
@@ -13,3 +11,18 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+@font-face{
+  font-family:"Helvetica Neue LT W05_55 Roman";
+  src:url("./assets/fonts/Moodys-Fonts/522972a6-5867-47ae-82fc-a7cf9bd5d4d4.eot?#iefix");
+  src:url("./assets/fonts/Moodys-Fonts/522972a6-5867-47ae-82fc-a7cf9bd5d4d4.eot?#iefix") format("eot"),url("./assets/fonts/Moodys-Fonts/08b57253-2e0d-4c12-9c57-107f6c67bc49.woff2") format("woff2"),url("./assets/fonts/Moodys-Fonts/08edde9d-c27b-4731-a27f-d6cd9b01cd06.woff") format("woff"),url("./assets/fonts/Moodys-Fonts/8f4a1705-214a-4dd0-80b8-72252c37e688.ttf") format("truetype");
+}
+
+@font-face{
+  font-family:"Helvetica Neue LT W05_75 Bold";
+  src:url("./assets/fonts/Moodys-Fonts/4c21ab66-1566-4a85-b310-fbc649985f88.eot?#iefix");
+  src:url("./assets/fonts/Moodys-Fonts/4c21ab66-1566-4a85-b310-fbc649985f88.eot?#iefix") format("eot"),url("./assets/fonts/Moodys-Fonts/800da3b0-675f-465f-892d-d76cecbdd5b1.woff2") format("woff2"),url("./assets/fonts/Moodys-Fonts/7b415a05-784a-4a4c-8c94-67e9288312f5.woff") format("woff"),url("./assets/fonts/Moodys-Fonts/f07c25ed-2d61-4e44-99ab-a0bc3ec67662.ttf") format("truetype");
+ }
+
+
+

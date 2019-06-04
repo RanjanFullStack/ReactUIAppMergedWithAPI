@@ -17,9 +17,8 @@ function POST(formData) {
     return fetch(`${URL}`, requestOptions).then(handleResponse);
 }
 
-function Get(file) {
+function Get(fileUrl,filename) {
    
-    let fileUrl = file.path;
     const URL = ApiURL + "?fileName="+ fileUrl
   
     const requestOptions = {
@@ -37,7 +36,7 @@ function Get(file) {
                 const fileURL = window.URL.createObjectURL(res);
                 //window.open(fileURL);
                 a.href = fileURL;
-                a.download = file.name;
+                a.download = filename;
                 a.click();
                 window.URL.revokeObjectURL(fileURL);
       

@@ -1,3 +1,12 @@
-  /* .star-rating__star:hover {
-    cursor: pointer;
-  } */
+.day-selected{
+  background: #007bff;
+}
+
+.roundbutton {
+  width: 44px !important;
+  height: 41px !important;
+  margin-right:2px;
+}
+.button-week{
+margin-top: 9px;
+}

@@ -1,6 +1,6 @@
 
-.dropdown-menu.show{
-    left: -50px !important;
+.headerdropdown .dropdown-menu.show{
+    left: -70px !important;
     top: 4px !important;
   }
   .roundbutton{
@@ -12,6 +12,10 @@
     color: #FFFFFF
   }
   
+
+  /* .headerdropdown  .show{
+    left: -50px !important;
+  } */
   
   .dropdown-toggle::after {
     display: inline-block !important;
@@ -23,3 +27,6 @@
     border-bottom: 0 !important;
     border-left: .3em solid transparent !important;
   }
+
+
+  

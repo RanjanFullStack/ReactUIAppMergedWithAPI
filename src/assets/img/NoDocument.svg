@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144">
+  <g id="Group_2316" data-name="Group 2316" transform="translate(-992 -298)">
+    <rect id="Rectangle_1278" data-name="Rectangle 1278" width="144" height="144" transform="translate(992 298)" fill="#fff"/>
+    <g id="Group_2315" data-name="Group 2315" transform="translate(-3302 120.272)">
+      <circle id="Ellipse_170" data-name="Ellipse 170" cx="4.098" cy="4.098" r="4.098" transform="translate(4295 275.292)" fill="#d8e7ec"/>
+      <circle id="Ellipse_172" data-name="Ellipse 172" cx="2.869" cy="2.869" r="2.869" transform="translate(4402.373 218.736)" fill="#d8e7ec"/>
+      <circle id="Ellipse_171" data-name="Ellipse 171" cx="9.836" cy="9.836" r="9.836" transform="translate(4417.946 277.75)" fill="#d8e7ec"/>
+      <g id="Group_1797" data-name="Group 1797" transform="translate(4296.903 216.687)">
+        <g id="Group_1796" data-name="Group 1796">
+          <path id="Path_678" data-name="Path 678" d="M3.279,0l21.31.359L37.861,13.632,37.7,46.719A3.279,3.279,0,0,1,34.425,50H3.279A3.279,3.279,0,0,1,0,46.719V3.279A3.279,3.279,0,0,1,3.279,0Z" transform="matrix(0.985, -0.174, 0.174, 0.985, 0, 6.574)" fill="#ef5555" opacity="0.3"/>
+          <path id="Path_679" data-name="Path 679" d="M4327.608,229.5l3.635,13.2,11.975-2.326Z" transform="translate(-4303.604 -227.041)" fill="#a13737" opacity="0.3"/>
+        </g>
+        <text id="PDF" transform="translate(13.454 36.515) rotate(-11)" fill="#fff" font-size="10" font-family="Arial-BoldMT, Arial" font-weight="700"><tspan x="0" y="0">PDF</tspan></text>
+      </g>
+      <g id="Group_1798" data-name="Group 1798" transform="translate(4353.515 185.728) rotate(14)" opacity="0.3">
+        <g id="Group_1796-2" data-name="Group 1796" transform="translate(0)">
+          <path id="Path_678-2" data-name="Path 678" d="M3.279,0l21.31.359L37.861,13.632,37.7,46.719A3.279,3.279,0,0,1,34.425,50H3.279A3.279,3.279,0,0,1,0,46.719V3.279A3.279,3.279,0,0,1,3.279,0Z" transform="matrix(0.985, -0.174, 0.174, 0.985, 0, 6.574)" fill="#50a0e4"/>
+          <path id="Path_679-2" data-name="Path 679" d="M0,0,3.635,13.2l11.975-2.326Z" transform="translate(24.004 2.459)" fill="#306088"/>
+        </g>
+        <text id="doc" transform="translate(13.454 36.515) rotate(-11)" fill="#fff" font-size="10" font-family="Arial-BoldMT, Arial" font-weight="700"><tspan x="0" y="0">doc</tspan></text>
+      </g>
+      <g id="Group_1799" data-name="Group 1799" transform="matrix(0.899, 0.438, -0.438, 0.899, 4398.344, 228.288)" opacity="0.3">
+        <g id="Group_1796-3" data-name="Group 1796" transform="translate(0 0)">
+          <path id="Path_678-3" data-name="Path 678" d="M2.156,0,16.17.236,24.9,8.965l-.1,21.76a2.156,2.156,0,0,1-2.156,2.156H2.156A2.156,2.156,0,0,1,0,30.725V2.156A2.156,2.156,0,0,1,2.156,0Z" transform="matrix(0.985, -0.174, 0.174, 0.985, 0, 4.324)" fill="#5dc582"/>
+          <path id="Path_679-3" data-name="Path 679" d="M0,0l2.39,8.68,7.875-1.53Z" transform="translate(15.786 1.617)" fill="#317b4b"/>
+        </g>
+        <text id="xls" transform="translate(8.673 23.112) rotate(-11)" fill="#fff" font-size="10" font-family="Arial-BoldMT, Arial" font-weight="700"><tspan x="0" y="0">xls</tspan></text>
+      </g>
+      <g id="Group_1800" data-name="Group 1800" transform="translate(4348.865 277.75)" opacity="0.3">
+        <path id="Rectangle_1013" data-name="Rectangle 1013" d="M0,0H37.8a4,4,0,0,1,4,4V26.327a4,4,0,0,1-4,4H4a4,4,0,0,1-4-4V0A0,0,0,0,1,0,0Z" transform="translate(0.231 5.737)" fill="#8077ba"/>
+        <path id="Path_680" data-name="Path 680" d="M4363.027,298H4374.9l2.618,5.606h-16.8Z" transform="translate(-4360.718 -298)" fill="#4e4780"/>
+      </g>
+    </g>
+  </g>
+</svg>

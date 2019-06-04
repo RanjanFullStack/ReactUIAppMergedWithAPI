@@ -19,26 +19,27 @@ class ContentArea extends Component {
   
         let features = this.props.globalState.features;
         let Accessablefeatures = [];
-     
+        
         if(features===undefined)
         {
            features = await RoleBFLOWDataService.getUserRoles();
            this.props.setGlobalState({ features: features });
         }
       
+        
         Routes.forEach((item)=>{
-            debugger;
+            ;
             let modifieditem = [];
          if(features.filter(x=> x.featureGroupName === item.name).length > 0)
         {
-            debugger;
+            ;
             if(item.children === true)
             {
                 item.childrenData.forEach((cData)=>{
-                    debugger;
+                    ;
                     if(features.filter(x=> x.featureGroupName === item.name && x.feature === cData.name).length > 0)
                     {
-                        debugger;
+                        ;
                         modifieditem = modifieditem.concat(cData); 
                     }
                     

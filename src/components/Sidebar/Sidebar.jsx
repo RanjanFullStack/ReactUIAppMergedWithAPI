@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import BFlowLogo from '../../../src/assets/img/Beat-Flow-Logo.png';
+import logo from '../../assets/img/BEATFlow_logo.svg'
 import Routes from "../../configuration/routes/route";
 import { Link, withRouter } from "react-router-dom";
 import { Collapse } from 'react-bootstrap';
@@ -29,6 +29,7 @@ class Sidebar extends Component {
          errorMessageType: '',
          availableRoute: [],
          showMasterAddButton: false,
+         isFirstLogin:false
       };
 
       this.toggleSideBar = this.toggleSideBar.bind(this);
@@ -47,16 +48,18 @@ class Sidebar extends Component {
    }
 
    async getMaster() {
-
+     
       const responseJson = await MasterBFLOWDataService.getMasters();
-
-      this.setState({ MasterMenu: responseJson });
-
+      this.setState({ MasterMenu: responseJson     
+       });
       this.props.setGlobalState({ ConfigurationMenu: responseJson });
+
    }
 
    async componentDidMount() {
       // Arrange availble features
+      var isFirstLogin = localStorage.getItem("isFirstLogin");
+      this.setState({ isFirstLogin:isFirstLogin});
 
       let features = this.props.globalState.features;
       let Accessablefeatures = [];
@@ -131,8 +134,8 @@ class Sidebar extends Component {
          }
          else {
             return (
-               <li class="list-group-item border-0 common-default-color col-auto sidebar-mainmenu ml-4">
-                  <i onClick={this.ShowTextBox} aria-controls="configuration-collapse" class="fa fa-plus MasterAdd cursor-pointer" aria-hidden="true" name="link_ShowText">Add to Preferences</i></li>
+               <li class="list-group-item border-0 common-default-color col-auto sidebar-mainmenu ml-4 text-truncate">
+                  <i onClick={this.ShowTextBox} aria-controls="configuration-collapse" class="fa fa-plus MasterAdd cursor-pointer text-truncate" aria-hidden="true" name="link_ShowText">Add to Preferences</i></li>
             )
          }
       }
@@ -208,7 +211,7 @@ class Sidebar extends Component {
             this.setState({ showErrorMesage: false });
          }
             .bind(this),
-         150000
+         5000
       );
    }
 
@@ -226,11 +229,11 @@ class Sidebar extends Component {
          <>
             <AlertBanner onClose={this.handleCloseErrorMessage} Message={this.state.errorMessage} visible={this.state.showErrorMesage} Type={this.state.errorMessageType}>
             </AlertBanner>
-            <div class="common-default-color" style={{ height: '100vh' }} >
+            <div  className={this.state.isFirstLogin==="true" ?'disable-div ':' '} >
                <ul className="list-group" name="SideBarList">
-                  <a href='#' className='header-logo'><img src={BFlowLogo} /></a>
+                  <a href='#' className='header-logo'><img src={logo} /></a>
                   {this.state.availableRoute.map((prop, key) => {
-                     if (!prop.redirect && prop.children === false)
+                      if (!prop.redirect && prop.children === false && prop.IsInternal !== true)
                         return (
                            <li key={key} class={prop.name === this.state.ActiveSelectMenu ? "list-group-item border-0 common-default-color p-1 Sidebaractive" : "list-group-item border-0 common-default-color p-1"}>
                               <Link to={prop.path}
@@ -322,7 +325,7 @@ class Sidebar extends Component {
                                  <div id={prop.name}>
                                     <ul className="list-group" name="SideBarList">
                                        {prop.childrenData.map((data, key) => {
-                                          if (!prop.redirect)
+                                          if (!prop.redirect && prop.IsInternal!==true)
                                              return (
                                                 <li key={key} className={data.name === this.state.ActiveSelectMenu ? "list-group-item border-0 common-default-color  Sidebaractive pt-2 pb-2" : "list-group-item border-0 common-default-color pt-2 pb-2"}>
                                                    <Link to={data.path}

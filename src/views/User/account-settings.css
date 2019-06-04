@@ -1,0 +1,41 @@
+#divAccountSettings .nav-tabs {
+    width: 100% !important;
+}
+#divAccountSettings .change-password-text{
+    color: #77777d;
+    font-size: 18px;
+}
+#divAccountSettings .password-pattern-text{
+    color: lightslategray;
+}
+
+#divAccountSettings .change-password-card{
+    margin-top: 100px;
+    width: 50%;
+    margin-left: 300px;
+}
+#divAccountSettings .card-footer {
+    height: 65px !important;
+}
+
+#divAccountSettings .textBoxCustom:hover {
+    border-bottom:1px solid #CAC9C7 !important;
+}
+
+#divAccountSettings  .textBoxCustom:focus {
+    border-bottom:1px solid #CAC9C7 !important;
+}
+   
+#divAccountSettings .textBoxCustom {
+    border-bottom:0px solid #CAC9C7 !important;
+}
+
+#divAccountSettings .form-control{
+       border: 0px !important;
+}
+
+label{
+     color: #ababab; 
+     font-size: ".80rem"
+}
+  

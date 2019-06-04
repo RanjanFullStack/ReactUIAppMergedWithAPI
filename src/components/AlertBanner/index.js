@@ -66,6 +66,7 @@ export default class AlertBanner extends Component {
       
      
 return(
+  <div className="errorAlertBanner">
  
  <div
         data-nep="AlertBanner"
@@ -80,6 +81,7 @@ return(
          
       
        
+      </div>
       </div>
 
  

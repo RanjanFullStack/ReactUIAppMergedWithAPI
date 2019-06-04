@@ -4,9 +4,7 @@
     min-height: calc(100% - 123px);
 }
 
-.bf-h100{
-    height: 100px !important;
-}
+
 
 .bf-font-size-15 {
     font-size: 15px !important;
@@ -15,3 +13,98 @@
 .bf-mb-60{
     margin-bottom: 60px;
 }
+
+.dasebordbartext{
+    font-size: 16px !important;
+    font-weight: 500 !important;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+   
+  }
+  
+  .tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    top: 100%;
+    left: 50%;
+    margin-left: -60px;
+  }
+  
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+  }
+
+  /* The switch - the box around the slider */
+ .dasebordSwitch .switch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 14px;
+  }
+  
+  /* Hide default HTML checkbox */
+  .dasebordSwitch .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  /* The slider */
+  .dasebordSwitch .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  .dasebordSwitch .slider:before {
+    position: absolute;
+    content: "";
+    height: 12px;
+  width: 12px;
+  left: 1px;
+  bottom: 1px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  .dasebordSwitch input:checked + .slider {
+    background-color: #00568F;
+  }
+  
+  .dasebordSwitch input:focus + .slider {
+    box-shadow: 0 0 1px #00568F;
+  }
+  
+  .dasebordSwitch input:checked + .slider:before {
+    -webkit-transform: translateX(16px);
+    -ms-transform: translateX(16px);
+    transform: translateX(16px);
+  }
+  
+  /* Rounded sliders */
+  .dasebordSwitch .slider.round {
+    border-radius: 34px;
+  }
+  
+  .dasebordSwitch .slider.round:before {
+    border-radius: 50%;
+  }

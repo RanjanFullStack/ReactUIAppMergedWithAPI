@@ -1,0 +1,29 @@
+
+ /*---------- for tabs changed the font size-------*/
+ .Reposts .nav-tabs .nav-link.active {
+    color: #00568F !important;
+    background-color: #fff !important;
+    border-bottom-color: #00568F !important;
+    /* font-weight: 700; */
+    font-size: 14px;
+  
+  }
+  .Reposts  .container -fluid {
+  max-width: 100% !important;
+  }
+  /*-------- for tabs changed the font size and color-------*/
+  .Reposts .nav-tabs .nav-link{
+    color:  #55565a !important;
+    border-color: white !important;
+    border-bottom-color: #dee2e6 !important;
+    padding-top: 20px;
+    font-size: 14px;
+  }
+   
+   .Reposts .nav-tabs{
+     border-color:  white !important;
+     border-bottom-color: #CAC9C7 !important;
+     background-color: white;
+     height: 60px;
+   }
+   

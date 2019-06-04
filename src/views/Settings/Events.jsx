@@ -1,3 +1,6 @@
+/**
+ * BFLOW: Workflow UI
+ */
 import React, { Component } from "react";
 import {
   Modal,
@@ -7,10 +10,12 @@ import { BFLOWDataService } from "../../configuration/services/BFLOWDataService"
 import DeleteIcon from '../../assets/fonts/Delete_icon.svg';
 import editIcon from '../../assets/fonts/edit.svg';
 
-
 import { EventBFLOWDataService } from "../../configuration/services/EventDataService";
 import './dragdrop.css';
-import AlertBanner from '../../components/AlertBanner/index'
+import AlertBanner from '../../components/AlertBanner/index';
+import LoadingOverlay from 'react-loading-overlay';
+import { withGlobalState } from 'react-globally'
+
 let SuccessorEventId = [];
 let eventArray = [];
 class Events extends Component {
@@ -104,48 +109,53 @@ class Events extends Component {
     });
 
   }
-
-
   async GetEventsbyId(id, data) {
-
+    this.props.setGlobalState({ IsLoadingActive: true });
     let responseJson = await EventBFLOWDataService.mapUserWithEventsById(id);
 
-    eventArray = [];
+    if(responseJson.length===0){
+      this.props.setGlobalState({ IsLoadingActive: false });
+    }
 
+   else if(responseJson.length>0)
+    {
+      setTimeout(() => {
+        this.props.setGlobalState({ IsLoadingActive: false });
+    
+      }, 1500);
+      
+    
+    }
+    eventArray = [];
     if (responseJson.length > 0) {
       responseJson.map((value) => {
         var eventid = this.state.eventId;
         if (value.id !== eventid && value.type === 1) {
           if (value.ismapped === true) {
             eventArray.push({ "id": value.id, "name": value.name, "category": "selected" })
-
             SuccessorEventId.push({ "EventId": eventid, "SuccessorEventId": value.id });
-
-
           } else {
             eventArray.push({ "id": value.id, "name": value.name, "category": "unselected" })
-
           }
         }
       })
-
-
     }
     setTimeout(() => {
       this.setState({ tasks: eventArray })
     }, 1000);
-
   }
-
-
   async GetEvents() {
-
     const responseJson = await BFLOWDataService.get("Event");
-
     let eventarray = [];
     this.setState({ eventList: responseJson });
-
-    this.GetEventData(responseJson[0]);
+    //this.GetEventData(responseJson[0]);
+    if(this.state.eventId>0){
+      this.GetEventsbyId(this.state.eventId)
+    }
+    else{
+      this.GetEventsbyId(responseJson[0].id)
+      this.setState({eventName:responseJson[0].name,eventId:responseJson[0].id})
+    }
     responseJson.map((data, key) => {
       if (data.id !== this.state.eventId) {
         if (data.type === 1) {
@@ -153,14 +163,10 @@ class Events extends Component {
         }
       }
     })
-
     this.setState({
       tasks: eventarray,
     });
   }
-
-
-
   handleClose() {
     this.setState({ show: false, isEdit: false, errorEventName: '' });
   }
@@ -170,12 +176,9 @@ class Events extends Component {
       eventIsActive: event.target.value,
       eventIsMappedToRequest: event.target.value
     });
-
   handleSubmit(event) {
     event.preventDefault();
-
   }
-
   async DeleteEvent() {
     if (window.confirm("Do you wish to delete this item?")){
     const response = await BFLOWDataService.Delete("Event", this.state.eventId);
@@ -190,19 +193,17 @@ class Events extends Component {
       this.setState({
         showErrorMesage: true,
         errorMessage: response,
-        errorMessageType: 'success'
+        errorMessageType: 'success',
+        eventId:0,
       });
       this.GetEvents();
     }
     this.setTimeOutForToasterMessages();
   }
   }
-
-
   componentDidMount() {
     this.GetEvents();
   }
-
   async UpdateEvent() {
     var value = this.validateForm();
     if (value === false) {
@@ -213,7 +214,6 @@ class Events extends Component {
           isMappedToRequest: this.state.eventIsMappedToRequest,
           Type: 1
         });
-
         const response = await BFLOWDataService.put("Event", this.state.eventId, body);
         if (response.Code === false && response.Code !== undefined) {
           this.setState({
@@ -237,7 +237,6 @@ class Events extends Component {
       }
     }
   }
-
   async CreateEvent() {
     var value = this.validateForm();
     if (value === false) {
@@ -248,7 +247,6 @@ class Events extends Component {
           isMappedToRequest: this.state.eventIsMappedToRequest,
           Type: 1
         });
-
         const response = await BFLOWDataService.post("Event", body);
         this.setState({ eventpopName: '', eventIsMappedToRequest: false, eventIsActive: false });
         if (response.Code === false && response.Code !== undefined) {
@@ -270,7 +268,6 @@ class Events extends Component {
         }
         this.handleClose();
         this.setTimeOutForToasterMessages();
-
       }
     }
   }
@@ -284,28 +281,18 @@ class Events extends Component {
     }
     return blError;
   }
-
   OpenModel() {
-
     this.setState({ show: true })
     if (this.state.isEdit === false) {
       this.setState({
         eventIsActive: false,
         eventIsMappedToRequest: false,
         eventpopName: ''
-
       });
     }
-
-
-
-
   }
   //Close pop
-
-
-
-  handleData(data) {
+ handleData(data) {
     //SuccessorEventId = [];
     //SuccessorEventId.push(data);
   }
@@ -323,20 +310,14 @@ class Events extends Component {
         isDefault: eventData.isDefault
 
       });
-
     }
     this.GetEventsbyId(eventData.id, eventData)
-
   }
-
-
   async BuildWorkFlow() {
-
     if (SuccessorEventId.length === 0) {
       SuccessorEventId.push({ "EventId": this.state.eventId, "SuccessorEventId": 0 });
     }
     const body = JSON.stringify(SuccessorEventId);
-
     const response = await EventBFLOWDataService.mapUserWithEvents(body);
     if (response.Code === false && response.Code !== undefined) {
       this.setState({
@@ -353,12 +334,10 @@ class Events extends Component {
       });
     }
     this.setTimeOutForToasterMessages();
-
-
   }
   ShowDeleteIcon() {
     if (this.state.isDefault === false) {
-      return (<div className="d-inline float-right" >  <i className="text-muted cursor-pointer" onClick={this.DeleteEvent.bind(this)}  ><img src={DeleteIcon} /></i></div>)
+      return (<div className="d-inline float-right" >  <i className="text-muted cursor-pointer" name="dltWorkflow" onClick={this.DeleteEvent.bind(this)}  ><img src={DeleteIcon} /></i></div>)
     }
   }
   /*Method to handle error message */
@@ -376,32 +355,26 @@ class Events extends Component {
     );
   }
   render() {
-
     //Drag and drop start
-
     var tasks = {
       unselected: [],
       selected: []
     }
-
     this.state.tasks.map((t) => {
-
+   console.log(tasks);
       tasks[t.category].push(
-
         <div name="eventsGroup" class="btn-group paddingtop rounded-0" style={{ paddingLeft: "10px" }}>
           <div key={t.name}
             onDragStart={(e) => this.onDragStart(e, t.name)}
             draggable
-            className="btn btn-primary common-button rounded-0" style={{ paddingLeft: "10px", width: "100px" }}>
-            <span className="badge badge-light">{t.name}</span>
+            className="btn btn-secondary backgroundcolour  rounded-0" style={{ paddingLeft: "10px", width: "100px" }}>
+         <span className="badge badge-light" name ="badgeWorkflow">  <i class="fas fa-ellipsis-v  mr-1"></i> {t.name}</span>
           </div>
         </div>
-
       );
     });
     //Drag and drop end
     let submitButton;
-
     if (this.state.isEdit === false) {
       submitButton = <button type="submit"
         name="createEvent"
@@ -417,15 +390,14 @@ class Events extends Component {
         onClick={this.UpdateEvent.bind(this)}
       >Update</button>;
     }
-
     return (
       <>
         <AlertBanner onClose={this.handleCloseErrorMessage.bind(this)} Message={this.state.errorMessage} visible={this.state.showErrorMesage} Type={this.state.errorMessageType}>
         </AlertBanner>
         <div class="container-fluid">
           <div class="row" >
-            <div class="col-sm-5   pl-0" >
-              <div class="card rounded-0  bg-white" style={{ height: '80vh' }}>
+            <div class="col-sm-5   pl-0 " >
+              <div class="card rounded-0  bg-white list-card-common">
                 <nav class="navbar navbar-expand navbar-light p-0  shadow-sm ">
                   <div class="input-group">
                     <input
@@ -443,41 +415,31 @@ class Events extends Component {
                     </div>
                     <div class="input-group-prepend">
                       <span class="filter-sort-icon input-group-text bg-white  border-top-0" id="inputGroupPrepend">
-                        <i class="fa fa-filter text-muted" aria-hidden="true"></i>
+                        <i class="fa fa-filter text-muted" name="WorkflowFilter" aria-hidden="true"></i>
                       </span>
                     </div>
                     <div class="input-group-prepend">
                       <span class="filter-sort-icon input-group-text bg-white  border-top-0" id="inputGroupPrepend">
-                        <i class="fa fa-sort text-muted" aria-hidden="true"></i>
+                        <i class="fa fa-sort text-muted" name="WorkflowSort" aria-hidden="true"></i>
                       </span>
                     </div>
 
                   </div>
                 </nav>
-                <ul class="list-group listGroup-scroll" name="EventList">
-
-
+                <ul class="list-group scrollbar" name="EventList">
                   {this.state.eventList.map((data, key) => {
-
-
                     if (data.id !== null && data.type === 1) {
-
-
                       return (
                         //  <ListGroup.Item   action className="list-item-listview"><i class="fas fa-circle" style={{color: 'green', paddingRight:'10px',fontSize:'10px'}}></i>{data.name}</ListGroup.Item>
                         <li onClick={this.GetEventData.bind(this, data)} className={
                           this.state.eventId === data.id
                             ? 'list-group-item rounded-0 pl-2 pt-3 pb-3 text-muted text-truncate  border-left-0 border-right-0 cursor-default bf-minheight-60 active' : 'list-group-item rounded-0 pl-2 pt-3 pb-3 text-muted text-truncate  border-left-0 border-right-0 cursor-default bf-minheight-60'
                         }><label>{data.name}</label>
-
-
                           <label className="float-right" >{data.isDefault === true ? "Default" : ""}</label>
-
                         </li>
                       );
                     }
                   })}
-
                 </ul>
                 <button
                   type="button"
@@ -499,34 +461,54 @@ class Events extends Component {
               <div class="pl-0 pr-2 pt-3 pb-3 h-60  text-secondary ">
                 <h5 class="text-truncate d-inline pl-2">{this.state.eventName}</h5>
                 {this.ShowDeleteIcon()}
-
                 <div className="d-inline float-right">
-                  <i className="text-muted cursor-pointer" onClick={this.ShowEditEvent.bind(this)} ><img src={editIcon} alt="editIcon" /></i>
+                  <i className="text-muted cursor-pointer" name="editWorkflow" onClick={this.ShowEditEvent.bind(this)} ><img src={editIcon} alt="editIcon" /></i>
                 </div>
               </div>
-
-              <div class="card rounded-0 border-0 shadow-sm listGroup-scroll" style={{ height: '65vh' }}>
-                <div class="card-body p-0 border-0  ">
-                  <div className="col-sm-12 pl-5 pr-5 pt-5">
+              <LoadingOverlay
+  active={this.props.globalState.IsLoadingActive}
+  spinner
+  text='Loading Events...'
+  styles={{
+    overlay: { position: 'absolute',
+    height: '100%',
+    width: '100%',
+    top: '0px',
+    left: '0px',
+    display: 'flex',
+    textAlign: 'center',
+    fontSize: '1.2em',
+    color: '#FFF',
+    background: 'rgba(0, 0, 0, 0.2)',
+    zIndex: 800,
+},
+  
+  }}
+  >
+              <div class="card rounded-0 border-0 shadow-sm scrollbar" style={{ height: '65vh' }}>
+                <div class="card-body p-0 bordercolour" >
+                  <div className="col-sm-12 pl-5 pr-5">
                     {/* _______________________________________________________ */}
                     <div name="DragAndDrop" className="">
                       {/* <div className="container-drag"> */}
                       <div className="row">
-                        <div className="wip w-90 active"
+                        <div className="wip_drag w-90 active "
                           onDragOver={(e) => this.onDragOver(e)}
-                          onDrop={(e) => { this.onDrop(e, "unselected") }}>
-
+                          onDrop={(e) => { this.onDrop(e, "unselected") }} name="dragWorkflow">
                           {tasks.unselected}
                         </div>
                       </div>
+                      <div className="marginTop">
+                        <label>Workflow status after  </label><label className="pl-1" style={{fontStyle:"italic"}}> {this.state.eventName}:</label>
+                      </div>
 
                       {/* </div> */}
-                      <div className="row marginTop" >
-                        <div className="droppable w-90"
+                      <div className="row pt-3" >
+                        <div className="droppable w-91"
                           onDragOver={(e) => this.onDragOver(e)}
-                          onDrop={(e) => this.onDrop(e, "selected")}>
+                          onDrop={(e) => this.onDrop(e, "selected")} name="dropWorkflow">
 
-                          {tasks.selected}
+                          {tasks.selected.length===0?"Drag and drop the status here which can occur after "+ this.state.eventName +" state.":tasks.selected}
                         </div>
                       </div>
                     </div>
@@ -535,11 +517,11 @@ class Events extends Component {
                 </div>
 
               </div>
-
+              </LoadingOverlay>
               <div class="bg-white" >
                 <div class="card-footer bg-white">
-                  <button type="button"
-                    className="common-button btn btn-dark float-right mr-2 mb-2" name="AddBuild"
+                <button type="button"
+                    className="default-button btn btn-dark float-right mr-2 mb-2 p-0" name="AddBuild"
                     id="Build" onClick={this.BuildWorkFlow.bind(this)} >Build</button>
                   {/* <button  type="button"  class=" btn btn-light float-right mr-4 mb-2">Remove</button> */}
                 </div>
@@ -630,4 +612,4 @@ class Events extends Component {
   }
 }
 
-export default Events;
+export default withGlobalState(Events);

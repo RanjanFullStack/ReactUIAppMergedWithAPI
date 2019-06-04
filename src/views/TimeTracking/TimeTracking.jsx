@@ -1,14 +1,17 @@
 import React, { Component } from "react";
 import { Tab, Tabs } from "react-bootstrap";
+import { withGlobalState } from "react-globally";
 import moment from 'moment';
 import { BFLOWDataService } from "../../configuration/services/BFLOWDataService";
+import { RoleBFLOWDataService } from "../../configuration/services/RolesDataService";
 const AlertBanner = React.lazy(() =>import ( '../../components/AlertBanner/index'));
 
 
 class TimeTracking extends Component {
-    constructor(...args) {
-        super(...args);
+    constructor(props) {
+        super(props);
         this.state = {
+          requestId:null,
 timeTrackingDataOrignal:[],
 timeTrackingDataNewAndUpdated:[],
 currentDate:Date,
@@ -29,6 +32,7 @@ friData:"0",
 satData:"0",
 weekTrackingTotal:0,
 weekStartDate:null,
+showSubmitButtononPermission:false,
 
       showTextBox:[{ show:false},
         { show:false},
@@ -54,10 +58,11 @@ weekStartDate:null,
     
         this.NextWeek=this.NextWeek.bind(this);
         this.BackWeek=this.BackWeek.bind(this);
-        this.getAllTimeTrackingData=this.getAllTimeTrackingData.bind(this);
+        this.getTimeTrackingDataByRequestId=this.getTimeTrackingDataByRequestId.bind(this);
         this.getTimeTrackingDataWithDates=this.getTimeTrackingDataWithDates.bind(this);
         this.saveTimeTrackingData=this.saveTimeTrackingData.bind(this);
         this.submitTimeTracking=this.submitTimeTracking.bind(this);
+       
 }
 
 showInputBoxSun()
@@ -104,6 +109,44 @@ showInputBoxWed()
     this.setState({newState})
 }
 
+ValidateHours(Hours)
+{
+
+ if(Hours < 0 || Hours > 23.59)
+ {
+
+   this.setState({
+     showErrorMessage: true,
+     errorMessage:'Invalid time format',
+     errorMessageType: 'danger',
+
+   });
+
+
+   this.setTimeOutForToasterMessages();
+   return false;
+ }
+
+ if(Hours.toString().match(/^([0-1]?[0-9]|[2][0-3]).?([0-5][0-9]?)?$/g)==null)
+ {
+
+     this.setState({
+       showErrorMessage: true,
+       errorMessage:'Invalid time format',
+       errorMessageType: 'danger',
+
+     });
+
+
+     this.setTimeOutForToasterMessages();
+     return false;
+   }
+
+
+
+ return true;
+}
+
 
 showInputBoxThur()
 {
@@ -142,6 +185,12 @@ showInputBoxSat()
 
 onBlurInputBoxSun()
 {
+  this.getWeekTotal()
+  var response = this.ValidateHours(this.state.sunData)
+  if(response===false)
+  {
+    this.setState({sunData:"0"})
+  }
   let newState = Object.assign({}, this.state);
 
     if(this.state.showTextBox[0].show===true)
@@ -154,6 +203,12 @@ onBlurInputBoxSun()
 
 onBlurInputBoxMon()
 {
+  this.getWeekTotal()
+  var response = this.ValidateHours(this.state.monData)
+  if(response===false)
+  {
+    this.setState({monData:"0"})
+  }
   let newState = Object.assign({}, this.state);
 
     if(this.state.showTextBox[1].show===true)
@@ -166,6 +221,12 @@ onBlurInputBoxMon()
 
 onBlurInputBoxTue()
 {
+  this.getWeekTotal()
+  var response = this.ValidateHours(this.state.tueData)
+  if(response===false)
+  {
+    this.setState({tueData:"0"})
+  }
   let newState = Object.assign({}, this.state);
 
     if(this.state.showTextBox[2].show===true)
@@ -179,6 +240,12 @@ onBlurInputBoxTue()
 
 onBlurInputBoxWed()
 {
+  this.getWeekTotal()
+  var response = this.ValidateHours(this.state.wedData)
+  if(response===false)
+  {
+    this.setState({wedData:"0"})
+  }
   let newState = Object.assign({}, this.state);
 
     if(this.state.showTextBox[3].show===true)
@@ -192,6 +259,12 @@ onBlurInputBoxWed()
 
 onBlurInputBoxThur()
 {
+  this.getWeekTotal()
+  var response = this.ValidateHours(this.state.thurData)
+  if(response===false)
+  {
+    this.setState({thurData:"0"})
+  }
   let newState = Object.assign({}, this.state);
 
     if(this.state.showTextBox[4].show===true)
@@ -205,6 +278,12 @@ onBlurInputBoxThur()
 
 onBlurInputBoxFri()
 {
+  this.getWeekTotal()
+  var response = this.ValidateHours(this.state.friData)
+  if(response===false)
+  {
+    this.setState({friData:"0"})
+  }
   let newState = Object.assign({}, this.state);
 
     if(this.state.showTextBox[5].show===true)
@@ -218,6 +297,12 @@ onBlurInputBoxFri()
 
 onBlurInputBoxSat()
 {
+  this.getWeekTotal()
+  var response = this.ValidateHours(this.state.satData)
+  if(response===false)
+  {
+    this.setState({satData:"0"})
+  }
   let newState = Object.assign({}, this.state);
 
     if(this.state.showTextBox[6].show===true)
@@ -229,7 +314,7 @@ onBlurInputBoxSat()
 }
 
 getWeekTotal()
-{debugger
+{
   setTimeout(
     function () {
       var weekTotal=parseInt(this.state.monData) + parseInt(this.state.tueData) + parseInt(this.state.wedData) + parseInt(this.state.thurData) + parseInt(this.state.friData) + parseInt(this.state.satData) + parseInt(this.state.sunData);
@@ -271,25 +356,44 @@ getWeekTotal()
 // }
 
 
+componentWillReceiveProps(nextProps) {
 
+  if(this.props.requestId!==nextProps.requestId){
+    this.props=nextProps;
+    this.initTimeTracker();
+  }
+}
 
 
 async componentDidMount()
 {
- debugger
-this.getAllTimeTrackingData();
-const responseJson = await BFLOWDataService.get("TimeTracking");
-this.setState({ timeTrackingDataOrignal: responseJson });
-  var date = new Date();
+ 
+  this.initTimeTracker()
+}
+
+
+getUserAccessibility(featureGroupName, feature) {
+  return RoleBFLOWDataService.getUserAccessibility(this.props.globalState.features, featureGroupName, feature);
+}
+
+
+async initTimeTracker(){
+
+  await this.getTimeTrackingDataByRequestId();
+  const showAddEditButton = this.getUserAccessibility("Effort Management", "Submit tracker for requests");
+  this.setState({showSubmitButtononPermission:showAddEditButton})
+
+console.log(this.props);
+var date = new Date();
 this.setState({currentDate:date});
   var today = new Date();
   date=today.getDay();
   this.setState({currentDate:date});
-
+var weekStart= new Date();
 
   if(date===1)
   {
-    debugger
+    
     let begin=moment().startOf('week').format('dddd DD-MM-YYYY');
     this.setState({
       monDate:moment().toDate().toDateString(),
@@ -301,13 +405,13 @@ this.setState({currentDate:date});
       sunDate:moment().subtract(1,'d').toDate().toDateString(),
 })
 
-var weekStart= moment().subtract(2,'d').toDate();
+ weekStart= moment().subtract(2,'d').toDate();
 }
 
 
   if(date===2)
   {
-    debugger
+    
     let begin=moment().startOf('week').format('dddd DD-MM-YYYY');
     this.setState({
       monDate:moment().subtract(1,'d').toDate().toDateString(),
@@ -319,7 +423,7 @@ var weekStart= moment().subtract(2,'d').toDate();
       sunDate:moment().subtract(2,'d').toDate().toDateString(),
 })
 
-var weekStart= moment().subtract(2,'d').toDate();
+ weekStart= moment().subtract(2,'d').toDate();
 }
 
 
@@ -345,7 +449,7 @@ var weekStart= moment().subtract(2,'d').toDate();
      sunDate:sun
   })
 
-  var weekStart= moment().subtract(2,'d').toDate();
+   weekStart= moment().subtract(2,'d').toDate();
 
  
 
@@ -365,7 +469,7 @@ var weekStart= moment().subtract(2,'d').toDate();
         
   })
 
-  var weekStart= moment().subtract(11,'d').toDate();
+   weekStart= moment().subtract(11,'d').toDate();
   }
   if(date===5)
   {
@@ -384,7 +488,7 @@ var weekStart= moment().subtract(2,'d').toDate();
 
 
 
-var weekStart= moment().subtract(5,'d').toDate();
+ weekStart= moment().subtract(5,'d').toDate();
 
 
 
@@ -404,29 +508,52 @@ if(date===6)
 
 
 
-var weekStart= moment().subtract(5,'d').toDate();
+ weekStart= moment().subtract(5,'d').toDate();
+
+}
+
+
+if(date===0)
+{
+  this.setState({
+    monDate:moment().add(1,'d').toDate().toDateString(),
+    tueDate:moment().add(2,'d').toDate().toDateString(),
+    wedDate:moment().add(3,'d').toDate().toDateString(),
+    thurDate:moment().add(4,'d').toDate().toDateString(),
+    friDate:moment().add(5,'d').toDate().toDateString(),
+    satDate:moment().add(6,'d').toDate().toDateString(),
+    sunDate:moment().toDate().toDateString(),
+})
+
+
+
+ weekStart= moment().subtract(5,'d').toDate();
 
 
 
 
 }
-var abc=weekStart.getDate();
-this.setState({weekStartDate:abc});
-  
+
+var startDate=weekStart.getDate();
+
+this.setState({weekStartDate:startDate});
+
 this.getTimeTrackingDataWithDates();
+console.log(this.state.timeTrackingDataOrignal);
 }
 
 
 
 saveTimeTrackingData()
 {
-  debugger
 
+  let requestId = this.props.requestId;
   let newState = Object.assign({}, this.state);
   let timeTrackingDataOrignal= this.state.timeTrackingDataOrignal;
   // let timeTrackingDataNewAndUpdated= this.state.timeTrackingDataNewAndUpdated;
   
-
+  // if(this.state.timeTrackingDataOrignal.length >0 )
+  // {
 
 //monday
 let flagMon=0;
@@ -444,7 +571,7 @@ this.state.timeTrackingDataOrignal.map((element, key) => {
    );
 if(flagMon===0 && this.state.monData>0)
 {
-  var data ={trackingDate:this.state.monDate , hours:this.state.monData};
+  var data ={trackingDate:this.state.monDate , hours:this.state.monData , requestId :requestId };
   timeTrackingDataOrignal.push(data); 
   
 }
@@ -468,7 +595,7 @@ this.state.timeTrackingDataOrignal.map((element, key) => {
    );
 if(flagtue===0 && this.state.tueData >0)
 {
-  var data ={trackingDate:this.state.tueDate , hours:this.state.tueData};
+  var data ={trackingDate:this.state.tueDate , hours:this.state.tueData , requestId :requestId };
   timeTrackingDataOrignal.push(data); 
   
 }
@@ -491,7 +618,7 @@ this.state.timeTrackingDataOrignal.map((element, key) => {
    );
 if(flagWed===0 && this.state.wedData >0)
 {
-  var data ={trackingDate:this.state.wedDate , hours:this.state.wedData};
+  var data ={trackingDate:this.state.wedDate , hours:this.state.wedData , requestId :requestId };
   timeTrackingDataOrignal.push(data); 
   
 }
@@ -514,7 +641,7 @@ this.state.timeTrackingDataOrignal.map((element, key) => {
    );
 if(flagThur===0 && this.state.thurData >0)
 {
-  var data ={trackingDate:this.state.thurDate , hours:this.state.thurData};
+  var data ={trackingDate:this.state.thurDate , hours:this.state.thurData , requestId :requestId };
   timeTrackingDataOrignal.push(data); 
   
 }
@@ -538,7 +665,7 @@ this.state.timeTrackingDataOrignal.map((element, key) => {
    );
 if(flagFri===0 && this.state.friData >0)
 {
-  var data ={trackingDate:this.state.friDate , hours:this.state.friData};
+  var data ={trackingDate:this.state.friDate , hours:this.state.friData , requestId :requestId };
   timeTrackingDataOrignal.push(data); 
   
 }
@@ -562,7 +689,7 @@ this.state.timeTrackingDataOrignal.map((element, key) => {
    );
 if(flagSat===0 && this.state.satData >0)
 {
-  var data ={trackingDate:this.state.satDate , hours:this.state.satData};
+  var data ={trackingDate:this.state.satDate , hours:this.state.satData , requestId :requestId };
   timeTrackingDataOrignal.push(data); 
   
 }
@@ -586,7 +713,7 @@ this.state.timeTrackingDataOrignal.map((element, key) => {
    );
 if(flagSun===0 && this.state.sunData >0)
 {
-  var data ={trackingDate:this.state.sunDate , hours:this.state.sunData};
+  var data ={trackingDate:this.state.sunDate , hours:this.state.sunData , requestId :requestId };
   timeTrackingDataOrignal.push(data); 
   
 }
@@ -597,7 +724,7 @@ if(flagSun===0 && this.state.sunData >0)
 
 
 
-
+  //}
 
 
 
@@ -615,7 +742,23 @@ if(flagSun===0 && this.state.sunData >0)
 
 }
 
+showSubmitButton() {
+  if (this.state.showSubmitButtononPermission === true) {
+    return (
+      <>
+        <button
+            type="button"
+            class="common-button btn btn-dark float-right mr-2 mb-2"
 
+            name="AddUpdate"
+            onClick={this.submitTimeTracking.bind(this)}
+          >
+            Submit
+          </button>
+      </>
+    );
+  }
+}
 
 getTimeTrackingDataWithDates()
 {
@@ -636,7 +779,8 @@ this.setState({
 
   setTimeout(
     function () {
-      
+      // if(this.state.timeTrackingDataOrignal.length >0 )
+      // {
       this.state.timeTrackingDataOrignal.forEach(element => {
       
       if(element !== undefined)
@@ -687,6 +831,7 @@ this.setState({
         }
       }
       });
+    //}
       this.getWeekTotal();
     }.bind(this),
     20
@@ -694,12 +839,22 @@ this.setState({
   
   
 
- 
 }
 
-async getAllTimeTrackingData() {
-  const responseJson = await BFLOWDataService.get("TimeTracking");
-  this.setState({ timeTrackingDataOrignal: responseJson });
+async getTimeTrackingDataByRequestId() {
+ 
+  let Id = this.props.requestId;
+  if(Id !==0)
+  {
+  const method = "TimeTracking/GetByRequestId/"+Id
+  const responseJson = await BFLOWDataService.get(method);
+
+      this.setState({
+        timeTrackingDataOrignal: responseJson
+        
+      });
+
+}
 }
 
 
@@ -722,8 +877,8 @@ setTimeout(
 function () {
 this.getTimeTrackingDataWithDates();
 var weekStart= moment(this.state.sunDate).toDate();
-  var abc=weekStart.getDate();
-  this.setState({weekStartDate:abc});
+  var startDate=weekStart.getDate();
+  this.setState({weekStartDate:startDate});
 }.bind(this),
 20
 );
@@ -750,8 +905,8 @@ BackWeek()
     function () {
       this.getTimeTrackingDataWithDates();
       var weekStart= moment(this.state.sunDate).toDate();
-          var abc=weekStart.getDate();
-          this.setState({weekStartDate:abc});
+          var startDate=weekStart.getDate();
+          this.setState({weekStartDate:startDate});
           
     }.bind(this),
     20
@@ -759,6 +914,11 @@ BackWeek()
 
 }
 
+
+Cancel(){
+
+  this.props.hideTrackingWindow()
+}
 
 
 
@@ -786,6 +946,7 @@ handleCloseErrorMessage() {
 
 async submitTimeTracking()
 {
+
   this.saveTimeTrackingData();
 
   if(this.state.timeTrackingDataOrignal.length>0)
@@ -793,7 +954,7 @@ async submitTimeTracking()
   const body = JSON.stringify(this.state.timeTrackingDataOrignal);
   const method = "TimeTracking/AddTimeTrackingBulk"
   var message=await  BFLOWDataService.post(method,body);
-  debugger
+  
   if (message.Code === false && message.Code !== undefined) {
      this.setState({
        showErrorMessage: true,
@@ -807,28 +968,44 @@ async submitTimeTracking()
        errorMessage: message,
        errorMessageType: 'success'
      });
- 
+    //  this.props.callRequestList();
   
    }
  
    this.setTimeOutForToasterMessages();
   }
 
-
-  const responseJson = await BFLOWDataService.get("TimeTracking");
+debugger
+  // const responseJson = await this.getTimeTrackingDataByRequestId();
   
-setTimeout(
-  function () {
-    this.setState({ timeTrackingDataOrignal: responseJson });
+// setTimeout(
+//   function () {
+//     this.setState({ timeTrackingDataOrignal: responseJson });
     
-  }
-    .bind(this),
-  20
-);
+//   }
+//     .bind(this),
+//   20
+// );
 this.getWeekTotal();
 }
 
-  render() {
+  render() { 
+    let sun=moment(this.state.sunDate).format('ddd') ;
+    let mon=moment(this.state.monDate).format('ddd');
+    let tue=moment(this.state.tueDate).format('ddd');
+    let wed=moment(this.state.wedDate).format('ddd');
+    let thur=moment(this.state.thurDate).format('ddd');
+    let fri=moment(this.state.friDate).format('ddd');
+    let sat=moment(this.state.satDate).format('ddd');
+    let sunDate=moment(this.state.sunDate).format('Do MMM') ;
+    let monDate=moment(this.state.monDate).format('Do MMM');
+    let tueDate=moment(this.state.tueDate).format('Do MMM');
+    let wedDate=moment(this.state.wedDate).format('Do MMM');
+    let thurDate=moment(this.state.thurDate).format('Do MMM');
+    let friDate=moment(this.state.friDate).format('Do MMM');
+    let satDate=moment(this.state.satDate).format('Do MMM');
+    let firstday=moment(this.state.sunDate).format('Do') ;
+    let lastDay=moment(this.state.satDate).format('Do MMM');
     return (<>
         <AlertBanner onClose={this.handleCloseErrorMessage.bind(this)} Message={this.state.errorMessage} visible={this.state.showErrorMessage} Type={this.state.errorMesageType}>
             </AlertBanner>
@@ -863,7 +1040,7 @@ this.getWeekTotal();
                 <div class="row ">
              <div class="col-sm-12">
               <div class="float-right mr-3">
-                <i class="fas fa-chevron-left mr-2" onClick={this.BackWeek.bind(this)} />{this.state.weekStartDate} - {this.state.satDate}{" "}
+                <i class="fas fa-chevron-left mr-2" onClick={this.BackWeek.bind(this)} />{firstday} - {lastDay}{" "}
                 <i class="fas fa-chevron-right ml-2" onClick={this.NextWeek.bind(this)} />
               </div>
             </div></div>
@@ -876,18 +1053,18 @@ this.getWeekTotal();
                     >
                       <thead>
                         <tr class="text-center">
-                          <th scope="col" > <p style={{fontSize:".90rem"  }} >{this.state.sunDate}</p></th>
-                          <th scope="col" > <p style={{fontSize:".90rem"  }}>{this.state.monDate}</p></th>
-                          <th scope="col" > <p style={{fontSize:".90rem"  }}>{this.state.tueDate}</p></th>
-                          <th scope="col" > <p style={{fontSize:".90rem"  }}>{this.state.wedDate}</p></th>
-                          <th scope="col" > <p style={{fontSize:".90rem"  }}>{this.state.thurDate}</p></th>
-                          <th scope="col" > <p style={{fontSize:".90rem"  }}>{this.state.friDate}</p></th>
-                          <th scope="col" > <p style={{fontSize:".90rem"  }}>{this.state.satDate}</p></th>
+                          <th scope="col" > <p style={{fontSize:".90rem",margin:"4px"  }} >{sun}</p><p style={{ fontSize : "0.75rem",color: "rgb(171, 171, 171)",fontWeight:"400",margin:"0"}}>{sunDate}</p></th>
+                          <th scope="col" > <p style={{fontSize:".90rem",margin:"4px"  }} >{mon}</p><p style={{ fontSize : "0.75rem",color: "rgb(171, 171, 171)",fontWeight:"400",margin:"0"}}>{monDate}</p></th>
+                          <th scope="col" > <p style={{fontSize:".90rem",margin:"4px"  }} >{tue}</p><p style={{ fontSize : "0.75rem",color: "rgb(171, 171, 171)",fontWeight:"400",margin:"0"}}>{tueDate}</p></th>
+                          <th scope="col" > <p style={{fontSize:".90rem",margin:"4px"  }} >{wed}</p><p style={{ fontSize : "0.75rem",color: "rgb(171, 171, 171)",fontWeight:"400",margin:"0"}}>{wedDate}</p></th>
+                          <th scope="col" > <p style={{fontSize:".90rem",margin:"4px"  }} >{thur}</p><p style={{ fontSize : "0.75rem",color: "rgb(171, 171, 171)",fontWeight:"400",margin:"0"}}>{thurDate}</p></th>
+                          <th scope="col" > <p style={{fontSize:".90rem",margin:"4px"  }} >{fri}</p><p style={{ fontSize : "0.75rem",color: "rgb(171, 171, 171)",fontWeight:"400",margin:"0"}}>{friDate}</p></th>
+                          <th scope="col" > <p style={{fontSize:".90rem",margin:"4px"  }} >{sat}</p><p style={{ fontSize : "0.75rem",color: "rgb(171, 171, 171)",fontWeight:"400",margin:"0"}}>{satDate}</p></th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr class="text-center">
-                        <td class="p-4" >{(this.state.showTextBox[0].show)?<input  class="w-75" onChange={e => this.setState({ sunData: e.target.value })} defaultValue={this.state.sunData} onBlur={this.onBlurInputBoxSun.bind(this)}   type="number" min="0" max="23"></input>:<div  onDoubleClick={this.showInputBoxSun.bind(this)}>{this.state.sunData}</div>  }</td>
+                        <td class="p-4" >{(this.state.showTextBox[0].show)?<input  class="w-75" onChange={e => this.setState({ sunData: e.target.value })} defaultValue={this.state.sunData}  onBlur={this.onBlurInputBoxSun.bind(this)}   type="number" min="0" max="23"></input>:<div  onDoubleClick={this.showInputBoxSun.bind(this)}>    {this.state.sunData}</div>  }</td>
                           {/* <div editable>{this.state.sunData}</div> <input  class="w-50" onChange={e => this.setState({ sunData: e.target.value }) } type="number" min="0" max="23"></input>  </td> */}
                           <td class="p-4">{(this.state.showTextBox[1].show)?<input  class="w-75" onChange={e => this.setState({ monData: e.target.value })} defaultValue={this.state.monData} onBlur={this. onBlurInputBoxMon.bind(this)}   type="number" min="0" max="23"></input>:<div  onDoubleClick={this.showInputBoxMon.bind(this)}>{this.state.monData}</div>  }</td>
                           <td class="p-4">{(this.state.showTextBox[2].show)?<input  class="w-75" onChange={e => this.setState({ tueData: e.target.value })} defaultValue={this.state.tueData} onBlur={this.  onBlurInputBoxTue.bind(this)}   type="number" min="0" max="23"></input>:<div  onDoubleClick={this.showInputBoxTue.bind(this)}>{this.state.tueData}</div>  }</td>                          
@@ -919,19 +1096,11 @@ this.getWeekTotal();
 
         </div>
         <div class="card-footer bg-white border-top-0">
-          <button
-            type="button"
-            class="common-button btn btn-dark float-right mr-2 mb-2"
-
-            name="AddUpdate"
-            onClick={this.submitTimeTracking.bind(this)}
-          >
-            Submit
-          </button>
+           {this.showSubmitButton()}
           <button
             type="button"
             class=" btn btn-light float-right mr-4 mb-2"
-
+            onClick={this.Cancel.bind(this)}
           >
             Cancel
           </button>
@@ -943,4 +1112,4 @@ this.getWeekTotal();
     );
   }
 }
-export default TimeTracking;
+export default withGlobalState(TimeTracking);

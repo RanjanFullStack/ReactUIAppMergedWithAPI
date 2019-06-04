@@ -22,7 +22,7 @@ import editIcon from '../../assets/fonts/edit.svg';
 import confirmIcon from '../../assets/fonts/confirm.svg';
 import cancelIcon from '../../assets/fonts/cancel.svg';
 import DeleteIcon from '../../assets/fonts/Delete_icon.svg';
-const AlertBanner = React.lazy(() =>import ( '../../components/AlertBanner/index'));
+const AlertBanner = React.lazy(() => import('../../components/AlertBanner/index'));
 
 /**import end*/
 
@@ -44,6 +44,7 @@ class Masters extends Component {
          masterValues: '',
          Id: 0,
          mapMasterId: 0,
+         isUserOnBoardingRequired: false,
          masterKeyValueId: 0,
          masterKey: '',
          masterValue: '',
@@ -51,9 +52,9 @@ class Masters extends Component {
          masterList: [],
          mapmasterList: [],
          GetmasterKeyValue: [],
-         showMasterDeleteButton:false,
-         showMasterEditButton:false,
-         showMasterAddButton:false,
+         showMasterDeleteButton: false,
+         showMasterEditButton: false,
+         showMasterAddButton: false,
          //Masters states End
 
          //Attributes states Start
@@ -65,8 +66,8 @@ class Masters extends Component {
          MapMasterWithAtribute: [],
          MapAtributeWithAtribute: [],
          AllMapAtributeWithAtribute: [],
-         showAttributeDeleteButton:false,
-         showAttributeEditButton:false,
+         showAttributeDeleteButton: false,
+         showAttributeEditButton: false,
          //Attributes states End   
 
          //User states Start
@@ -114,8 +115,8 @@ class Masters extends Component {
       this.ShowtextEditAttribute = this.ShowtextEditAttribute.bind(this);
       this.showMasterDeleteButton = this.showMasterDeleteButton.bind(this);
       this.getUserAccessibility = this.getUserAccessibility.bind(this);
-      
-      
+
+
       // Bind Method End
    }
 
@@ -123,12 +124,8 @@ class Masters extends Component {
    // Lifecycle Event Start
 
    componentDidMount() {
-   
       this.GetcomponentData(this.props);
    }
-
-  
-
    componentWillReceiveProps(nextProps) {
       const { match: { params } } = nextProps;
       // checking pervious Props 
@@ -153,7 +150,7 @@ class Masters extends Component {
 
       // set new value to states
       this.setState({ masterValues: masterDataById.name })
-      this.setState({ Id: params.name })
+      this.setState({ Id: params.name, isUserOnBoardingRequired: masterDataById.isUserOnBoardingRequired })
       //this.setState({GetMaster:responseJson})
       this.setState({ showtextbox: false })
       this.setState({ open: false })
@@ -163,10 +160,10 @@ class Masters extends Component {
       this.getMaster();
       this.GetAttribute(masterDataById.id)
       this.getMasterMapMaster(masterDataById.id);
-      const showDeletebutton=  this.getUserAccessibility("Customization","Delete");
-      const showEditbutton=  this.getUserAccessibility("Customization","Add");
-      this.setState({showMasterDeleteButton:showDeletebutton,showAttributeDeleteButton:showDeletebutton,showMasterEditButton:showEditbutton,showAttributeEditButton:showEditbutton, showMasterAddButton:showEditbutton})
-       
+      const showDeletebutton = this.getUserAccessibility("Customization", "Delete");
+      const showEditbutton = this.getUserAccessibility("Customization", "Add");
+      this.setState({ showMasterDeleteButton: showDeletebutton, showAttributeDeleteButton: showDeletebutton, showMasterEditButton: showEditbutton, showAttributeEditButton: showEditbutton, showMasterAddButton: showEditbutton })
+
       // end of method calls
    }
 
@@ -201,7 +198,6 @@ class Masters extends Component {
 
    //Get: Master Data
    async getMaster() {
-
       let masterList = await BFLOWDataService.get('Masters');
       const selectedMasterId = masterList.filter(x => x.id === parseInt(this.state.Id))
       masterList = masterList.filter(function (item) {
@@ -212,26 +208,25 @@ class Masters extends Component {
 
    // delete Master Record
    async deleteMaster() {
-    if (window.confirm("Do you wish to delete the item?")){
-      const message = await BFLOWDataService.Delete('Masters', this.state.Id);
-      if (message.Code === false && message.Code !== undefined) {
-         this.setState({
-           showErrorMesage: true,
-           errorMessage: message.Message,
-           errorMessageType: 'danger'
-         });
-       }
-       else {
-         this.setState({
-           showErrorMesage: true,
-           errorMessage: message,
-           errorMessageType: 'success'
-         });
-         this.props.history.push("/Dashboard");
-         this.RefreshMastersAtSideBar();
-       }
-     
-       this.setTimeOutForToasterMessages();
+      if (window.confirm("Do you wish to delete the item?")) {
+         const message = await BFLOWDataService.Delete('Masters', this.state.Id);
+         if (message.Code === false && message.Code !== undefined) {
+            this.setState({
+               showErrorMesage: true,
+               errorMessage: message.Message,
+               errorMessageType: 'danger'
+            });
+         }
+         else {
+            this.setState({
+               showErrorMesage: true,
+               errorMessage: message,
+               errorMessageType: 'success'
+            });
+            this.props.history.push("/Dashboard");
+            this.RefreshMastersAtSideBar();
+         }
+         this.setTimeOutForToasterMessages();
       }
    }
 
@@ -242,7 +237,7 @@ class Masters extends Component {
 
    // Edit Master
    async EditMaster() {
-      const body = JSON.stringify({ name: this.masterValue.value });
+      const body = JSON.stringify({ name: this.masterValue.value, isUserOnBoardingRequired: this.state.isUserOnBoardingRequired });
       const response = await BFLOWDataService.put('Masters', this.state.Id, body);
 
       if (response.Code === false && response.Code !== undefined) {
@@ -258,13 +253,26 @@ class Masters extends Component {
          // this.setState({GetMaster:responseJson})
 
          this.RefreshMastersAtSideBar();
-
          const masterById = await BFLOWDataService.getbyid('Masters', this.state.Id);
          this.setState({ masterValues: masterById.name });
       }
-
       this.setTimeOutForToasterMessages();
+   }
 
+   async updateisUserOnBoardingRequired() {
+      this.setState({ isUserOnBoardingRequired: !this.state.isUserOnBoardingRequired })
+      const body = JSON.stringify({ name: this.state.masterValues, isUserOnBoardingRequired: !this.state.isUserOnBoardingRequired });
+      const response = await BFLOWDataService.put('Masters', this.state.Id, body);
+      if (response.Code === false && response.Code !== undefined) {
+         this.setState({ showErrorMesage: true });
+         this.setState({ ErrorMesage: response.Message });
+         this.setState({ ErrorMesageType: 'danger' });
+      }
+      else {
+         this.setState({ showErrorMesage: true });
+         this.setState({ ErrorMesage: response });
+         this.setState({ ErrorMesageType: 'success' });
+      }
    }
 
    // Click on edit button show show label to textbox for master update
@@ -277,66 +285,66 @@ class Masters extends Component {
       }
    }
 
-   getUserAccessibility(featureGroupName,feature) {
-     return RoleBFLOWDataService.getUserAccessibility(this.props.globalState.features, featureGroupName,feature);
-   } 
-
-   showMasterDeleteButton(){
-  
-    if(this.state.showMasterDeleteButton===true){
-return(
-   <div className="d-inline float-right">
-   <label className="px-1 text-secondary float-right"> | </label>
-   <i className="text-muted cursor-pointer float-right iconhover"  name="DeleteMaster" onClick={this.deleteMaster.bind(this)} ><img src={DeleteIcon} /></i>
-   </div>
-)
-    }
+   getUserAccessibility(featureGroupName, feature) {
+      return RoleBFLOWDataService.getUserAccessibility(this.props.globalState.features, featureGroupName, feature);
    }
 
-   showAttributeDeleteButton(){
-  
-      if(this.state.showAttributeDeleteButton===true){
-  return(
-     <>
-   <div className="d-inline float-right">
-   <i className="text-muted cursor-pointer" onClick={this.DeleteAttribute.bind(this)} name="DeleteAttribute"><img src={DeleteIcon} /></i> </div>
-<label className="px-1 text-secondary float-right"> | </label>
-</>
-  )
+   showMasterDeleteButton() {
+
+      if (this.state.showMasterDeleteButton === true) {
+         return (
+            <div className="d-inline float-right">
+               <label className="px-1 text-secondary float-right"> | </label>
+               <i className="text-muted cursor-pointer float-right iconhover" name="DeleteMaster" onClick={this.deleteMaster.bind(this)} ><img src={DeleteIcon} /></i>
+            </div>
+         )
       }
-     }
+   }
+
+   showAttributeDeleteButton() {
+
+      if (this.state.showAttributeDeleteButton === true) {
+         return (
+            <>
+               <div className="d-inline float-right">
+                  <i className="text-muted cursor-pointer" onClick={this.DeleteAttribute.bind(this)} name="DeleteAttribute"><img src={DeleteIcon} /></i> </div>
+               <label className="px-1 text-secondary float-right"> | </label>
+            </>
+         )
+      }
+   }
 
 
-     showMasterEditButton(){
-  
-      if(this.state.showMasterEditButton===true){
-  return(
-     <>
-    <label className="px-1 text-secondary float-right"> | </label>
+   showMasterEditButton() {
+
+      if (this.state.showMasterEditButton === true) {
+         return (
+            <>
+               <label className="px-1 text-secondary float-right"> | </label>
                <i className="text-muted d-inline cursor-pointer float-right iconhover" onClick={this.ShowtextEditMaster} name="EditMaster"> <img src={editIcon} /></i>
-</>
-  )
+            </>
+         )
       }
-     }
+   }
 
-     showAttributeEditButton(){
-  
-      if(this.state.showAttributeEditButton===true){
-  return(
-     <>
- <div className="d-inline float-right">
+   showAttributeEditButton() {
+
+      if (this.state.showAttributeEditButton === true) {
+         return (
+            <>
+               <div className="d-inline float-right">
                   <i className="text-muted cursor-pointer" onClick={this.ShowAttributetextEditMaster.bind(this)} name="EditAttribute"><img src={editIcon} /></i>
                </div>
-</>
-  )
+            </>
+         )
       }
-     }
+   }
 
-  
+
 
    // based on state change label to textbox 
    showtextonEdit() {
-     
+
       const { open } = this.state;
       if (this.state.showtextbox === true) {
          return (
@@ -360,36 +368,41 @@ return(
       else {
          return (
             <div class="w-100 pt-2">
-               <h3 class="card-title ml-4 d-inline text-truncate mt-4">{this.state.masterValues}</h3>
+               <h5 class="card-title ml-4 d-inline text-truncate mt-4">{this.state.masterValues}</h5>
                <i class={this.state.open === true ? "fas fa-angle-up float-right sidebar-list-item-arrow d-inlin openMaster" : "fas fa-angle-down float-right sidebar-list-item-arrow d-inlin closeMaster"}
                   onClick={() => this.setState({ open: !open })}
                   aria-controls="example-collapse-text"
                // aria-expanded={open}
                />
-                {this.showMasterDeleteButton()}
-                 {this.showMasterEditButton()}
-              
+               {this.showMasterDeleteButton()}
+               {this.showMasterEditButton()}
+               <label className="px-1 text-secondary float-right"> | </label>
+               <label class="switch float-right mt-1" title="is User OnBoarding Required">
+                  <input type="checkbox" checked={this.state.isUserOnBoardingRequired} onChange={this.updateisUserOnBoardingRequired.bind(this)} />
+                  <span class="slider round"></span>
+               </label>
+
             </div>
          )
       }
    }
 
-   showMasterAddButton(){
-      if(this.state.showMasterAddButton===true){
-         return(
+   showMasterAddButton() {
+      if (this.state.showMasterAddButton === true) {
+         return (
             <button
-            type="button"
-            class="rounded-circle btn add-button-list-view common-button "
-            name="btnAddMaster"
-            style={{
-               boxShadow:
-                  " 8px 4px 8px 0 rgba(0, 0, 0, 0.2), 8px 6px 20px 0 rgba(0, 0, 0, 0.19)"
-            }}
-            onClick={this.OpenModel}
-         >
-            {" "}
-            <i class="fa fa-plus text-white" aria-hidden="true" />
-         </button>
+               type="button"
+               class="rounded-circle btn add-button-list-view common-button "
+               name="btnAddMaster"
+               style={{
+                  boxShadow:
+                     " 8px 4px 8px 0 rgba(0, 0, 0, 0.2), 8px 6px 20px 0 rgba(0, 0, 0, 0.19)"
+               }}
+               onClick={this.OpenModel}
+            >
+               {" "}
+               <i class="fa fa-plus text-white" aria-hidden="true" />
+            </button>
          );
       }
    }
@@ -425,12 +438,12 @@ return(
       if (this.state.open === true) {
          if (this.state.mapmasterList.length > 0) {
             return (
-               <div class="card w-100 border-bottom mt-0 border-top-0 border-right-0 border-left-0 rounded-0 pt-0  h-220">
+               <div class="card shadow-sm w-100 border-bottom mt-0 border-top-0 border-right-0 border-left-0 rounded-0 pt-0  h-220">
                   <div className="col-sm-12 pl-0">
                      <div class="col-sm-6 pl-0 float-left ">
                      </div>
                      <div class="col-sm-6 p-4 float-right ">
-                        <div className="h-120 listGroup-scroll">
+                        <div className="h-120 scrollbar">
                            {this.state.mapmasterList.map((data, key) => {
                               let className = '';
                               if (data.isMapped === true) {
@@ -460,7 +473,7 @@ return(
          }
          else {
             return (
-               <div class="card w-100 border-bottom mt-0 border-top-0 border-right-0 border-left-0 rounded-0 pt-0  h-220">
+               <div class="card w-100 border-bottom mt-0 border-top-0 border-right-0 border-left-0 rounded-0 pt-0 shadow-sm  h-220">
                   <div className="col-sm-12 pl-0">
                      <div class="col-sm-6 pl-0 float-left ">
                      </div>
@@ -516,7 +529,7 @@ return(
                   <div class="card-body p-0 border-0  ">
                      <div class="row">
                         <div class="col-sm-3  d-inline  pr-0" style={{ height: '55vmin' }}>
-                           <ul class="list-group listGroup-scroll border-top-0 border-bottom-0 app" name="MapMasterWithAttributeList" style={{ border: "1px solid rgba(0,0,0,.125)", height: "100%" }}>
+                           <ul class="list-group scrollbar border-top-0 border-bottom-0 app" name="MapMasterWithAttributeList" style={{ border: "1px solid rgba(0,0,0,.125)", height: "100%" }}>
                               {this.state.MapMasterWithAtribute.map((data, key) => {
                                  if (data.isMapped === true) {
                                     return (
@@ -534,7 +547,7 @@ return(
                         <div class="col-sm-9  d-inline pl-0" style={{ height: '56vmin' }}>
                            <nav class="navbar navbar-expand navbar-light p-0 border-0">
                               <div class="input-group ">
-                                 <input placeholder="Search" onChange={this.searchMapAttributes.bind(this)} aria-describedby="inputGroupPrepend" name="username" type="text" class=" search-textbox form-control rounded-0 border-right-0 border-left-0 pt-1 border-top-0" />
+                                 <input placeholder="Search" onChange={this.searchMapAttributes.bind(this)} aria-describedby="inputGroupPrepend" name="username" type="text" class=" search-textbox form-control rounded-0 border-right-0 border-left-0 pt-1"  />
                                  <div class="input-group-prepend ">
                                     <span class="search-icon input-group-text bg-white border-left-0  border-top-0" id="inputGroupPrepend">
                                        <i class="fa fa-search text-muted" aria-hidden="true"></i>
@@ -542,38 +555,38 @@ return(
                                  </div>
                               </div>
                            </nav>
-                           <div className="listGroup-scroll" style={{ height: '50vmin' }}>
-                           <ul class="list-group listGroup-scroll border-top-0 border-bottom-0 border-left-0" name="MapAttributeWithAtributeList" style={{ border: "1px solid rgba(0,0,0,.125)" }}>
-                              {/* AllMapAtributeWithAtribute */}
-                              {this.state.MapAtributeWithAtribute.map((data, key) => {
-                                 let checkedlist = false;
-                                 let AttributeMaster = this.state.attributesList.filter(x => x.id === this.state.attributesId)
-                                 AttributeMaster[0].mapAttributesWithAttributes.map((item, key) => {
+                           <div className="scrollbar" style={{ height: '50vmin' }}>
+                              <ul class="list-group scrollbar border-top-0 border-bottom-0 border-left-0" name="MapAttributeWithAtributeList" style={{ border: "1px solid rgba(0,0,0,.125)" }}>
+                                 {/* AllMapAtributeWithAtribute */}
+                                 {this.state.MapAtributeWithAtribute.map((data, key) => {
+                                    let checkedlist = false;
+                                    let AttributeMaster = this.state.attributesList.filter(x => x.id === this.state.attributesId)
+                                    AttributeMaster[0].mapAttributesWithAttributes.map((item, key) => {
 
-                                    let attributeId = item.secondaryAttributeId
+                                       let attributeId = item.secondaryAttributeId
 
-                                    if (attributeId === data.id) {
+                                       if (attributeId === data.id) {
 
-                                       checkedlist = true;
-                                    }
+                                          checkedlist = true;
+                                       }
 
-                                 });
+                                    });
 
-                                 return (
-                                    //  <ListGroup.Item   action className="list-item-listview"><i class="fas fa-circle" style={{color: 'green', paddingRight:'10px',fontSize:'10px'}}></i>{data.name}</ListGroup.Item>
-                                    <li className='list-group-item rounded-0 pl-4 pt-2 pb-2 text-muted text-truncate  border-0  cursor-default' style={{height:"40px"}}>
-                                       <div class="custom-control-lg custom-control custom-checkbox  pl-4">
-                                          <input type="checkbox" class="custom-control-input" checked={checkedlist} name={data.id} onChange={this.attributeToAttributeHanlder.bind(this)} id={data.id} />
-                                          <label class="custom-control-label" For={data.id}></label>
-                                          <span className="text-truncate ">{data.name}</span>
-                                       </div>
+                                    return (
+                                       //  <ListGroup.Item   action className="list-item-listview"><i class="fas fa-circle" style={{color: 'green', paddingRight:'10px',fontSize:'10px'}}></i>{data.name}</ListGroup.Item>
+                                       <li className='list-group-item rounded-0 pl-4 pt-2 pb-2 text-muted text-truncate  border-0  cursor-default' style={{ height: "40px" }}>
+                                          <div class="custom-control-lg custom-control custom-checkbox  pl-4">
+                                             <input type="checkbox" class="custom-control-input" checked={checkedlist} name={data.id} onChange={this.attributeToAttributeHanlder.bind(this)} id={data.id} />
+                                             <label class="custom-control-label" For={data.id}></label>
+                                             <span className="text-truncate ">{data.name}</span>
+                                          </div>
 
-                                    </li>
-                                 );
+                                       </li>
+                                    );
 
-                              })}
+                                 })}
 
-                           </ul>
+                              </ul>
                            </div>
                         </div>
                      </div>
@@ -746,8 +759,8 @@ return(
          return (
             <>
                <h5 class="text-truncate d-inline pl-2">{this.state.attributesName}</h5>
-              {this.showAttributeDeleteButton()}
-              {this.showAttributeEditButton()}
+               {this.showAttributeDeleteButton()}
+               {this.showAttributeEditButton()}
             </>
          )
       }
@@ -798,23 +811,23 @@ return(
    }
 
    async DeleteAttribute() {
-      if (window.confirm("Do you wish to delete this item?")){
-      var id = parseInt(this.state.attributesId);
-      const response = await BFLOWDataService.Delete('Attributes', id);
-      if (response.Code === false && response.Code !== undefined) {
-         this.setState({ showErrorMesage: true });
-         this.setState({ ErrorMesage: response.Message });
-         this.setState({ ErrorMesageType: 'danger' });
-      }
-      else {
-         this.setState({ showErrorMesage: true });
-         this.setState({ ErrorMesage: "Deleted success" });
-         this.setState({ ErrorMesageType: 'success' });
-         this.GetAttribute(this.state.Id);
-      }
+      if (window.confirm("Do you wish to delete this item?")) {
+         var id = parseInt(this.state.attributesId);
+         const response = await BFLOWDataService.Delete('Attributes', id);
+         if (response.Code === false && response.Code !== undefined) {
+            this.setState({ showErrorMesage: true });
+            this.setState({ ErrorMesage: response.Message });
+            this.setState({ ErrorMesageType: 'danger' });
+         }
+         else {
+            this.setState({ showErrorMesage: true });
+            this.setState({ ErrorMesage: "Deleted success" });
+            this.setState({ ErrorMesageType: 'success' });
+            this.GetAttribute(this.state.Id);
+         }
 
-      this.setTimeOutForToasterMessages();
-   }
+         this.setTimeOutForToasterMessages();
+      }
    }
 
    /** Attribute Section End */
@@ -1142,11 +1155,11 @@ return(
                      title="Team Members"
                      name="TeamMembers"
                   >
-                     <div className="card rounded-0 border-0 shadow-sm " style={{ height: '62vmin' }}>
+                     <div className="card rounded-0 border-0 shadow-sm" >
                         <div class="card-body p-0 border-0  ">
                            <nav class="navbar navbar-expand navbar-light p-0 border-0">
                               <div class="input-group ">
-                                 <input placeholder="Search" onChange={this.searchUserHandler} aria-describedby="inputGroupPrepend" name="username" type="text" class=" search-textbox form-control rounded-0 border-right-0 border-left-0 pt-1 border-top-0" />
+                                 <input placeholder="Search" onChange={this.searchUserHandler} aria-describedby="inputGroupPrepend" name="username" type="text" class=" search-textbox form-control rounded-0 border-right-0 border-left-0 pt-1"   />
                                  <div class="input-group-prepend ">
                                     <span class="search-icon input-group-text bg-white border-left-0 border-right-0 border-top-0" id="inputGroupPrepend">
                                        <i class="fa fa-search text-muted" aria-hidden="true"></i>
@@ -1154,12 +1167,12 @@ return(
                                  </div>
                               </div>
                            </nav>
-                           <div class="listGroup-scroll" style={{ height: '52vh' }}>
+                           <div class="scrollbar" style={{ height: '60vh' }}>
                               <table class="table w-95 ml-3 mr-3" style={{ borderbottom: "1px solid #dee2e6" }}>
                                  <thead>
                                     <tr>
                                        <th scope="col" className="border-th"> <div class="custom-control-lg custom-control   custom-checkbox pl-5">
-                                          <input type="checkbox" class="custom-control-input" id="customCheck1" onChange={this.SelectALLUsers.bind(this)} checked={this.state.SelectALLUsers} />
+                                          <input type="checkbox" class="custom-control-input" id="customCheck1" disabled={!this.state.isUserOnBoardingRequired} onChange={this.SelectALLUsers.bind(this)} checked={this.state.SelectALLUsers} />
                                           <label class="custom-control-label" for="customCheck1"></label>
                                           <span className="">UserName</span>
                                        </div> </th>
@@ -1179,7 +1192,7 @@ return(
                                        return (
                                           <tr>
                                              <td> <div class="custom-control-lg custom-control custom-checkbox  pl-5">
-                                                <input type="checkbox" class="custom-control-input" checked={checkedlist} name={data.id} onChange={this.attributeToAttributeHanlderUsers.bind(this)} id={data.id} />
+                                                <input type="checkbox" class="custom-control-input" disabled={!this.state.isUserOnBoardingRequired} checked={checkedlist} name={data.id} onChange={this.attributeToAttributeHanlderUsers.bind(this)} id={data.id} />
                                                 <label class="custom-control-label" for={data.id}></label>
                                                 <span className="text-truncate "><i class="fas fa-circle text-success mr-2" style={{ fontSize: ".75rem" }}></i>{data.userName}</span>
                                              </div>
@@ -1197,7 +1210,7 @@ return(
                         </div>
                         <div class="bg-white" >
                            <div class="card-footer bg-white">
-                              <button type="button" class="common-button btn btn-dark float-right mr-2 mb-0 mt-2" name="AddMap" disabled={this.state.disableButton} onClick={this.MapUser.bind(this)}>Map</button>
+                           <button type="button" class="default-button btn btn-dark float-right p-0 mr-2 mb-2 mt-2" name="AddMap" disabled={this.state.disableButton} onClick={this.MapUser.bind(this)}>Map</button>
                               {/* <button  type="button"  class=" btn btn-light float-right mr-4 mb-2">Remove</button> */}
                            </div>
                         </div>
@@ -1261,7 +1274,7 @@ return(
          <>
             <AlertBanner onClose={this.handleCloseErrorMessage.bind(this)} Message={this.state.ErrorMesage} visible={this.state.showErrorMesage} Type={this.state.ErrorMesageType}>
             </AlertBanner>
-            <div class="card w-100 border-bottom mt-2 border-top-0 border-right-0 border-left-0 rounded-0 pt-2  h-80">
+            <div class="card w-100 border-bottom mt-1 border-top-0 border-right-0 border-left-0 rounded-0 pt-2 shadow-sm  h-60">
                {this.showtextonEdit()}
             </div>
 
@@ -1269,7 +1282,7 @@ return(
             <div class="container-fluid">
                <div class="row" >
                   <div class="col-sm-5   pl-0" >
-                     <div class="card rounded-0  bg-white" style={{ height: '78.6vh' }}>
+                     <div class="card rounded-0  bg-white shadow-sm  list-card-masters" >
                         <nav class="navbar navbar-expand navbar-light p-0  shadow-sm ">
                            <div class="input-group">
                               <input type="text"
@@ -1287,18 +1300,18 @@ return(
                               </div>
                               <div class="input-group-prepend">
                                  <span class="filter-sort-icon input-group-text bg-white  border-top-0" id="inputGroupPrepend">
-                                    <i class="fa fa-filter text-muted" aria-hidden="true"></i>
+                                    <i class="fa fa-filter text-muted" name="sortMaster"  aria-hidden="true"></i>
                                  </span>
                               </div>
                               <div class="input-group-prepend">
-                                 <span class="filter-sort-icon input-group-text bg-white  border-top-0" id="inputGroupPrepend">
-                                    <i class="fa fa-sort text-muted" aria-hidden="true"></i>
+                                 <span class="filter-sort-icon input-group-text bg-white  border-top-0"  id="inputGroupPrepend">
+                                    <i class="fa fa-sort text-muted" name="filterMaster"  aria-hidden="true"></i>
                                  </span>
                               </div>
 
                            </div>
                         </nav>
-                        <ul class="list-group listGroup-scroll" name="AttributesList">
+                        <ul class="list-group scrollbar" name="AttributesList">
                            {this.state.attributesList.map((data, key) => {
                               return (
                                  //  <ListGroup.Item   action className="list-item-listview"><i class="fas fa-circle" style={{color: 'green', paddingRight:'10px',fontSize:'10px'}}></i>{data.name}</ListGroup.Item>

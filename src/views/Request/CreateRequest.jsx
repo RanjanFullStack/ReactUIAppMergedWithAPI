@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Modal, Button, Row, Col, Form, ButtonToolbar } from 'react-bootstrap';
+import { Modal, Button, Row, Col, Form, ButtonToolbar, ModalTitle } from 'react-bootstrap';
 import { BFLOWDataService } from "../../configuration/services/BFLOWDataService";
 import { withGlobalState } from 'react-globally'
 import DateTime from 'react-datetime';
@@ -8,10 +8,13 @@ import moment from 'moment';
 import { DocumentService } from "../../configuration/services/DocumentService";
 import AlertBanner from '../../components/AlertBanner/index';
 
+
 let files = [];
 let formData = new FormData()
 let Documents = [];
 let DocComments = [];
+let docSize = 0;
+let totalSizeInMB = 0;
 
 class CreateRequest extends Component {
   constructor(props, context) {
@@ -30,18 +33,23 @@ class CreateRequest extends Component {
       IsSubmitDisable: false,
       Title: '',
       Description: '',
-      errorTitle: ''
+      errorTitle: '',
+      showPopUp: false,
     }
     this.getRequestList = this.getRequestList.bind(this);
     this.modalClose = this.modalClose.bind(this);
     this.removeSelectedAttachment = this.removeSelectedAttachment.bind(this)
     this.intialize = this.intialize.bind(this);
+    this.handleShow = this.handleShow.bind(this);
+    this.handleClose = this.handleClose.bind(this);
   }
 
   componentDidMount() {
     const { show, ParentId } = this.props;
     if (show === true) {
       this.intialize(this.props);
+      this. resetValueAfterSubmit();
+      totalSizeInMB=0;
     }
   }
 
@@ -51,10 +59,24 @@ class CreateRequest extends Component {
   //   }
 
   componentWillReceiveProps(nextProps) {
+   
     const { show, ParentId } = nextProps;
     if (show === true) {
       this.intialize(nextProps);
+     this. resetValueAfterSubmit();
+     totalSizeInMB=0;
     }
+  }
+
+  /** Attachments PopUp */
+  handleShow() {
+   ;
+    this.setState({ showPopUp: true });
+  }
+
+  //Close pop
+  handleClose() {
+    this.setState({showPopUp: false});
   }
 
   intialize(props) {
@@ -67,6 +89,7 @@ class CreateRequest extends Component {
     files = [];
     DocComments = [];
     Documents = [];
+    totalSizeInMB = 0;
     this.state.keyValueList.map((data, key) => {
       data.value = '';
       this.setState({ ['err' + data.name]: undefined });
@@ -74,22 +97,29 @@ class CreateRequest extends Component {
 
   }
 
-  onUpload = (acceptedFiles) => {
+  onUpload = acceptedFiles => {
+   
+    this.setState({fileValidation:""})
     let documents = acceptedFiles.target.files;
     for (let index = 0; index < documents.length; index++) {
       let file = documents[index];
-      if(!files.some(item => file.name === item.name && file.type === item.type)){
-        debugger
-        formData.append('files', file, file.name);
-        files.push({
-          "name": file.name, "lastModified": file.lastModified, "lastModifiedDate": file.lastModifiedDate
-          , "size": file.size, "type": file.type, "comment": ""
-        });
-      }
+      var fileSize = ((file.size / (1000000)).toFixed(2));
+      totalSizeInMB = (parseFloat(totalSizeInMB) + parseFloat(fileSize));
+        
+          if (!files.some(item => file.name === item.name && file.type === item.type)) {
+            formData.append("files", file, file.name);
+            files.push({
+              name: file.name,
+              lastModified: file.lastModified,
+              lastModifiedDate: file.lastModifiedDate,
+              size: fileSize,
+              type: file.type,
+              comment: ""
+            });
+          }
     }
-  
     this.setState({ uploadedFiles: files });
-  }
+  };
 
   processComments = (index, file, c) => {
     let comment = c.target.value
@@ -117,7 +147,7 @@ class CreateRequest extends Component {
     this.setState({ DueDateTime: date })
   }
   async GetMasters() {
-    const responseJson = await BFLOWDataService.get("Masters");
+    const responseJson = await BFLOWDataService.get("Masters/GetMasterForRequest");
     this.setState({ mastersData: responseJson });
     this.setState({ CurrentSelectedMastersData: responseJson });
 
@@ -141,14 +171,46 @@ class CreateRequest extends Component {
 
   async CreateRequest() {
     var value = this.validateForm();
+    this.setState({fileValidation:""})
+    const SUPPORTED_DOCUMENT_FORMATS = process.env.REACT_APP_SUPPORTED_DOCUMENT_FORMATS;
+    var documentFormats = SUPPORTED_DOCUMENT_FORMATS.split(',');
+    const MAX_DOCUMENTS_SIZE = process.env.REACT_APP_MAX_DOCUMENTS_SIZE;
+    let invalidFileType = "";
+    let hasSupportedDocumentsFormat = true;
+    {this.state.uploadedFiles.map((data, key) => {
+      var fileData = data.name.split('.');
+      var index = (fileData.length - 1);
+      var extension = fileData[index];
+      
+      if (!documentFormats.includes(extension)){
+       
+        invalidFileType = extension;
+        hasSupportedDocumentsFormat = false;
+        return invalidFileType;
+      }
+
+    })}
+
+    let isValid = true;
     if (value === false) {
       this.setState({ IsSubmitDisable: true });
-      if (formData !== null && this.state.uploadedFiles.length > 0) {
-        Documents = await DocumentService.POST(formData)
-        for (let index = 0; index < Documents.length; index++) {
-          Documents[index].comment = DocComments[index];
+      if(formData !== null && this.state.uploadedFiles.length > 0) {
+        if (totalSizeInMB < MAX_DOCUMENTS_SIZE && hasSupportedDocumentsFormat) {
+          Documents = await DocumentService.POST(formData)
+          for (let index = 0; index < Documents.length; index++) {
+            Documents[index].comment = DocComments[index];
+          }
+          formData = new FormData()
+        } else if(!hasSupportedDocumentsFormat){
+         
+          const DOCUMENTS_FORMAT_VALIDATION = process.env.REACT_APP_DOCUMENTS_FORMAT_VALIDATION;
+          this.setState({fileValidation:'.' + invalidFileType + ' ' + DOCUMENTS_FORMAT_VALIDATION});
+          isValid = false;
+        } else{
+          const DOCUMENTS_SIZE_VALIDATION = process.env.REACT_APP_DOCUMENTS_SIZE_VALIDATION;
+          this.setState({fileValidation:DOCUMENTS_SIZE_VALIDATION + ', while the selected attachment size is '+ totalSizeInMB.toFixed(2) + ' MB.'});
+          isValid = false;
         }
-        formData = new FormData()
       }
 
       const RequestKeyValue = [];
@@ -174,51 +236,66 @@ class CreateRequest extends Component {
         MapRequestWithMasterAttributes.push({ "AttributeId": item.value === "" ? 0 : item.value })
       })
 
-
-      if (this.state.Title !== "") {
-        const body = JSON.stringify({
-          Title: this.state.Title,
-          Description: this.state.Description,
-          ParentId: this.state.parentId,
-          RequestKeyValues: RequestKeyValue,
-          MapRequestWithMasterAttributes: MapRequestWithMasterAttributes,
-          Timeline: Timeline,
-          DueDateTime: this.state.DueDateTime,
-          Documents: Documents
-        });
-
-        const message = await BFLOWDataService.post('Request', body);
-        if (message.Code === false && message.Code !== undefined) {
-          this.setState({
-            showErrorMesage: true,
-            errorMessage: message.Message,
-            errorMessageType: 'danger'
+   
+      if(isValid === true){
+        if (this.state.Title !== "") {
+          const body = JSON.stringify({
+            Title: this.state.Title,
+            Description: this.state.Description,
+            ParentId: this.state.parentId,
+            RequestKeyValues: RequestKeyValue,
+            MapRequestWithMasterAttributes: MapRequestWithMasterAttributes,
+            Timeline: Timeline,
+            DueDateTime: this.state.DueDateTime,
+            Documents: Documents
           });
-        }
-        else {
-          this.setState({
-            showErrorMesage: true,
-            errorMessage: message,
-            errorMessageType: 'success'
-          });
-          this.setState({ validated: false, parentId: 0 });
-          const responseJson = await BFLOWDataService.get('Request');
-
-          let reqID = responseJson[0].id;
-          const bodyDocuments = JSON.stringify({ "requestId": reqID, "documents": Documents });
-          if (this.state.uploadedFiles.length > 0) {
-            const message1 = await DocumentService.Upload(bodyDocuments)
+          this. resetValueAfterSubmit();
+          const message = await BFLOWDataService.post('Request', body);
+  
+         
+          if (message.Code === false && message.Code !== undefined) {
+            this.setState({
+              showErrorMesage: true,
+              errorMessage: message.Message,
+              errorMessageType: 'danger'
+            });
           }
-          this.setState({ validated: false, uploadedFiles: [] });
-          files = [];
-          DocComments = [];
+          else {
+            this.props.create();
+            this.setState({
+              showErrorMesage: true,
+              errorMessage: message,
+              errorMessageType: 'success',
+              mastersData: [],
+              keyValueList: [],
+              dynamicArray: [],   
+              CurrentSelectedMastersData: [],
+              DueDateTime:null,
+              show:false,
+            });
+          
+            this.setState({ validated: false, parentId: 0 });
+            const responseJson = await BFLOWDataService.get('Request');
+  
+            let reqID = responseJson[0].id;
+            const bodyDocuments = JSON.stringify({ "requestId": reqID, "documents": Documents });
+            if (this.state.uploadedFiles.length > 0) {
+              const message1 = await DocumentService.Upload(bodyDocuments)
+            }
+            this.setState({ validated: false, uploadedFiles: [] });
+            files = [];
+            DocComments = [];
+            totalSizeInMB = 0;
+          }
+          this.ResetStateValues();
+          this.setTimeOutForToasterMessages();
         }
-        this.ResetStateValues();
-        this.setTimeOutForToasterMessages();
+       
       }
-      this.props.create();
-    }
-    this.setState({ IsSubmitDisable: false });
+      this.setState({ IsSubmitDisable: false });
+
+      }
+      
   }
   /*Modal close and document array empty*/
   modalClose() {
@@ -227,34 +304,47 @@ class CreateRequest extends Component {
     DocComments = [];
     formData = new FormData();
     Documents = [];
+    totalSizeInMB = 0;
     this.props.hide(this.state.show);
   }
   /*For removing selected document from array*/
 
   removeSelectedAttachment(name) {
+   
+    totalSizeInMB = 0;
+    this.setState({fileValidation:""})
     let alteredArray = [];
 
     alteredArray = this.state.uploadedFiles;
 
     var listofproject = alteredArray.filter(x => x.name === name);
-    alteredArray = alteredArray.filter(function (name) {
+    alteredArray = alteredArray.filter(function(name) {
       return listofproject.indexOf(name) === -1;
     });
 
+    let oldformData = formData;
+    formData = new FormData();
+    for(var pair of oldformData.entries()) {
+      if(name !== pair[1].name) {
+       
+        formData.append(pair[0],pair[1],pair[2]); 
+      }
+   }
+
     if (alteredArray.length > 0) {
       this.setState({ uploadedFiles: alteredArray });
-      files = this.state.uploadedFiles;
+      files = alteredArray;
 
-      formData = new FormData();
       for (let index = 0; index < alteredArray.length; index++) {
-        let file = this.state.uploadedFiles[index];
-        ;
-        formData.append("files", file, file.name);
+        let file = alteredArray[index];
+       
+        totalSizeInMB =  (parseFloat(totalSizeInMB) + parseFloat(file.size))  ;
       }
     } else {
       this.setState({ uploadedFiles: [] });
       files = [];
       formData = new FormData();
+      totalSizeInMB = 0;
     }
   }
 
@@ -297,8 +387,15 @@ class CreateRequest extends Component {
       return item;
     });
     this.setState({ keyValueList: _key });
+    this.setState({ ['err' + event.target.name]: undefined });
   }
-
+  handelchangetitel(event){
+   
+    this.setState({ Title: event.target.value })
+    if(event.target.value!=="" && this.state.errorTitle!==''){
+      this.setState({ errorTitle: '' })
+    }
+  }
 
   bindTimeline(name, date) {
 
@@ -519,8 +616,19 @@ class CreateRequest extends Component {
   // }
 
   /*Method to reset state values */
+
+
   ResetStateValues() {
-   
+    this.setState({fileValidation:""})
+    this.resetValueAfterSubmit()
+    this.setState({
+      show: false,
+    });
+
+    this.props.hide();
+  }
+
+  resetValueAfterSubmit(){
     this.state.keyValueList.map((data, key) => {
       data.value = '';
       this.setState({ ['err' + data.name]: undefined });
@@ -528,15 +636,13 @@ class CreateRequest extends Component {
     this.setState({
       errorTitle: '',
       Title: '',
-      show: false,
-      Description: ''
+      Description: '',
+    
     });
-
-    this.props.hide();
   }
   /**Method to hide Alert Message */
   setTimeOutForToasterMessages() {
-    debugger;
+    ;
     setTimeout(
       function () {
         this.setState({ showErrorMesage: false });
@@ -568,6 +674,7 @@ class CreateRequest extends Component {
             <Modal.Title id="contained-modal-title-vcenter" style={{ width: "100%" }}>
               <div className="float-left d-inline ">
                 {this.state.parentId === 0 || this.state.parentId === undefined ? "Create Request" : "Create Linked Request"}
+                {/* {totalSizeInMB = 0} */}
               </div>
               <div className="float-right d-inline pt-2">
                 <h6 >  {this.state.parentId === 0 || this.state.parentId === undefined ? "" : "Parent Request : REQ" + this.state.parentId}   </h6>
@@ -579,16 +686,14 @@ class CreateRequest extends Component {
               <div class="row pl-3 pr-3 pt-0 pb-0">
                 <div class="col-sm-12">
                   <div class="form-group">
-                    <label for="lblTitle" className={this.state.errorTitle ===""?"mandatory":"error-label mandatory"}>Title</label>
+                    <label for="lblTitle" className={this.state.errorTitle === "" ? "mandatory" : "error-label mandatory"}>Title</label>
                     <input
                       type="text"
-                      className={this.state.errorTitle ===""?"form-control border-top-0 border-right-0 border-left-0 rounded-0 ":"error-textbox form-control border-top-0 border-right-0 border-left-0 rounded-0 "}
+                      className={this.state.errorTitle === "" ? "form-control border-top-0 border-right-0 border-left-0 rounded-0 " : "error-textbox form-control border-top-0 border-right-0 border-left-0 rounded-0 "}
                       id="txtTitle"
                       placeholder="Title"
                       name="Title"
-                      onChange={e =>
-                        this.setState({ Title: e.target.value })
-                      }
+                      onChange={this.handelchangetitel.bind(this)}
                     />
                     <div className="errorMsg">{this.state.errorTitle}</div>
                   </div>
@@ -617,12 +722,12 @@ class CreateRequest extends Component {
                     return (
                       <div class="col-sm-6">
                         <div>
-                          <label className={this.state['err' + data.name] !==undefined && data.isRequired == true   ? 'error-label form-group border-top-0 border-right-0 border-left-0 rounded-0' : 'form-group border-top-0 border-right-0 border-left-0 rounded-0'}>
+                          <label className={this.state['err' + data.name] !== undefined && data.isRequired == true ? 'error-label form-group border-top-0 border-right-0 border-left-0 rounded-0' : 'form-group border-top-0 border-right-0 border-left-0 rounded-0'}>
                             {data.name}
                           </label>
-                          <span  className={data.isRequired == true  ? 'mandatory' : ''}></span>
+                          <span className={data.isRequired == true ? 'mandatory' : ''}></span>
                           <input type="text"
-                             className={this.state['err' + data.name] !==undefined && data.isRequired == true ?"error-textbox  form-control border-top-0 border-right-0 border-left-0 rounded-0 ":"form-control border-top-0 border-right-0 border-left-0 rounded-0 "}
+                            className={this.state['err' + data.name] !== undefined && data.isRequired == true ? "error-textbox  form-control border-top-0 border-right-0 border-left-0 rounded-0 " : "form-control border-top-0 border-right-0 border-left-0 rounded-0 "}
                             id={'txt' + data.name.trim()}
                             maxLength="100"
                             placeholder={data.name}
@@ -654,7 +759,7 @@ class CreateRequest extends Component {
                       name="DueDateTime"
                       id="DueDateTime"
                       timeConstraints={{ hours: { min: new Date().getHours(), max: 23, step: 1 }, minutes: { min: new Date().getMinutes(), max: 59, step: 1 } }}
-                      inputProps={{ readOnly: true }}
+                      inputProps={{ readOnly: true , style:{color:"rgb(85, 86, 90)", padding: "0px",fontSize: "0.875rem"}}}
                     />
                   </div>
                 </div>
@@ -678,7 +783,7 @@ class CreateRequest extends Component {
                             name={data.name}
                             id={'Datetime' + data.name.trim()}
                             timeConstraints={{ hours: { min: new Date().getHours(), max: 23, step: 1 }, minutes: { min: new Date().getMinutes(), max: 59, step: 1 } }}
-                            inputProps={{ readOnly: true }}
+                            inputProps={{ readOnly: true , style:{color:"rgb(85, 86, 90)", padding: "0px",fontSize: "0.875rem"}}}
                           // value={data.value}
                           />
                         </div>
@@ -691,7 +796,6 @@ class CreateRequest extends Component {
               <hr />
               <div class="row">
                 {this.state.CurrentSelectedMastersData.map((data, key) => {
-
                   if (!data.id !== null)
                     return (
                       <div class="col-sm-6">
@@ -708,22 +812,40 @@ class CreateRequest extends Component {
 
             </form>
             {/* Attachments module */}
-            <b class="pl-3">Attachments</b>
-            <hr />
-            <div class="row pl-3 pr-3 pt-0 pb-0">
-              <div class="col-sm-12">
-                <div class="input-group">
-                  <input type="file" class="custom-file-input" id="inputGroupFile01"
-                    aria-describedby="inputGroupFileAddon01" multiple
-                    onChange={this.onUpload.bind(this)}
-                    onClick={event => {
-                      event.target.value = null;
-                    }}
-                  />
-                  <label class="custom-file-label" for="uploadFiles">Browse file from your computer</label>
-                </div>
+            <b class="pl-3">Attachments
+            <i class="fas fa-info float-right" id="infoClick" onClick={this.handleShow.bind(this)}></i></b>
+            <hr/>
+            <Modal name="ShowPopup" show={this.state.showPopUp} onHide={this.handleClose}>
+              <Modal.Header closeButton>
+                <ModalTitle>Supported File types
+                </ModalTitle>
+              </Modal.Header>
+              <Modal.Body>
+                <table class="table w-50 ml-3 mr-3 " style={{ borderbottom: "1px solid #dee2e6" }}>
+                  <tr> MS Word (.doc and .docx)</tr>
+                  <tr> MS Excel (.xls and .xlsx)</tr>
+                  <tr> MS PowerPoint (.ppt and .pptx)</tr>
+                  <tr>.PDF</tr>
+                  <tr> .CSV.txt</tr>
+                  <tr> .rtf</tr>
+                  <tr>.zip and .rar</tr>
+                  <tr> <h6>Images :JPEG, PNG, HEIF and JPG </h6></tr>
+                </table>
+              </Modal.Body>
+            </Modal>
+          <div class="row pl-3 pr-3 pt-0 pb-0">
+            <div class="col-sm-12">
+              <div class="input-group">
+                <input type="file" id="inputGroupFile01"
+                  aria-describedby="inputGroupFileAddon01" multiple
+                  onChange={this.onUpload.bind(this)}
+                  onClick={event => {
+                    event.target.value = null;
+                  }}
+                />
               </div>
             </div>
+          </div>
 
             <div class="row pl-3 pr-3 pt-0 pb-0">
               <div class="col-sm-12">
@@ -751,6 +873,7 @@ class CreateRequest extends Component {
                       );
                     })
                     }
+                    <tr><div className="errorMsg">{this.state.fileValidation}</div></tr>
                   </table>
                 </div>
               </div>

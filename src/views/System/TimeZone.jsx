@@ -32,21 +32,33 @@ class TimeZone extends Component {
       console.log('USA time: ' + usaTime.toLocaleString())
    }
 
-
-
-
-
    async GetTimeZone() {
       const responseJson = await BFLOWDataService.get('Timezone');
       this.setState({ Alltimezonelist: responseJson })
       this.setState({ timezonelist: responseJson })
-      this.setState({ TimeZoneName: responseJson[0].timeZoneName })
-      this.setState({ TimeZoneId: responseJson[0].id })
-      this.setState({ isTimeZoneActive: responseJson[0].isActive })
-      this.setState({ TimeZoneCode: responseJson[0].timeZoneCode })
-      this.setState({ systemTimeZoneId: responseJson[0].systemTimeZoneId })
+      if (responseJson !== undefined) {
+         if (this.state.TimeZoneId > 0) {
+            this.GetTimeZoneById(this.state.TimeZoneId);
+         }
+         else {
+            this.GetTimeZoneById(responseJson[0].id);
+         }
+      }
    }
 
+   /*Method to call Get TimeZone By ID API*/
+   async GetTimeZoneById(timeZoneId) {
+      const responseJson = await BFLOWDataService.getbyid('Timezone', timeZoneId);
+      if (responseJson !== undefined) {
+         this.setState({
+            TimeZoneName: responseJson.timeZoneName,
+            TimeZoneId: responseJson.id,
+            isTimeZoneActive: responseJson.isActive,
+            TimeZoneCode: responseJson.timeZoneCode,
+            systemTimeZoneId: responseJson.systemTimeZoneId
+         });
+      }
+   }
    SetTimezoneIdAndName(id, name, isActive, TimeZoneCode, SystemTimeZoneID) {
       this.setState({ TimeZoneName: name })
       this.setState({ TimeZoneId: id })
@@ -123,28 +135,26 @@ class TimeZone extends Component {
 
 
    /**Method to hide Alert Message */
-setTimeOutForToasterMessages() {
-   debugger
-   setTimeout(
-       function () {
-         debugger
-           this.setState({ showErrorMesage: false });
-       }
-           .bind(this),
-       15000
-   );
- }
+   setTimeOutForToasterMessages() {
+      setTimeout(
+         function () {
+            this.setState({ showErrorMesage: false });
+         }
+            .bind(this),
+         15000
+      );
+   }
    /*Method to handle error message */
    handleCloseErrorMessage() {
       this.setState({ showErrorMesage: false })
-  }
+   }
    render() {
 
       return (
          <>
 
             <AlertBanner onClose={this.handleCloseErrorMessage.bind(this)} Message={this.state.errorMessage} visible={this.state.showErrorMesage} Type={this.state.errorMessageType}>
-              </AlertBanner>
+            </AlertBanner>
 
             {/* <div class="card w-100 border-bottom mt-2 border-top-0 border-right-0 border-left-0 rounded-0 pt-2  h-80">
 
@@ -157,7 +167,7 @@ setTimeOutForToasterMessages() {
             <div class="container-fluid">
                <div class="row" >
                   <div class="col-sm-5   pl-0" >
-                     <div class="card rounded-0  bg-white" style={{ height: '80.5vmin' }}>
+                     <div class="card rounded-0  bg-white list-card-common" >
                         <nav class="navbar navbar-expand navbar-light p-0  shadow-sm ">
                            <div class="input-group">
                               <input type="text"
@@ -186,7 +196,7 @@ setTimeOutForToasterMessages() {
 
                            </div>
                         </nav>
-                        <ul class="list-group listGroup-scroll" name="TimeZoneList">
+                        <ul class="list-group scrollbar" name="TimeZoneList">
 
 
                            {this.state.timezonelist.map((data, key) => {
@@ -215,7 +225,7 @@ setTimeOutForToasterMessages() {
                         </label>
 
                      </div>
-                     <div class="card rounded-0 border-0 shadow-sm listGroup-scroll" style={{ height: '70vmin' }}>
+                     <div class="card rounded-0 border-0 shadow-sm scrollbar" style={{ height: '70vmin' }}>
 
                         <table class="table table-bordered mt-5">
                            <thead>

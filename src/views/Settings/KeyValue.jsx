@@ -234,7 +234,7 @@ class KeyValue extends Component {
             <>
                 <AlertBanner onClose={this.handleCloseErrorMessage.bind(this)} Message={this.state.errorMessage} visible={this.state.showErrorMesage} Type={this.state.errorMessageType}>
                 </AlertBanner>
-                <div className="container-fluid listGroup-scroll">
+                <div className="container-fluid scrollbar" style={{backgroundColor:"#FAFAFB"}}>
                     <div className="row" >
                         <div className="col-sm-12   p-0" >
                             <nav className="navbar navbar-expand navbar-light p-0  shadow-sm ">
@@ -246,15 +246,15 @@ class KeyValue extends Component {
                                         onChange={this.searchHandler.bind(this)}
                                         type="text"
                                         className=" search-textbox form-control rounded-0 " />
-                                    <div className="input-group-prepend">
+                                    <div className="input-group-prepend" >
                                         <span className="search-icon input-group-text bg-white border-left-0   border-top-0" id="inputGroupPrepend">
-                                            <i className="fa fa-search text-muted" aria-hidden="true"></i>
+                                            <i className="fa fa-search text-muted" aria-hidden="true" name="SearchField"></i>
                                         </span>
                                     </div>
 
                                 </div>
                             </nav>
-                            <div className="card border-0  bg-white listGroup-scroll pr-2" style={{ fontSize: "1.25rem", borderRadius: "8px", margin: "8rem", height: "50vh" }}>
+                            <div className="card border-0  bg-white scrollbar pr-2 border-0 shadow-sm" style={{ fontSize: "1.25rem", borderRadius: "8px", margin: "8rem", height: "50vh" }}>
                                 {/* style={{ height: '72vmin' }} */}
                                 <ul className="list-group" name="KeyList">
                                     {this.state.KeyList.map((data, key) => {
@@ -263,8 +263,8 @@ class KeyValue extends Component {
                                                 //  <ListGroup.Item   action className="list-item-listview"><i className="fas fa-circle" style={{color: 'green', paddingRight:'10px',fontSize:'10px'}}></i>{data.name}</ListGroup.Item>
                                                 <li className='list-group-item rounded-0 pl-2 m-2 pt-3 pb-3 text-muted text-truncate  border-bottom border-top-0 border-left-0 border-right-0 cursor-default bf-minheight-60' Id={data.id} name={data.name} >
                                                     {data.name}
-                                                    <i className="text-muted float-right mb-1" onClick={this.keyDelete.bind(this, data.id)} ><img src={DeleteIcon} alt="Delete" /></i>
-                                                    <i className="text-muted d-inline float-right mb-1" onClick={this.keyValue.bind(this, data.id, data.name, data.isActive, data.isRequired)}> <img src={editIcon} alt="Edit" /></i>
+                                                    <i className="text-muted float-right mb-1" name="dltCustomFields" onClick={this.keyDelete.bind(this, data.id)} ><img src={DeleteIcon} alt="Delete" /></i>
+                                                    <i className="text-muted d-inline float-right mb-1" name="editCustomFields" onClick={this.keyValue.bind(this, data.id, data.name, data.isActive, data.isRequired)}> <img src={editIcon} alt="Edit" /></i>
                                                 </li>
                                             );
                                         }

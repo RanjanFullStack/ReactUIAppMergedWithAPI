@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="77.036" height="64.333" viewBox="0 0 77.036 64.333">
+  <g id="Empty_State" data-name="Empty State" transform="translate(1.066 1.46)">
+    <g id="circle" transform="translate(0.395)">
+      <path id="Stroke_1" data-name="Stroke 1" d="M0,0V.645" transform="translate(2.065 28.164)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+      <g id="Group_8" data-name="Group 8" transform="translate(0 28.514)">
+        <path id="Stroke_2" data-name="Stroke 2" d="M0,0,.527.543" transform="translate(0.617)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+        <path id="Stroke_4" data-name="Stroke 4" d="M0,0H.745" transform="translate(0 1.444)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+        <path id="Stroke_6" data-name="Stroke 6" d="M0,.543.527,0" transform="translate(0.556 2.372)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+      </g>
+      <path id="Stroke_9" data-name="Stroke 9" d="M0,.645V0" transform="translate(2.065 30.959)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+      <path id="Stroke_10" data-name="Stroke 10" d="M.43.43,0,0" transform="translate(2.71 30.744)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+      <path id="Stroke_11" data-name="Stroke 11" d="M.645,0H0" transform="translate(3.355 30.099)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+      <path id="Stroke_12" data-name="Stroke 12" d="M.43,0,0,.43" transform="translate(3.14 28.594)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+      <path id="Stroke_13" data-name="Stroke 13" d="M0,0V.43" transform="translate(36.679)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+      <path id="Stroke_15" data-name="Stroke 15" d="M0,0H.43" transform="translate(35.389 1.29)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+      <path id="Stroke_16" data-name="Stroke 16" d="M0,.43V0" transform="translate(36.679 2.15)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+      <path id="Stroke_17" data-name="Stroke 17" d="M.43,0H0" transform="translate(37.324 1.29)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+      <path id="Stroke_18" data-name="Stroke 18" d="M0,0V.645" transform="translate(11.74 18.06)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+      <path id="Stroke_19" data-name="Stroke 19" d="M0,0H.645" transform="translate(9.805 19.995)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+      <path id="Stroke_20" data-name="Stroke 20" d="M0,.645V0" transform="translate(11.74 21.07)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+      <path id="Stroke_21" data-name="Stroke 21" d="M.645,0H0" transform="translate(12.815 19.995)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+      <g id="Group_42" data-name="Group 42" transform="translate(5.564 5.95)">
+        <path id="Stroke_22" data-name="Stroke 22" d="M.931,0A.931.931,0,1,1,0,.931" transform="translate(51.524 35.552)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+        <path id="Fill_26" data-name="Fill 26" d="M0,1.575A2.713,2.713,0,0,0,1.6,0a2.18,2.18,0,0,0,1.6,1.46A2.653,2.653,0,0,0,1.6,3.15,2.538,2.538,0,0,0,0,1.575" transform="translate(56.713 25.533)" fill="#ebecee"/>
+        <path id="Fill_28" data-name="Fill 28" d="M0,.788A1.356,1.356,0,0,0,.8,0a1.091,1.091,0,0,0,.8.73,1.327,1.327,0,0,0-.8.845A1.269,1.269,0,0,0,0,.788" transform="translate(0 34.478)" fill="#ebecee"/>
+        <path id="Fill_30" data-name="Fill 30" d="M1.443.722A.722.722,0,1,1,.722,0a.722.722,0,0,1,.722.722" transform="translate(3.685 4.637)" fill="#d1d8df"/>
+        <path id="Fill_32" data-name="Fill 32" d="M2.412,1.206A1.206,1.206,0,1,1,1.206,0,1.206,1.206,0,0,1,2.412,1.206" transform="translate(50.895 6.09)" fill="#ebecee"/>
+        <path id="Fill_34" data-name="Fill 34" d="M1.913.957A.957.957,0,1,1,.956,0a.957.957,0,0,1,.957.957" transform="translate(68.098 3.071)" fill="#ebecee"/>
+        <path id="Stroke_36" data-name="Stroke 36" d="M1.206.6A.6.6,0,1,1,.6,0,.6.6,0,0,1,1.206.6Z" transform="translate(17.407 48.113)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+        <path id="Stroke_38" data-name="Stroke 38" d="M1.443.722A.722.722,0,1,1,.722,0a.722.722,0,0,1,.722.722Z" transform="translate(16.811)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+        <path id="Stroke_40" data-name="Stroke 40" d="M1.21,1.728A.894.894,0,1,1,1.727.576.894.894,0,0,1,1.21,1.728Z" transform="translate(35.448 53.667)" fill="none" stroke="#d2d8df" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2.921"/>
+      </g>
+    </g>
+    <g id="search" transform="translate(19.445 14.62)">
+      <g id="documents" transform="translate(0 0)">
+        <path id="Fill_1" data-name="Fill 1" d="M19.887,29.669H2.257A2.267,2.267,0,0,1,0,27.405V2.264A2.267,2.267,0,0,1,2.257,0H19.887a2.267,2.267,0,0,1,2.257,2.264V27.405a2.267,2.267,0,0,1-2.257,2.264" transform="translate(3.01 0)" fill="#e0e2ee"/>
+        <path id="Fill_3" data-name="Fill 3" d="M19.887,29.669H2.257A2.267,2.267,0,0,1,0,27.405V2.264A2.267,2.267,0,0,1,2.257,0H19.887a2.267,2.267,0,0,1,2.257,2.264V27.405a2.267,2.267,0,0,1-2.257,2.264" transform="translate(1.505 1.075)" fill="#e8ebf2"/>
+        <path id="Fill_5" data-name="Fill 5" d="M19.928,29.546H2.262A2.265,2.265,0,0,1,0,27.292V2.254A2.265,2.265,0,0,1,2.262,0H19.928A2.265,2.265,0,0,1,22.19,2.254V27.292a2.265,2.265,0,0,1-2.262,2.255" transform="translate(0 2.047)" fill="#d8dbea"/>
+        <path id="Fill_8" data-name="Fill 8" d="M19.928,29.546H2.262A2.265,2.265,0,0,1,0,27.292V2.254A2.265,2.265,0,0,1,2.262,0H19.928A2.265,2.265,0,0,1,22.19,2.254V27.292a2.265,2.265,0,0,1-2.262,2.255" transform="translate(0 2.047)" fill="#f1f2f7"/>
+        <path id="Fill_11" data-name="Fill 11" d="M13.727,1.29H.678A.664.664,0,0,1,0,.645.664.664,0,0,1,.678,0h13.05a.664.664,0,0,1,.678.645.664.664,0,0,1-.678.645" transform="translate(3.655 8.385)" fill="#e0e2ee"/>
+        <path id="Fill_13" data-name="Fill 13" d="M13.727,1.29H.678A.664.664,0,0,1,0,.645.664.664,0,0,1,.678,0h13.05a.664.664,0,0,1,.678.645.664.664,0,0,1-.678.645" transform="translate(3.655 12.255)" fill="#e0e2ee"/>
+        <path id="Fill_15" data-name="Fill 15" d="M13.727,1.29H.678A.664.664,0,0,1,0,.645.665.665,0,0,1,.678,0h13.05a.665.665,0,0,1,.678.645.664.664,0,0,1-.678.645" transform="translate(3.655 16.125)" fill="#e0e2ee"/>
+        <path id="Fill_17" data-name="Fill 17" d="M13.727,1.29H.678A.664.664,0,0,1,0,.645.664.664,0,0,1,.678,0h13.05a.664.664,0,0,1,.678.645.664.664,0,0,1-.678.645" transform="translate(3.655 19.995)" fill="#e0e2ee"/>
+        <path id="Fill_19" data-name="Fill 19" d="M7.489,1.29H.681A.666.666,0,0,1,0,.645.666.666,0,0,1,.681,0H7.489A.666.666,0,0,1,8.17.645a.666.666,0,0,1-.681.645" transform="translate(3.655 23.864)" fill="#e0e2ee"/>
+      </g>
+      <g id="search-2" data-name="search" transform="translate(10.339 5.823)">
+        <path id="Fill_21" data-name="Fill 21" d="M12.847,12.841a7.53,7.53,0,0,1-9.582.889A7.911,7.911,0,0,1,2.2,12.841,7.278,7.278,0,0,1,.926,11.136,7.191,7.191,0,0,1,.138,8.958,7.525,7.525,0,0,1,8.964.135a7.441,7.441,0,0,1,2.177.789,7.565,7.565,0,0,1,1.169.794,7.155,7.155,0,0,1,.532.485,7.5,7.5,0,0,1,.005,10.639" transform="translate(1.7 1.489)" fill="rgba(255,255,255,0.1)"/>
+        <path id="Fill_23" data-name="Fill 23" d="M8.943,17.863a8.913,8.913,0,1,1,7.163-3.595,9.011,9.011,0,0,1-.853.984,9.116,9.116,0,0,1-.984.851,8.907,8.907,0,0,1-5.326,1.76h0Zm0-15.871a6.924,6.924,0,1,0,2.614.509,6.924,6.924,0,0,0-2.614-.509Z" transform="translate(-0.04 -0.036)" fill="#e0e2ee"/>
+        <path id="Fill_25" data-name="Fill 25" d="M12.6,12.457l-.147.147a2.5,2.5,0,0,1-3.521,0L0,3.667,3.667,0,12.6,8.936a2.5,2.5,0,0,1,0,3.521" transform="translate(16.32 15.892)" fill="#00568f"/>
+        <path id="Fill_27" data-name="Fill 27" d="M1.874,0,4.515,2.641,2.64,4.515,0,1.874A9.3,9.3,0,0,0,1,1a9.132,9.132,0,0,0,.87-1" transform="translate(14.385 13.957)" fill="#e0e2ee"/>
+        <path id="Fill_29" data-name="Fill 29" d="M4.3.657.656,4.3,0,3.644,3.644,0Z" transform="translate(24.489 24.061)" fill="#287cb4"/>
+        <path id="Fill_31" data-name="Fill 31" d="M4.3.556.556,4.3,0,3.744,3.744,0Z" transform="translate(15.89 15.462)" fill="#287cb4"/>
+        <path id="Fill_33" data-name="Fill 33" d="M9.89.709.709,9.89A6.45,6.45,0,0,1,0,7.933L7.933,0A6.7,6.7,0,0,1,9.89.709" transform="translate(2.13 2.347)" fill="rgba(255,255,255,0.5)"/>
+        <path id="Fill_35" data-name="Fill 35" d="M11.395,1.387,1.469,10.75a7.378,7.378,0,0,1-1.01-.8A6.561,6.561,0,0,1,0,9.479L10.047,0c.176.136.343.281.505.434a6.846,6.846,0,0,1,.843.95" transform="translate(3.635 3.852)" fill="rgba(255,255,255,0.5)"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -9,7 +9,8 @@ import DateTime from 'react-datetime'
 import { withGlobalState } from "react-globally";
 import moment from 'moment';
 import { Tab, Tabs, Modal, Button } from "react-bootstrap";
-
+import { Collapse } from 'react-bootstrap';
+import { NavDropdown } from 'react-bootstrap';
 // Data services start
 import { BFLOWDataService } from "../../configuration/services/BFLOWDataService";
 import { RequestDataService } from "../../configuration/services/RequestDataService";
@@ -33,16 +34,19 @@ import { RoleBFLOWDataService } from "../../configuration/services/RolesDataServ
 //Used for TimeTracking 
 import TimeTracking from '../TimeTracking/TimeTracking';
 
+//Used for Loader
+import LoadingOverlay from 'react-loading-overlay';
+import ContentLoader, { Facebook } from 'react-content-loader'
+
+import LinesEllipsis from 'react-lines-ellipsis';
+
+import NoDocument from "../../assets/img/NoDocument.svg";
 
 
 //Used Component Imports start
 const CreateRequest = React.lazy(() => import('../Request/CreateRequest'))
 const AlertBanner = React.lazy(() => import('../../components/AlertBanner/index'))
 const Feedback = React.lazy(() => import('./Feedback'))
-
-
-
-
 
 //Used Component Imports end
 /**import end*/
@@ -54,6 +58,9 @@ let Documents = [];
 let DocComments = [];
 let searchText = "";
 let allRequests = [];
+let hasDocuments = false;
+let totalSizeInMB = 0;
+let docSize = 0;
 /**global variable end */
 
 class Request extends Component {
@@ -76,14 +83,18 @@ class Request extends Component {
       ParentId: 0,
       DueDateTime: null,
       isLatest: false,
+      createdBy: "",
+      createdOn: "",
+      modifiedOn: "",
+      modifiedBy: "",
       searchInput: "",
-      errorTitle:'',
+      errorTitle: '',
       //Event State
       StatsData: [],
       EventList: [],
       StatusData: [],
       RequestActionClassName: "dropdown-content",
-      isWatcher:false,
+      isWatcher: false,
 
       //Linked Request
       linkedRequests: [],
@@ -92,10 +103,14 @@ class Request extends Component {
       editRequestDocumentsData: [],
       uploadedFiles: [],
       validateDocuments: false,
+      fileValidation:"",
 
       //key Value list
       keyValueList: [],
 
+      //delete
+      showdel:false,
+      
       //Master Data
       mastersData: [],
 
@@ -128,22 +143,33 @@ class Request extends Component {
       UserList: [],
       Assignee: [],
 
+      //Accordian
+      open: '',
+      BasicDetailsopen:false,
+      Peopleopen:true,
+      Requestinputsopen:true,
+      Datesopen:true,
+      Productinputsopen:true,
+
       //Role based state
-      showRequestAddButton:false,
-      showRequestEditButton:false,
-      showRequestDeleteButton:false,
-      showRequestAssignee:false,
-      showRequestFeedbackButton:false,
-      showLinkRequestTab:false,
-      showRecurrenceRequestTab:false,
-      showHistoryTab:false,
-      showDueDate:false,
-      showProductInput:false,
+      showRequestAddButton: false,
+      showRequestEditButton: false,
+      showRequestDeleteButton: false,
+      showRequestAssignee: false,
+      showRequestFeedbackButton: false,
+      showLinkRequestTab: false,
+      showRecurrenceRequestTab: false,
+      showHistoryTab: false,
+      showDueDate: false,
+      showProductInput: false,
+      showDocumentUploadbutton: false,
+      showDocumentDownloadbutton: false,
+      showDocumentDeletebutton: false,
 
       //Time Tracking 
-      showTimeTracking:false,
-      hideTimeTracking:false,
-
+      showTimeTracking: false,
+      hideTimeTracking: false,
+      
       //recurrence
       GetRequestByIdJson: ''
 
@@ -162,13 +188,16 @@ class Request extends Component {
     this.removeSelectedAttachment = this.removeSelectedAttachment.bind(this);
     this.handleCheck = this.handleCheck.bind(this);
     this.search = this.search.bind(this);
+    this.handleShowdel = this.handleShowdel.bind(this);
+    this.handleClosedel = this.handleClosedel.bind(this);
+    this.hideTrackingWindow=this.hideTrackingWindow.bind(this);
 
   }
 
   /** Lifecycle Event start */
   async componentDidMount() {
     this.getComponentData();
-   
+
   }
 
   componentWillReceiveProps(nextProps) {
@@ -177,6 +206,14 @@ class Request extends Component {
       this.getComponentData();
       this.props.setGlobalState({ RequestModalOnHide: false })
     }
+  }
+
+  handleClosedel() {
+    this.setState({ showdel: false });
+  }
+
+  handleShowdel() {
+    this.setState({ showdel: true });
   }
 
   /** Lifecycle Event end */
@@ -196,13 +233,54 @@ class Request extends Component {
 
     this.setState({ show: false })
     this.setState({ ParentId: 0 })
-    this.getRequestList("first");
+    this.getRequestList("first",false);
     this.GetMasters();
   }
 
   showpop() {
     this.setState({ show: true });
   }
+
+  /** Edit Request Card Accordian */
+  toggle(name) {
+    debugger
+    if (name==="Basic Details" && this.state.BasicDetailsopen===false) {
+      this.setState({ BasicDetailsopen: true })
+    }
+    else if(name==="Basic Details" && this.state.BasicDetailsopen===true){
+      this.setState({ BasicDetailsopen: false })
+    }
+  else  if (name==="People" && this.state.Peopleopen===false) {
+      this.setState({ Peopleopen: true })
+    }
+    else  if( name==="People" && this.state.Peopleopen===true){
+      this.setState({ Peopleopen: false })
+    }
+
+  else  if (name==="Request inputs" && this.state.Requestinputsopen===false) {
+      this.setState({ Requestinputsopen: true })
+    }
+    else  if( name==="Request inputs" &&  this.state.Requestinputsopen===true){
+      this.setState({ Requestinputsopen: false })
+    }
+
+    else if (name==="Dates" && this.state.Datesopen===false) {
+      this.setState({ Datesopen: true })
+    }
+    else  if(name==="Dates" && this.state.Datesopen===true){
+      this.setState({ Datesopen: false })
+    }
+
+   else if (name==="Product inputs" && this.state.Productinputsopen===false) {
+      this.setState({ Productinputsopen: true })
+    }
+    else  if(name==="Product inputs" && this.state.Productinputsopen===true){
+      this.setState({ Productinputsopen: false })
+    }
+
+  }
+
+
   /**Method to hide Alert Message */
   setTimeOutForToasterMessages() {
     setTimeout(
@@ -214,28 +292,35 @@ class Request extends Component {
     );
   }
   /**Method to get Component data */
-  getComponentData(){
+  getComponentData() {
     this.GetUser();
-    this.getRequestList("first");
+    this.getRequestList("first",true);
     this.GetMasters();
     this.GetKeyValue();
     this.GetStatus();
 
-    const showAddEditButton=  this.getUserAccessibility("Request","Create request");
-    const showDeleteButton=  this.getUserAccessibility("Request","Delete request");
-    const showAssignee=  this.getUserAccessibility("Request","Assigment");
-    const showFeedbackButton=  this.getUserAccessibility("Request","Submit FeedBack");
-    const showLinkRequestTab=  this.getUserAccessibility("Request","Create Linked Request");
-    const showRecurrenceRequestTab=  this.getUserAccessibility("Request","Set Recurrence");
-    const showHistoryTab=  this.getUserAccessibility("Request","View History");
-    const showDueDate=  this.getUserAccessibility("Request","Change Due Date");
-    const showProductInput=  this.getUserAccessibility("Request","Change Product Input");
-debugger;
-    this.setState({showRequestAddButton:showAddEditButton,showRequestEditButton:showAddEditButton,
-      showRequestDeleteButton:showDeleteButton,showRequestAssignee:showAssignee,
-      showRequestFeedbackButton:showFeedbackButton,showLinkRequestTab:showLinkRequestTab,
-      showRecurrenceRequestTab:showRecurrenceRequestTab, showHistoryTab:showHistoryTab,
-      showDueDate:showDueDate, showProductInput:showProductInput
+    const showAddEditButton = this.getUserAccessibility("Requests", "Create request");
+    const showDeleteButton = this.getUserAccessibility("Requests", "Delete request");
+    const showAssignee = this.getUserAccessibility("Requests", "Assigment");
+    const showFeedbackButton = this.getUserAccessibility("Requests", "Submit FeedBack");
+    const showLinkRequestTab = this.getUserAccessibility("Requests", "Create Linked Request");
+    const showRecurrenceRequestTab = this.getUserAccessibility("Requests", "Set Recurrence");
+    const showHistoryTab = this.getUserAccessibility("Requests", "View History");
+   
+    const showDueDate = this.getUserAccessibility("Requests", "Change Due Date");
+    const showProductInput = this.getUserAccessibility("Requests", "Change Product Input");
+    const showDocumentUploadButton = this.getUserAccessibility("Documents", "Upload documents");
+    
+    const showDocumentDownloadButton = this.getUserAccessibility("Documents", "Download documents");
+   
+    const showDocumentDeleteButton = this.getUserAccessibility("Documents", "Delete documents");
+    this.setState({
+      showRequestAddButton: showAddEditButton, showRequestEditButton: showAddEditButton,
+      showRequestDeleteButton: showDeleteButton, showRequestAssignee: showAssignee,
+      showRequestFeedbackButton: showFeedbackButton, showLinkRequestTab: showLinkRequestTab,
+      showRecurrenceRequestTab: showRecurrenceRequestTab, showHistoryTab: showHistoryTab,
+      showDueDate: showDueDate, showProductInput: showProductInput, showDocumentUploadbutton: showDocumentUploadButton,
+      showDocumentDownloadbutton: showDocumentDownloadButton, showDocumentDeletebutton: showDocumentDeleteButton
     })
   }
   /** Common method end */
@@ -265,6 +350,12 @@ debugger;
     }
   }
 
+
+  callRequestListFromRecurrence() {
+   
+    this.getRequestList("first",true);
+  }
+
   //sorting by created date end
 
   //search start
@@ -273,8 +364,8 @@ debugger;
     if (event.target.value !== undefined) {
       searchText = event.target.value;
     }
- 
-  
+
+
     var updatedList = this.state.requestList;
     let dueDate = null;
     updatedList = allRequests.filter(function (item) {
@@ -303,14 +394,14 @@ debugger;
             "dddd, mmm d yyyy"
           );
           let str = dueDate.toLowerCase();
-          if (str.search(searchText.toLowerCase()) !== -1 === false){
+          if (str.search(searchText.toLowerCase()) !== -1 === false) {
             dueDate = dateFormat(
               item.dueDateTime,
               "dddd, d mmm yyyy"
             );
             let str = dueDate.toLowerCase();
             return str.search(searchText.toLowerCase()) !== -1;
- 
+
           }
           return str.search(searchText.toLowerCase()) !== -1;
         }
@@ -324,50 +415,50 @@ debugger;
 
 
 
-//Time Tracking Hide & Show functions
+  //Time Tracking Hide & Show functions
 
+  showTimeTracking() {
+    if (this.state.showTimeTracking === false) {
+      var showTimeTracking = true
 
-showTimeTracking()
-{
+    }
+    if (this.state.showTimeTracking === true) {
+      var showTimeTracking = false
+    }
+    this.setState({ showTimeTracking: showTimeTracking })
 
-debugger
-  if(this.state.showTimeTracking===false)
-   {
-     var showTimeTracking=true
+  }
+
+  //End Time Tracking Hide & Show functions
+  async getRequestList(check,isloder) {
  
-   }
-
-   if(this.state.showTimeTracking===true)
-   {
-     var showTimeTracking=false
- 
-   }
-   this.setState({showTimeTracking:showTimeTracking})
-
-}
-
-//End Time Tracking Hide & Show functions
-
-
-
-
-
-
-  async getRequestList(check) {
-
     //getRequestList
-    const responseJson = await RequestDataService.getRequestList();
+    if(isloder===true)
+    {
+       this.props.setGlobalState({ IsLoadingActive: true });
+    }
+       const responseJson = await RequestDataService.getRequestList()
+
+    if(responseJson.length===0 ){
+      this.props.setGlobalState({ IsLoadingActive: false });
+    }
+  if(responseJson.length>0)
+  { this.props.setGlobalState({ IsLoadingActive: false });}
+     
+   
     this.setState({ requestList: responseJson });
+   
+
     allRequests = this.state.requestList;
+    totalSizeInMB = 0;
     this.RefreshRequestlist(this.state.isLatest);
     this.setState({ searchInput: "" });
     if (check === "update") {
-
-      this.GetRequestById(this.state.requestId,this.state.isWatcher);
+      this.GetRequestById(this.state.requestId, this.state.isWatcher);
     }
     if (check === "first") {
       if (this.state.requestList.length > 0) {
-        this.GetRequestById(this.state.requestList[0].id,this.state.isWatcher)
+        this.GetRequestById(this.state.requestList[0].id, this.state.isWatcher)
       }
       else {
         this.setState({
@@ -386,6 +477,13 @@ debugger
 
 
 
+  }
+
+
+  hideTrackingWindow()
+  {
+     
+    this.showTimeTracking()
   }
 
   /**Request List End */
@@ -408,51 +506,47 @@ debugger
     if (this.state.showFeedBack === "RequestTab") {
       return (
 
-
-       
-
-
-
-        <div class="card rounded-0 border-0 shadow-sm p-1 scrollbar" id="style-4"   >
-           {(this.state.showTimeTracking)?
-           <div class="m-3">
-             <span
-             class="card-header border-0"
-             style={{
-               fontWeight: "600",
-               color: "#55565a",
-               backgroundColor: "white"
-             }}
-             onClick={this.showTimeTracking.bind(this)}
-           >
-             <i class="fas fa-arrow-left mr-3" />
-             Time Tracking
+        <div class="card rounded-0 border-0 shadow-sm  mb-0 scrollbar" id="style-4"   >
+          {(this.state.showTimeTracking) ?
+            <div class="m-3">
+              <span
+                class="card-header border-0"
+                style={{
+                  fontWeight: "600",
+                  color: "#55565a",
+                  backgroundColor: "white"
+                }}
+                onClick={this.showTimeTracking.bind(this)}
+              >
+                <i class="fas fa-arrow-left mr-3" />
+                Time Tracking
            </span>
-           <TimeTracking /></div>
-           
-           :
-                     <Tabs activeKey={this.state.currentActiveTab} id="uncontrolled-tab-example"
-            onSelect={currentActiveTab => this.setState({ currentActiveTab })}
-          >
-            <Tab
-              className="tab-content-mapping"
-              eventKey="editRequestCard"
-              title="Request details"
+              <TimeTracking requestId={this.state.requestId} hideTrackingWindow={this.hideTrackingWindow.bind(this)} />
+            </div>
+
+            :
+            <Tabs activeKey={this.state.currentActiveTab} id="uncontrolled-tab-example"
+              onSelect={currentActiveTab => this.setState({ currentActiveTab })}
             >
-              {this.editRequestCard()}
-            </Tab>
-            <Tab
-              className="tab-content-mapping"
-              eventKey="Documents"
-              title="Documents"
-            >
-              {this.UploadRequest()}
-            </Tab>
-            {this.showLinkRequestTab()}
-            
-            {this.showRecurrenceRequestTab()}
-            {this.showHistoryTab()}
-          </Tabs>}
+              <Tab
+                className="tab-content-mapping"
+                eventKey="editRequestCard"
+                title="Request details"
+              >
+                {this.editRequestCard()}
+              </Tab>
+              <Tab
+                className="tab-content-mapping"
+                eventKey="Documents"
+                title="Documents"
+              >
+                {this.UploadRequest()}
+              </Tab>
+              {this.showLinkRequestTab()}
+
+              {this.showRecurrenceRequestTab()}
+              {this.showHistoryTab()}
+            </Tabs>}
         </div>
       )
     }
@@ -486,195 +580,272 @@ debugger
       )
     }
   }
- 
+
   editRequestCard() {
     return (
       <>
         <div class="card-header bg-white p-0 border-0" />
-        <div
-          class="card-body p-0  border-0 pt-2 scrollbar" id="style-4"
-          style={{ height: "67.4vh" }}
-        >
-          <form>
-            <div class="card-header m-0 border-0 " style={{ fontWeight: "500" }}>
-              Basic Details
-          </div>
-            <div class="row pl-3 pr-3 pt-2 pb-0">
-              <div class="col-sm-12">
-                <div class="form-group">
-                  <label for="lblTitle" className={this.state.errorTitle ===""?"mandatory":"error-label mandatory"} style={{ color: "#ababab", fontSize: ".80rem" }}  >Request Title</label>
-                  <input
-                    type="text"
-                    value={this.state.Title}
-                    onChange={e =>
-                      this.setState({ Title: e.target.value })
-                    }
-                    style={{ color: "#55565a" }}
-                   
-                    className={this.state.errorTitle ===""?"form-control textBoxCustom rounded-0  pl-0 pt-0 mt-0":"error-textbox form-control textBoxCustom rounded-0  pl-0 pt-0 mt-0 "}
-                    id="txtTitle"
-                    placeholder="Title"
-                  />
-                  <div className="errorMsg">{this.state.errorTitle}</div>
-                </div>
-              </div>
-              <div class="col-sm-12">
-                <div class="form-group">
-                  <label for="textAreaDescription1" class="m-0" style={{ color: "#ababab", fontSize: ".80rem" }} >Description</label>
-                  <textarea
-                    style={{ color: "#55565a" }}
-                    class="form-control textAreaCustom rounded-0  pl-0 pt-0 mt-0"
-                    id="textAreaDescription"
-                    rows="2"
-                    value={this.state.Description}
-                    onChange={e =>
-                      this.setState({ Description: e.target.value })
-                    }
+        <div id="accordion">
+          <div
+            class="card-body p-0  border-0  scrollbar" id="style-4"
+            style={{ height: "67.4vh" }}
+          >
+            <form>
+            <div class="card-header m-0 border-0 pl-3 p-0" style={{ fontWeight: "500" }}>
+                <div class="card-header-details" >
+                  <a class="card-link " data-toggle="collapse"  >
+                    <label className="text-bold-500" style={{fontSize:".875rem"}}> Basic Details</label>
+                  </a>
+                  <i aria-controls="configuration-collapse" style={{ color:"#ababab"  }}
+                    onClick={this.toggle.bind(this, "Basic Details")}
+                    name="BasicdtlTogg"
+                    className={this.state.BasicDetailsopen === true ? "fas fa-chevron-up float-right sidebar-list-item-arrow mr-3" : "fas fa-chevron-down float-right sidebar-list-item-arrow mr-3"}
+               
                   />
                 </div>
+                {/* <hr class="mb-0 mt-1 ml-0 mr-0" /> */}
+                <div id="collapseOne" className={this.state.BasicDetailsopen === true ? "collapse show" : "collapse"} style={{ height:"3.188rem" }} >
+                  <div className="row basic-info-row" style={{ color: "#ababab", fontSize: ".9rem" }}>
+                    <div className="span4 request-basic-info" >
+                      <div class="request-basic-info-details" > Request ID</div>
+                      <div class="request-basic-info-details-id"> REQ {this.state.requestId}</div>
+                    </div>
+                    <div className="span4 request-basic-info">
+                      <div class="request-basic-info-details">Created By</div>
+                      <div class="request-basic-info-details-id">{this.state.createdby}</div>
+                    </div>
+                    <div className="span4 request-basic-info">
+                      <div class="request-basic-info-details"> Created On  </div>
+                      <div class="request-basic-info-details-id">{moment(this.state.createdOn).format('DD MMMM YYYY')}</div>
+                    </div>
+                    <div className="span4 request-basic-info">
+                      <div class="request-basic-info-details"> Modified On  </div>
+                      <div class="request-basic-info-details-id">{this.state.modifiedOn === null  ? "" : moment(this.state.modifiedOn).format('DD MMMM YYYY')}</div>
+                    </div>
+                    <div className="span4 request-basic-info">
+                      <div class="request-basic-info-details"> Modified By  </div>
+                      <div class="request-basic-info-details-id">{this.state.modifiedby}</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <b class="pl-3 mb-0 mt-1">People</b>
-            <div class="pl-3 pr-3"> <hr class="mb-0 mt-1 ml-0 mr-0" /></div>
-            <div class="row pl-3 pr-3 pt-0 pb-0 mt-3">
 
-              {this.showRequestAssignee()}
-
-              <div class="col-sm-12">
-                <div class="form-group border-top-0 border-right-0 border-left-0 rounded-0 ">
-                  <label class="m-0" style={{ color: "#ababab", fontSize: ".80rem" }}> Watchers </label>
-                  <Chips
-                    onChange={this.handleWatcher.bind(this)}
-                    name="Watcher"
-                    id="Watcher"
-                    className="border-top-0 border-right-0 border-left-0 rounded-0"
-                    value={this.state.Watchers}
-                    suggestions={this.state.ChipsItems}
-                    chipTheme={{ chip: { margin: "3px", padding: 5, background: "#00568F", color: "#ffff", fontSize: "16px", border: "0px" } }}
-                    chipTheme={chipTheme}
-                    theme={theme}
-                    shouldRenderSuggestions={value => value.length >= 1}
-                    fetchSuggestionMin={5}
-                  />
+              <div class="row pl-3 pr-3 pt-2 pb-0">
+                <div class="col-sm-12" style={{paddingLeft:"1.25rem"}} >
+                  <div class="form-group">
+                  <label for="lblTitle" className={this.state.errorTitle === "" ? "mandatory" : "error-label mandatory"}>Title</label>
+                    <input
+                      type="text"
+                      value={this.state.Title}
+                      onChange={this.handelchangetitel.bind(this)}
+                      style={{ color: "#55565a",padding:"0",fontSize:"0.875rem" }}
+                      className={this.state.errorTitle === "" ? "form-control textBoxCustom border-top-0 border-right-0 border-left-0 rounded-0 " : "error-textbox form-control border-top-0 border-right-0 border-left-0 rounded-0 "}
+                      id="txtTitle"
+                      placeholder="Title"
+                    />
+                    <div className="errorMsg">{this.state.errorTitle}</div>
+                  </div>
+                </div>
+                <div class="col-sm-12" style={{paddingLeft:"1.25rem"}}>
+                  <div class="form-group">
+                    <label for="textAreaDescription1" class="m-0 details-label"  >Description</label>
+                    <textarea
+                      style={{paddingBottom:"0",fontSize:"0.875rem" }}
+                      class="form-control textAreaCustom rounded-0  pl-0 pt-0 mt-0"
+                      id="textAreaDescription"
+                      rows="2"
+                      value={this.state.Description}
+                      onChange={e =>
+                        this.setState({ Description: e.target.value })
+                      }
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-            <b class="pl-3 mt-1">Request inputs</b>
-            <div class="pl-3 pr-3"> <hr class="mb-0 mt-1 ml-0 mr-0" /></div>
-            <div class="row pl-3 pr-3 pt-0 pb-0 mt-3">
-              {this.state.keyValueList.map((data, key) => {
-                if (!data.id !== null)
-                  return (
-                    <div class="col-sm-6">
-                      <div class="form-group border-top-0 border-right-0 border-left-0 rounded-0">
-                        <label style={{ color: "#ababab", fontSize: ".80rem" }} className={this.state['err' + data.name] !==undefined && data.isRequired == true   ? 'error-label form-group border-top-0 border-right-0 border-left-0 rounded-0' : 'form-group border-top-0 border-right-0 border-left-0 rounded-0'}>
+
+              <div class="card-body"   >
+                <a class="card-link " data-toggle="collapse"  >
+                  <b class="pl-3 mb-0 mt-1 details-headings" >People</b>
+                </a>
+                <i aria-controls="configuration-collapse"
+                  onClick={this.toggle.bind(this, "People")}
+                  name="PplTogg" style={{paddingRight:"1.25rem", margin:"0", color:"#ababab" }}
+                  className={this.state.Peopleopen === false ?  "fas fa-chevron-up float-right sidebar-list-item-arrow" : "fas fa-chevron-down float-right sidebar-list-item-arrow"}
+                
+                />
+              </div>
+              <div class="pl-3 pr-3"> <hr class="mb-0 mt-1 ml-0 mr-0" /></div>
+              <div id="collapseOne" className={this.state.Peopleopen === true ? "collapse show" : "collapse"}  >
+                <div class="row pl-3 pr-3 pt-0 pb-0 mt-3">
+                  {this.showRequestAssignee()}
+                  <div class="col-sm-12" style={{paddingLeft:"1.188rem"}}>
+                    <div class="form-group border-top-0 border-right-0 border-left-0 rounded-0 ">
+                      <label class="m-0 details-label" > Watchers </label>
+                      <Chips
+                        onChange={this.handleWatcher.bind(this)}
+                        name="Watcher"
+                        id="Watcher"
+                        className="border-top-0 border-right-0 border-left-0 rounded-0"
+                        value={this.state.Watchers}
+                        suggestions={this.state.ChipsItems}
+                        chipTheme={{ chip: { margin: "3px", padding: 5, background: "#00568F", color: "rgb(85, 86, 90)", fontSize: "0.875rem", border: "0px" } }}
+                        chipTheme={chipTheme}
+                        theme={theme}
+                        shouldRenderSuggestions={value => value.length >= 1}
+                        fetchSuggestionMin={5}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body" >
+                <a class="card-link " data-toggle="collapse"  >
+                  <b class="pl-3 mt-1 details-headings"  >Request inputs</b>
+                </a>
+                <i aria-controls="configuration-collapse"
+                  onClick={this.toggle.bind(this, "Request inputs")}
+                  name="RiTogg" style={{paddingRight:"1.25rem", margin:"0", color:"#ababab"}}
+                  className={this.state.Requestinputsopen == false ?  "fas fa-chevron-up float-right sidebar-list-item-arrow" : "fas fa-chevron-down float-right sidebar-list-item-arrow"}
+                
+               />
+              </div>
+              <div class="pl-3 pr-3"> <hr class="mb-0 mt-1 ml-0 mr-0" /></div>
+              <div id="collapseOne" className={this.state.Requestinputsopen == true ? "collapse show" : "collapse"} >
+                <div class="row pl-3 pr-3 pt-0 pb-0 mt-3" >
+                  {this.state.keyValueList.map((data, key) => {
+                    if (!data.id !== null)
+                      return (
+                        <div class="col-sm-6">
+                          <div class="form-group border-top-0 border-right-0 border-left-0 rounded-0">
+                          <label className={this.state['err' + data.name] !== undefined && data.isRequired == true ? 'error-label form-group border-top-0 border-right-0 border-left-0 rounded-0 details-label'  : 'form-group border-top-0 border-right-0 border-left-0 rounded-0 details-label'}>
                             {data.name}
                           </label>
-                          <span  className={data.isRequired == true  ? 'mandatory' : ''}></span>
-                        <input type="text"
-                          style={{ color: "#55565a" }}
-                          class=""
-                          className={this.state['err' + data.name] !==undefined && data.isRequired == true ?"error-textbox  form-control textBoxCustom rounded-0  pl-0 pt-0 mt-0":"form-control textBoxCustom rounded-0  pl-0 pt-0 mt-0 "}
-                          id={'txt' + data.name.trim()}
-                          maxLength="100"
-                          placeholder={data.name}
-                          name={data.name}
-                          value={data.value}
-                          onChange={this.updateKeyValue.bind(this)}
-                        />
-                        <div className="errorMsg">{this.state['err' + data.name]}</div>
-                      </div>
-                    </div>
-                  );
-              })}
-            </div>
-
-            <b class="pl-3 mt-1">Dates</b>
-            <div class="pl-3 pr-3"> <hr class="mb-0 mt-1 ml-0 mr-0" /></div>
-            <div class="row pl-3 pr-3 pt-0 pb-0 mt-3">
-              <div class="col-sm-6">
-                <div class="form-group border-top-0 border-right-0 border-left-0 rounded-0 ">
-                  <label class="m-0" style={{ color: "#ababab", fontSize: ".80rem" }}>
-                    Due Date
-                  </label>
-                  <DateTime
-                    viewMode='days'
-
-                    timeFormat='HH:mm'
-                    viewDate={this.state.DueDateTime === null ? new Date() : this.state.DueDateTime}
-                    dateFormat='MMMM DD YYYY'
-                    isValidDate={current => current.isAfter(DateTime.moment(new Date()).startOf('day') - 1)}
-                    // timeConstraints={hours{min:9, max:15, step:2}
-                    onChange={this.handleDate.bind(this)}
-                    name="DueDateTime"
-                    id="DueDateTime"
-                    value={this.state.DueDateTime !== null ? moment(this.state.DueDateTime).format('MMMM DD YYYY HH:mm') : ''}
-                    selected={this.state.DueDateTime}
-                    timeConstraints={{ hours: { min: this.state.DueDateTime !== null ? new Date(this.state.DueDateTime).getHours() : new Date().getHours(), max: 23, step: 1 }, minutes: { min: this.state.DueDateTime !== null ? new Date(this.state.DueDateTime).getMinutes() : new Date().getMinutes(), max: 59, step: 1 } }}
-                    inputProps={{ readOnly: true, disabled:!this.state.showDueDate}}
-                  />
+                          <span className={data.isRequired == true ? 'mandatory' : ''}></span>
+                            <input type="text"
+                              style={{ color: "#55565a",fontSize:"0.875rem" }}
+                             className={this.state['err' + data.name] !== undefined && data.isRequired == true ? "error-textbox  form-control border-top-0 textBoxCustom border-right-0 border-left-0 rounded-0 " : "form-control border-top-0  textBoxCustom border-right-0 border-left-0 rounded-0 "}
+                              id={'txt' + data.name.trim()}
+                              maxLength="100"
+                              placeholder={data.name}
+                              name={data.name}
+                              value={data.value}
+                              onChange={this.updateKeyValue.bind(this)}
+                            />
+                            <div className="errorMsg">{this.state['err' + data.name]}</div>
+                          </div>
+                        </div>
+                      );
+                  })}
                 </div>
               </div>
-              {this.state.StatusData.map((data, key) => {
+              <div class="card-body" >
+                <a class="card-link " data-toggle="collapse"  >
+                  <b class="pl-3 mt-1 details-headings">Dates</b>
+                </a>
+                <i aria-controls="configuration-collapse"
+                  onClick={this.toggle.bind(this, "Dates")}
+                  name="DatesTogg" style={{paddingRight:"1.25rem", margin:"0",color:"#ababab"}}
+                  className={this.state.Datesopen == false ?  "fas fa-chevron-up float-right sidebar-list-item-arrow" : "fas fa-chevron-down float-right sidebar-list-item-arrow"}
+                  
+               />
+              </div>
+              <div class="pl-3 pr-3"> <hr class="mb-0 mt-1 ml-0 mr-0" /></div>
+              <div id="collapseOne" className={this.state.Datesopen == true? "collapse show" : "collapse"}>
+                <div class="row pl-3 pr-3 pt-0 pb-0 mt-3">
+                  <div class="col-sm-6">
+                    <div class="form-group border-top-0 border-right-0 border-left-0 rounded-0 ">
+                      <label class="m-0" style={{ color: "#ababab", fontSize: ".80rem" }}>
+                        Due Date
+                  </label>
+                      <DateTime
+                        viewMode='days'
 
-                if (data.type == 2)
-                  return (
-                    <div class="col-sm-6">
-                      <div class="form-group border-top-0 border-right-0 border-left-0 rounded-0 ">
-                        <label for="exampleFormControlInput1" class="m-0" style={{ color: "#ababab", fontSize: ".80rem" }}>
-                          {data.name}
-                        </label>
-                        <br />
-
-                        <DateTime
-                          viewMode='days'
-
-                          timeFormat='HH:mm'
-                          dateFormat='MMMM DD YYYY'
-                          viewDate={data.value === null ? new Date() : data.value}
-                          isValidDate={current => current.isAfter(DateTime.moment(new Date()).startOf('day') - 1)}
-                          onChange={this.bindTimeline.bind(this, data.name)}
-                          name={data.name}
-                          id={'Datetime' + data.name.trim()}
-                          value={data.value !== null ? moment(data.value).format('MMMM Do YYYY HH:mm') : ''}
-                          selected={data.value}
-                          timeConstraints={{ hours: { min: data.value !== null ? new Date(data.value).getHours() : new Date().getHours(), max: 23, step: 1 }, minutes: { min: data.value !== null ? new Date(data.value).getMinutes() : new Date().getMinutes(), max: 59, step: 1 } }}
-                          inputProps={{ readOnly: true }}
-                        />
-                      </div>
+                        timeFormat='HH:mm'
+                        viewDate={this.state.DueDateTime === null ? new Date() : this.state.DueDateTime}
+                        dateFormat='MMMM DD YYYY'
+                        isValidDate={current => current.isAfter(DateTime.moment(new Date()).startOf('day') - 1)}
+                        // timeConstraints={hours{min:9, max:15, step:2}
+                        onChange={this.handleDate.bind(this)}
+                        name="DueDateTime"
+                        id="DueDateTime"
+                        value={this.state.DueDateTime !== null ? moment.utc(this.state.DueDateTime).format('MMMM DD YYYY HH:mm') : ''}
+                        selected={this.state.DueDateTime}
+                        timeConstraints={{ hours: { min: this.state.DueDateTime === null ? new Date().getHours(): ( moment(this.state.DueDateTime).format('MMMM DD YYYY HH:mm')=== moment(new Date()).format('MMMM DD YYYY HH:mm')) ? new Date().getHours() : new Date(this.state.DueDateTime).getHours(), max: 23, step: 1 }, minutes: { min: this.state.DueDateTime === null ?  new Date().getMinutes() : (moment(this.state.DueDateTime).format('MMMM DD YYYY HH:mm')=== moment(new Date()).format('MMMM DD YYYY HH:mm')) ? new Date().getMinutes() : new Date(this.state.DueDateTime).getMinutes(), max: 59, step: 1 } }}
+                        
+                        inputProps={{ readOnly: true, disabled:  !this.state.showDueDate, style:{color:"rgb(85, 86, 90)", padding: "0px",fontSize: "0.875rem"} }}
+                      />
                     </div>
-                  );
-              })}
+                  </div>
+                  {this.state.StatusData.map((data, key) => {
+                    
+                    if (data.type == 2)
+                      return (
+                        <div class="col-sm-6">
+                          <div class="form-group border-top-0 border-right-0 border-left-0 rounded-0 ">
+                            <label for="exampleFormControlInput1" class="m-0" style={{ color: "#ababab", fontSize: ".80rem" }}>
+                              {data.name}
+                            </label>
+                            <br />
+                            <DateTime
+                              viewMode='days'
 
-            </div>
-            <b class="pl-3 mt-1">Product inputs</b>
-            <div class="pl-3 pr-3"> <hr class="mb-0 mt-1 ml-0 mr-0" /></div>
-            <div class="row pl-3 pr-3 pt-0 pb-0 mt-3">
-              {this.state.CurrentSelectedMastersData.map((data, key) => {
-
-                if (!data.id !== null)
-                  return (
-                    <div class="col-sm-6">
-                      <div class="form-group border-top-0 border-right-0 border-left-0 rounded-0 ">
-                        <label for="exampleFormControlSelect1" class="m-0" style={{ color: "#ababab", fontSize: ".80rem" }}>
-                          {data.name}
-                        </label>
-                        {this.LoadOptions(data, key)}
-                      </div>
-                    </div>
-                  );
-              })}
-            </div>
-          </form>
+                              timeFormat='HH:mm'
+                              dateFormat='MMMM DD YYYY'
+                              viewDate={data.value === null ? new Date() : data.value}
+                              isValidDate={current => current.isAfter(DateTime.moment(new Date()).startOf('day') - 1)}
+                              onChange={this.bindTimeline.bind(this, data.name)}
+                              name={data.name}
+                              id={'Datetime' + data.name.trim()}
+                              value={data.value !== null ? moment.utc(data.value).format('MMMM DD YYYY HH:mm') : ''}
+                              selected={data.value}
+                              timeConstraints={{ hours: { min: data.value !== null ? new Date(data.value).getHours() : new Date().getHours(), max: 23, step: 1 }, minutes: { min: data.value !== null ? new Date(data.value).getMinutes() : new Date().getMinutes(), max: 59, step: 1 } }}
+                              inputProps={{ readOnly: true,style:{color:"rgb(85, 86, 90)", padding: "0px",fontSize: "0.875rem"} }}
+                            />
+                          </div>
+                        </div>
+                      );
+                  })}
+                </div>
+              </div>
+              <div class="card-body" >
+                <a class="card-link " data-toggle="collapse"  >
+                  <b class="pl-3 mt-1 details-headings">Product inputs</b>
+                </a>
+                <i aria-controls="configuration-collapse"
+                  onClick={this.toggle.bind(this, "Product inputs")}
+                  name="PiTogg" style={{paddingRight:"1.25rem", margin:"0" , color:"#ababab"}}
+                  className={this.state.Productinputsopen == false ?  "fas fa-chevron-up float-right sidebar-list-item-arrow" : "fas fa-chevron-down float-right sidebar-list-item-arrow"}
+   
+               />
+              </div>
+              <div class="pl-3 pr-3"> <hr class="mb-0 mt-1 ml-0 mr-0" /></div>
+              <div id="collapseOne" className={this.state.Productinputsopen == true ? "collapse show" : "collapse"}>
+                <div class="row pl-3 pr-3 pt-0 pb-0 mt-3">
+                  {this.state.CurrentSelectedMastersData.map((data, key) => {
+                    if (!data.id !== null)
+                      return (
+                        <div class="col-sm-6">
+                          <div class="form-group border-top-0 border-right-0 border-left-0 rounded-0 ">
+                            <label for="exampleFormControlSelect1" class="m-0" style={{ color: "#ababab", fontSize: ".80rem" }}>
+                              {data.name}
+                            </label>
+                            {this.LoadOptions(data, key)}
+                          </div>
+                        </div>
+                      );
+                  })}
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
-        <div class="card-footer bg-white">
+        <div class=" bg-white">
           {this.showRequestEditButton()}
         </div>
 
       </>
     )
   }
-
   onChange = event =>
     this.setState({
       Title: event.target.value,
@@ -682,30 +853,30 @@ debugger
     });
 
   async DeleteRequest() {
-    if (window.confirm("Do you wish to delete this item?")){
-    const message = await BFLOWDataService.Delete("Request", this.state.requestId);
-    if (message.Code === false && message.Code !== undefined) {
-      this.setState({
-        showErrorMesage: true,
-        errorMessage: message.Message,
-        errorMessageType: 'danger'
-      });
-    }
-    else {
-      this.setState({
-        showErrorMesage: true,
-        errorMessage: message,
-        errorMessageType: 'success'
-      });
-      this.getRequestList("first");
-    }
-    this.setTimeOutForToasterMessages();
-  }
+    
+      const message = await BFLOWDataService.Delete("Request", this.state.requestId);
+      if (message.Code === false && message.Code !== undefined) {
+        this.setState({
+          showErrorMesage: true,
+          errorMessage: message.Message,
+          errorMessageType: 'danger'
+        });
+      }
+      else {
+        this.setState({
+          showErrorMesage: true,
+          errorMessage: message,
+          errorMessageType: 'success'
+        });
+        this.getRequestList("first",true);
+        this.handleClosedel();
+      }
+      this.setTimeOutForToasterMessages();
+    
   }
 
   GetEditrequestData(requestData) {
     this.props.setGlobalState({ EditRequestBlockId: requestData.id });
-
     if (this.state.requestList !== null) {
       this.setState({
         requestList: this.state.requestList,
@@ -720,24 +891,23 @@ debugger
 
 
   /*Method to call API to Get Request By ID*/
-  async GetRequestById(requestid,isWatcher) {
-debugger
+  async GetRequestById(requestid, isWatcher) {
     this.setState({ show: false });
+    totalSizeInMB = 0;
     if (requestid !== this.state.requestId) {
-
-      this.setState({ showFeedBack: "RequestTab"})
-     
+      this.setState({ showFeedBack: "RequestTab" })
     }
     const responseJson = await BFLOWDataService.getbyid('Request', requestid);
-
+    
     if (responseJson != undefined) {
       let lstRequest = [];
-      let lsttimeline;
+   
       let lstWorflow;
       lstRequest = responseJson.requestKeyValues;
       let lstkeyvalue;
       if (responseJson.requestKeyValues != undefined) {
         lstRequest = responseJson.requestKeyValues;
+        debugger
         lstkeyvalue = this.state.keyValueList.map((data, key) => {
           let filtervalue = lstRequest.filter(x => x.keyId === data.id)
           if (filtervalue.length > 0) {
@@ -750,28 +920,13 @@ debugger
         });
 
         if (responseJson.timeline != undefined) {
-
-          lstRequest = responseJson.timeline;
-
+          lstRequest = responseJson.currentAssignee;
           var workflowId = responseJson.currentSelectedWorkflowId;
-          this.getEventWorkFlowForRequest(workflowId);
+          this.getEventWorkFlowForRequest(workflowId,lstRequest);
           this.setState({ Workflow: workflowId })
-
-          lsttimeline = this.state.StatusData.map((data, key) => {
-
-            let filtervalue = lstRequest.filter(x => x.eventId === data.id)
-            if (filtervalue.length > 0) {
-              if (filtervalue[0].value !== null) {
-                data.value = filtervalue[0].value;
-              }
-            }
-            else {
-              data.value = null;
-            }
-            return data;
-          });
-
-          ;
+        
+     
+         
           /*Block to get Assignee list */
           let arrAssignee = [];
           let lstAssignee = lstRequest.filter(x => x.userId != null)
@@ -781,15 +936,11 @@ debugger
           let assigneeLst;
           let arrlstAssignee = [];
           arrAssignee.map((data, key) => {
-
             assigneeLst = this.state.UserList.filter(item => item.id == data)
-
             arrlstAssignee.push(assigneeLst[0].email)
           })
           this.state.Assignee = arrlstAssignee;
         }
-
-
         /*Block to get Watchers list */
         if (responseJson.requestWatchers != undefined) {
 
@@ -800,20 +951,15 @@ debugger
           });
           let watchersLst;
           let arrlstWatchers = [];
-
           arrWatchers.map((data, key) => {
-
             if (this.state.UserList.length > 0) {
-
               watchersLst = this.state.UserList.filter(item => item.id == data)
               arrlstWatchers.push(watchersLst[0].email)
             }
-
           });
           this.state.Watchers = arrlstWatchers;
         }
       }
-
       this.setState({
         editRequestData: responseJson,
         Title: responseJson.title,
@@ -821,15 +967,36 @@ debugger
         requestId: responseJson.id,
         keyValueList: lstkeyvalue,
         DueDateTime: responseJson.dueDateTime,
-        StatusData: lsttimeline,
+        //StatusData: lsttimeline,
         linkedRequests: responseJson.linkedRequests,
         errorTitle: '',
-        isWatcher: isWatcher
-
+        isWatcher: isWatcher,
+        GetRequestByIdJson: responseJson,
+        createdOn: responseJson.createdOn,
+        modifiedOn: responseJson.modifiedOn,
+        // createdby:_createdBy,
+        // modifiedby:_modifiedBy,
       });
+     
+ 
+     var _createdBy= this.state.UserList.filter(item => item.id == responseJson.createdBy)
+     var _modifiedBy= this.state.UserList.filter(item => item.id == responseJson.modifiedBy)
+     if(_modifiedBy.length===0){
+      this.setState({createdby:_createdBy[0].userName, modifiedby:""})  
+     }
+     else{
+      this.setState({createdby:_createdBy[0].userName, modifiedby:_modifiedBy[0].userName})
+     }
+     
+     
 
       if (responseJson.documents !== undefined) {
         this.setState({ editRequestDocumentsData: responseJson.documents })
+        {this.state.editRequestDocumentsData.map((prop, key) => {
+           
+              var size = (parseFloat(totalSizeInMB) + parseFloat(prop.size)); 
+              totalSizeInMB = size;
+			  })}
 
       }
       else {
@@ -851,28 +1018,17 @@ debugger
           FeedBackComments: null,
         });
       }
-
-
-
     }
 
     if (this.state.Rating > 0 && (this.state.showFeedBack === "FeedBack")) {
-
       this.setState({ currentActiveTab: "editRequestCard", showFeedBack: "RequestTab" })
-
     }
-
     this.state.keyValueList.map((data, key) => {
-     
       this.setState({ ['err' + data.name]: undefined });
     });
   }
-
-
- 
   /** Request Details Start */
   async SubmitEditRequestData() {
-
     this.setState({ show: false });
     var value = this.ValidateForm();
     if (value === false) {
@@ -924,11 +1080,19 @@ debugger
           DueDateTime: this.state.DueDateTime,
           RequestWatchers: arrRequestWatchers
         });
+        this.props.setGlobalState({ IsLoadingActive: true });
         const message = await BFLOWDataService.put(
           "Request",
           this.state.requestId,
           body
         );
+
+        if(message.length===0){
+          this.props.setGlobalState({ IsLoadingActive: false });
+        }
+      if(message.length>0)
+      { this.props.setGlobalState({ IsLoadingActive: false });}
+    
         if (message.Code === false && message.Code !== undefined) {
           this.setState({
             showErrorMesage: true,
@@ -942,7 +1106,7 @@ debugger
             errorMessage: message,
             errorMessageType: 'success'
           });
-          const responseJson = this.getRequestList("update");
+          const responseJson = this.getRequestList("update",false);
         }
         this.ResetStateValues();
         this.setTimeOutForToasterMessages();
@@ -962,7 +1126,7 @@ debugger
 
   /*Method to reset state values */
   ResetStateValues() {
-   
+
     this.state.keyValueList.map((data, key) => {
       data.value = '';
       this.setState({ ['err' + data.name]: undefined });
@@ -990,6 +1154,16 @@ debugger
       return item;
     });
     this.setState({ keyValueList: _key });
+    this.setState({ ['err' + event.target.name]: undefined });
+  }
+
+
+  handelchangetitel(event){
+     
+    this.setState({ Title: event.target.value })
+    if(event.target.value!=="" && this.state.errorTitle!==''){
+      this.setState({ errorTitle: '' })
+    }
   }
 
   /*Method to validate key values*/
@@ -1014,11 +1188,26 @@ debugger
   /** Request Key end */
 
   /** Request Workflow Start */
-  async getEventWorkFlowForRequest(id) {
+  async getEventWorkFlowForRequest(id,lstRequest) {
 
-
+    let lsttimeline;
     let statusData = await EventBFLOWDataService.getEventWorkFlowForRequest(id);
-    this.setState({ StatsData: statusData });
+    debugger
+
+    lsttimeline = statusData.map((data, key) => {
+      let filtervalue = lstRequest.filter(x => x.eventId === data.id)
+      if (filtervalue.length > 0) {
+        if (filtervalue[0].value !== null) {
+          data.value = filtervalue[0].value;
+        }
+      }
+      else {
+        data.value = null;
+      }
+      return data;
+    });
+    ;
+    this.setState({ StatsData: lsttimeline });
   }
 
   bindWorkflow(event) {
@@ -1089,7 +1278,7 @@ debugger
   /** Request Masters Start */
   async GetMasters() {
 
-    const responseJson = await BFLOWDataService.get("Masters");
+    const responseJson = await BFLOWDataService.get("Masters/GetMasterForRequest");
 
     this.setState({ mastersData: responseJson });
   }
@@ -1289,10 +1478,10 @@ debugger
       }
       return (
         <select
-          class="form-control border-top-0 border-right-0 border-left-0 rounded-0"
+          class="form-control textBoxCustom rounded-0  pl-0 pt-0 mt-0"
           id={"drpMaster_" + data.id} onChange={this.onChangeDropDownMaster.bind(this)} value={data.value}
           disabled={!this.state.showProductInput}
-          >
+        >
           <option selected disable value="" key={key}>
             Select {data.name}
           </option>
@@ -1338,9 +1527,9 @@ debugger
             <div class="card-body">
               <div className="bf-container-center" >
                 {/* createlinkedreques */}
-                <label className="align-middle ">You have not created any linked requests yet.</label> <br />
-                <button type="button"  disabled={this.state.isWatcher} className="btn btn-primary btn-sm align-middle bf-linkRequestButton" onClick={this.CreateLinkedRequest.bind(this)} >
-                  <i className="text-muted d-inline cursor-pointer" onClick={this.CreateLinkedRequest.bind(this)} name="createlinkedreques"> <img src={createlinkedreques} /></i>
+                <label className="text-center " style={{fontSize:"0.75rem",color:"#ababab"}}>You have not created any linked requests yet.</label> <br />
+                <button type="button" disabled={this.state.isWatcher} style={{display:"flex",alignItems:"center"}} className="btn btn-primary btn-sm align-middle bf-linkRequestButton ml-4" onClick={this.CreateLinkedRequest.bind(this)} >
+                  <i className="text-muted d-inline cursor-pointer pr-2" onClick={this.CreateLinkedRequest.bind(this)} name="createlinkedreques"> <img src={createlinkedreques} /></i>
                   Create Linked Request</button>
               </div>
 
@@ -1356,23 +1545,21 @@ debugger
         <>
           <div class="card w-100 border-bottom  border-top-0 border-right-0 border-left-0 rounded-0 bg-white" style={{ height: "74vh" }} >
             <div class="card-body">
-              <div>
+              <div style={{height:"2.75rem"}}>
                 <div className="float-left d-inline">
-                  <h6>Linked Requests</h6>
+                 
                 </div>
                 <div className="float-right d-inline">
 
-                  <button type="button" disabled={this.state.isWatcher}  className="btn btn-light" onClick={this.CreateLinkedRequest.bind(this)}>
-                    <i className="text-muted d-inline cursor-pointer" name="addnew"> <img src={addnew} /></i>
+                  <button type="button" disabled={this.state.isWatcher} className="btn btn-light" style={{height:"2rem",fontSize:"0.875rem",borderColor:"#fff",backgroundColor:"#fff"}} onClick={this.CreateLinkedRequest.bind(this)}>
+                    <i className="text-muted d-inline cursor-pointer" style={{position:"relative",top:"-0.125rem"}} name="addnew"> <img src={addnew} /></i>
                     Add New</button>
                 </div>
               </div>
-              <table class="table" style={{ borderbottom: "1px solid #dee2e6" }}>
+              <table class="table" style={{ borderbottom: "0.0625rem solid #dee2e6" }}>
                 <thead>
                   <tr>
-                    <th scope="col" className="border-th">
-                      Request ID
-                </th>
+                    <th scope="col" className="border-th">Request ID</th>
                     <th scope="col" className="border-th">Created On</th>
 
                     <th scope="col" className="border-th">Created By</th>
@@ -1383,11 +1570,11 @@ debugger
                 </thead>
                 <tbody>
                   {this.state.linkedRequests.map((data, key) => {
+                     var _createdBy= this.state.UserList.filter(item => item.id == data.createdBy)
                     return (
                       <tr>
                         <td>
                           <a className="common-color" onClick={this.getlinkedRequests.bind(this, data.id)}>REQ{data.id}</a>
-
                         </td>
                         <td>
                           {new Intl.DateTimeFormat("en-Gb", {
@@ -1397,7 +1584,7 @@ debugger
                           }).format(new Date(data.createdOn))}
                         </td>
                         <td>
-                          {data.createdBy}
+                          {_createdBy[0].userName}
                         </td>
                         <td >
                           <label className="d-inline-block  text-truncate" style={{ maxWidth: "200px" }} title={data.title} >{data.title}</label>
@@ -1424,7 +1611,7 @@ debugger
 
   getlinkedRequests(id) {
     this.setState({ requestId: id });
-    this.GetRequestById(id,this.state.isWatcher);
+    this.GetRequestById(id, this.state.isWatcher);
     this.setState({ currentActiveTab: "editRequestCard" })
   }
 
@@ -1440,65 +1627,211 @@ debugger
     DocComments = [];
     formData = new FormData();
     Documents = [];
+    this.setState({fileValidation:""})
+    totalSizeInMB = docSize;
     //this.props.hide(this.state.showDocumentUpload);
   }
 
 
   UploadRequest() {
+
+    let docResult;
+    if (this.state.editRequestDocumentsData.length > 0) {
+      docResult = (
+        <div className="mt-2 pl-3">
+          {hasDocuments = false}
+          {" "}
+          <i class="far fa-folder mr-2" />
+          <span style={{color:"#000000",fontWeight:"500",fontSize:"0.875rem"}}>Attachments </span><span style={{color:"#ababab",fontWeight:"500",fontSize:"0.875rem"}}>({this.state.editRequestDocumentsData.length})</span>
+          <hr />
+          <div class="row">
+            {this.state.editRequestDocumentsData.map((prop, key) => {
+              var date = new Date(prop.createdOn);
+              if (!prop.id !== null)
+                return (
+                  <div class="card col-5  border    m-2 p-0">
+                    <div class="card-header" style={{}}>
+                      <div class="row">
+                      <div class=" pl-0" >
+                      <i class="far fa-file-alt " style={{ padding:"0.6875rem 0.75rem 1.375rem 0.75rem " }} />
+                        </div>
+                        <div class="col-sm-10">
+                        <div class="row"><div class="text-truncate" style={{color:"#55565a",fontSize:"0.875rem"}}>{prop.name}</div></div>
+                          <div
+                            class="row"
+                            style={{
+                              fontSize: "0.75rem",
+                              color: " #ababab"
+                            }}
+                          >
+                            {prop.size} MB /
+                            {new Intl.DateTimeFormat("en-Gb", {
+                              year: "numeric",
+                              month: "short",
+                              day: "2-digit"
+                            }).format(date)}
+                            -
+                            {new Intl.DateTimeFormat("default", {
+                              hour: "numeric",
+                              minute: "numeric"
+                            }).format(date)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-body p-0 m-0 " style={{height:"2.5rem"}} >                      <button
+                        type="button"
+                        class="btn btn-primary rounded-circle"
+                        disabled
+                        style={{
+                          backgroundColor: "#ffffff",
+                          borderColor: "#75787b",
+                          fontSize: "0.625rem",
+                          color: "#75787b",
+                          height:"1.5rem",
+                          width:"1.5rem",
+                          padding:"0",
+                          margin:"0.5rem 0.75rem ",
+                          opacity: ".87"
+                        }}
+                      >
+                        <b>A</b>
+                      </button>
+                      {this.showDocumentDownload(prop)} <span style={{color:"#dedfe0",width:"0"}}>|</span>
+                      <i
+                        class={
+                          this.state.isWatcher !== true
+                            ? "far fa-comment-alt m-2"
+                            : "far fa-comment-alt m-2 disable-div"
+                        }
+                        data-toggle="tooltip"
+                        title={prop.comment}
+                        style={{ color: "#55565a", fontSize: "1rem" }}
+                        onClick={this.handleShowCommentUpload.bind(
+                          this,
+                          prop.comment
+                        )}
+                      />
+                      {this.showDocumentDelete(prop.id, prop.size)}
+                      <Modal
+                        show={this.state.showCommentUpload}
+                        onHide={this.handleCloseCommentUpload}
+                      >
+                        <Modal.Header closeButton>
+                          <Modal.Title>Save Comment</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                          <div class="row">
+                            <div class="col-sm-12">
+                              <input
+                                placeholder="Comment"
+                                aria-describedby="inputGroupPrepend"
+                                name="Comment"
+                                type="text"
+                                value={this.state.documentComment}
+                                class=" search-textbox form-control rounded-0 border-right-0 border-left-0 border-top-0"
+                                onChange={e =>
+                                  this.setState({
+                                    documentComment: e.target.value
+                                  })
+                                }
+                              />
+                            </div>
+                          </div>
+                        </Modal.Body>
+                        <Modal.Footer>
+                          <Button
+                            variant="secondary"
+                            onClick={this.handleCloseCommentUpload}
+                          >
+                            Close
+                          </Button>
+                          <Button
+                            variant="primary"
+                            onClick={this.saveComment.bind(this, prop)}
+                          >
+                            Save Comment
+                          </Button>
+                        </Modal.Footer>
+                      </Modal>
+                    </div>
+                  </div>
+                );
+            })}
+          </div>
+        </div>
+      );
+    } else {
+      docResult = (
+        
+        <div
+          style={{
+            alignItems: "center",
+            justifyContent: "center"
+          }}
+        > 
+        {hasDocuments = true}
+          <center
+            style={{
+              paddingTop: "100px"
+            }}
+          >
+            
+            <div
+            style={{ fontSize: ".95rem", color: "#75787B",fontWeight: "600" }}
+            >
+            <img src={NoDocument} 
+          style = {{height : "10%", width : "20%"}}
+          />
+              <div style={{ fontSize: ".95rem",fontWeight: "750", paddingTop:"50px" }}>No documents added yet!</div>
+            {this.showDocumentUploadforempty()}
+            </div>
+          </center>
+        </div>
+      );
+    }
+
     return (
       <>
         <nav class="navbar navbar-expand navbar-light p-0 ">
           <div class="input-group">
-            <input
+            {/* <input
               placeholder="Search"
               aria-describedby="inputGroupPrepend"
               name="username"
               type="text"
               class=" search-textbox form-control rounded-0 border-right-0 border-left-0 border-top-0"
             />
-            <div class="input-group-prepend">
+            <div class="input-group-prepend" style={{backgroundColor:" #fafafb!important"}}>
               <span
-                class="search-icon input-group-text bg-white border-left-0  border-top-0"
+                class="common-icon-color input-group-text  border-left-0  border-top-0" style={{height:"40px",backgroundColor:" #fafafb!important"}}
                 id="inputGroupPrepend"
               >
-                <i class="fa fa-search text-muted" aria-hidden="true" />
+                <i class="fa fa-search text-muted" aria-hidden="true" style={{height:"0.6875rem",width:"0.6875rem",color:"#75787b"}} />
               </span>
-            </div>
+            </div> */}
+          <input placeholder="Search" style={{backgroundColor:"#fafafb!important"}} aria-describedby="inputGroupPrepend" name="username" type="text" class="search-textbox form-control rounded-0 border-right-0 border-left-0  pt-1 border-top-0 w-10" />
+          <div class="input-group-prepend " style={{backgroundColor:"#fafafb!important"}}>
+            <span class="search-icon input-group-text bg-white border-right-0 border-left-0  border-top-0" id="inputGroupPrepend" style={{backgroundColor:"#fafafb!important"}}>
+              <i class="fa fa-search text-muted" aria-hidden="true"></i>
+            </span>
+          </div>
 
             <div class="input-group-prepend">
-              <span
-                class="input-group-text bg-white  border-top-0"
-                id="downloadAll"
-                style={{ paddingLeft: "10px", paddingRight: "10px" }}
-                onClick={this.allDownload.bind(this, this.state.editRequestDocumentsData)}
-              >
-                <i class="fa fa-download" aria-hidden="true" style={{ paddingLeft: "10px", paddingRight: "10px" }} />
-                Download all
-              </span>
+              {this.showDocumentDownloadAll()}
+
             </div>
-            <div class= {this.state.isWatcher!==true?"input-group-prepend":"input-group-prepend disable-div"}>
-              <span
-                class="input-group-text bg-white border-top-0"
-                id="upload"
-                style={{ paddingLeft: "10px", paddingRight: "10px" }}
-                onClick={this.handleShowDocUpload}
-              >
-                <i class="fa fa-upload" aria-hidden="true" style={{ paddingLeft: "10px", paddingRight: "10px" }} />
-                Upload file
-              </span>
-
-
-
-              <Modal show={this.state.showDocumentUpload} onHide={this.handleCloseDocUpload}>
-                <Modal.Header closeButton>
-                  <Modal.Title>Upload file</Modal.Title>
+            <div class={this.state.isWatcher !== true ? "input-group-prepend" : "input-group-prepend disable-div"}>
+              {this.showDocumentUpload()}
+              <Modal show={this.state.showDocumentUpload} onHide={this.handleCloseDocUpload}  >
+                <Modal.Header style={{backgroundColor:" #fafafb"}} closeButton >
+                  <Modal.Title style={{paddingLeft:"1.438rem" }}>Upload file</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
-
+                <Modal.Body style={{paddingLeft:"2.438rem",marginTop:"0.5rem",paddingRight:"2.438rem"}}>
                   <p>Select files to upload</p>
                   <hr />
                   <div class="row pl-3 pr-3 pt-0 pb-0">
-                    <div class="col-sm-12">
+                    <div class="col-sm-12" style={{padding:"0"}}>
                       <div class="input-group">
                         <input type="file" class="custom-file-input" id="inputGroupFile01"
                           aria-describedby="inputGroupFileAddon01" multiple
@@ -1513,7 +1846,7 @@ debugger
 
                   <div class="row pl-3 pr-3 pt-0 pb-0">
                     <div class="col-sm-12">
-                      <div class="form-group">
+                      <div >
                         <table class="table ml-3 mr-3" >
                           {this.state.uploadedFiles.map((data, key) => {
                             return (
@@ -1537,6 +1870,7 @@ debugger
                             );
                           })
                           }
+                          <tr><div className="errorMsg">{this.state.fileValidation}</div></tr>
                         </table>
                       </div>
                     </div>
@@ -1545,11 +1879,13 @@ debugger
 
 
                 </Modal.Body>
-                <Modal.Footer>
-                  <Button variant="secondary" onClick={this.handleCloseDocUpload}>
+                <Modal.Footer style={{padding:"0",backgroundColor:" #fafafb"}}>
+                  <Button variant="secondary" style={{backgroundColor:"#FFFFFF",color:"#55565a",padding:"0 1.313rem 0 1rem", height:"2rem",border:"0.0625rem solid #dedfe0",margin:"0.75rem 0 0.6875rem 0.75rem"}} 
+                   onClick={this.handleCloseDocUpload}  >
                     Close
             </Button>
-                  <Button variant="primary" onClick={this.handleSaveDocuments.bind(this, this.state.editRequestDocumentsData.requestid)}>
+                  <Button variant="primary" style={{ backgroundColor:"#00568F",border:"none",padding:"0 1.188rem 0 0.9375rem",height:"2rem",margin:"0.75rem 2.5rem 0.6875rem 0.75rem"}}  
+                  onClick={this.handleSaveDocuments.bind(this, this.state.editRequestDocumentsData.requestid)}>
                     Upload file
             </Button>
                 </Modal.Footer>
@@ -1558,135 +1894,8 @@ debugger
           </div>
         </nav>
         <div id="attachments" style={{ height: "70vh" }}>
-
-          <div className="mt-2 pl-3">
-            {" "}
-            <i class="far fa-folder mr-2" />Attachments ({this.state.editRequestDocumentsData.length})
-          <hr />
-
-            <div class="row">
-
-
-
-
-
-
-              {this.state.editRequestDocumentsData.map((prop, key) => {
-                var date = new Date(prop.createdOn);
-                if (!prop.id !== null)
-                  return (
-
-
-
-
-                    <div class="card col-5  border    m-2 p-0"
-
-                    >
-                      <div class="card-header" style={{}}>
-
-
-                        <div class="row">
-                          <div class="col-sm-2" style={{ fontSize: "3vh" }}>
-                            <i class="far fa-file-alt"></i>
-                          </div>
-                          <div class="col-sm-10">
-
-                            <div class="row text-truncate">{prop.name}</div>
-                            <div class="row" style={{ fontSize: "1.5vh", color: " rgb(85, 86, 90)" }}>{prop.size} KB /
-            {new Intl.DateTimeFormat("en-Gb", {
-                              year: "numeric",
-                              month: "short",
-                              day: "2-digit"
-                            }).format(date)}
-
-                              -{new Intl.DateTimeFormat("default", {
-                                hour: "numeric",
-                                minute: "numeric"
-                              }).format(date)}
-
-                            </div>
-
-                          </div>
-                        </div>
-
-                      </div>
-                      <div class="card-body">
-
-
-                        <button
-                          type="button"
-                          class="btn btn-primary rounded-circle mr-2"
-                          disabled
-                          style={{
-                            backgroundColor: "#ffffff",
-                            borderColor: "#55565a",
-                            fontSize: ".75rem",
-                            color: "#55565a"
-                          }}
-                        >
-                          <b>A</b>
-                        </button>
-                        
-                        | <i class="fas fa-download m-2" style={{ color: "#55565a", fontSize: "2vh" }} onClick={this.onDownload.bind(this, prop)}></i>|<i class={this.state.isWatcher!==true? "far fa-comment-alt m-2":"far fa-comment-alt m-2 disable-div"} data-toggle="tooltip" title={prop.comment} style={{ color: "#55565a", fontSize: "2vh" }} onClick={this.handleShowCommentUpload.bind(this, prop.comment)}></i>
-                        <i class={this.state.isWatcher!==true?"far fa-trash-alt float-right m-2":"far fa-trash-alt float-right m-2 disable-div"} style={{ color: "#55565a", fontSize: "2vh" }} onClick={this.DeleteDocument.bind(this, prop.id)}></i>
-
-
-
-
-
-
-                        <Modal show={this.state.showCommentUpload} onHide={this.handleCloseCommentUpload}>
-                          <Modal.Header closeButton>
-                            <Modal.Title>Save Comment</Modal.Title>
-                          </Modal.Header>
-                          <Modal.Body>
-                            <div class="row">
-                              <div class="col-sm-12">
-                                <input
-                                  placeholder="Comment"
-                                  aria-describedby="inputGroupPrepend"
-                                  name="Comment"
-                                  type="text"
-                                  value={this.state.documentComment}
-                                  class=" search-textbox form-control rounded-0 border-right-0 border-left-0 border-top-0"
-                                  onChange={e =>
-                                    this.setState({ documentComment: e.target.value })
-                                  }
-                                />
-                              </div>
-
-                            </div>
-
-
-
-
-                          </Modal.Body>
-                          <Modal.Footer>
-                            <Button variant="secondary" onClick={this.handleCloseCommentUpload}>
-                              Close
-            </Button>
-                            <Button variant="primary" onClick={this.saveComment.bind(this, prop)}>
-                              Save Comment
-            </Button>
-                          </Modal.Footer>
-                        </Modal>
-
-
-
-
-                      </div>
-                    </div>
-
-                  );
-              })}
-
-
-            </div>
-
-          </div>
-
+        {docResult}
         </div>
-
         {/* <div className="mt-2 pl-3">
           {" "}
           <b>Drafts</b>
@@ -1698,10 +1907,8 @@ debugger
           <hr />
         </div> */}
       </>
-
     )
   }
-
   handleSubmit(event) {
     const form = event.currentTarget;
     if (form.checkValidity() === false) {
@@ -1722,43 +1929,102 @@ debugger
     this.setState({ uploadedFiles: files });
   }
 
-  removeSelectedAttachment(key) {
-
+  removeSelectedAttachment(name) {
+      
+    let filesSize = 0;
+    this.setState({fileValidation:""})
     let alteredArray = [];
+
     alteredArray = this.state.uploadedFiles;
-    alteredArray.splice(key, 1);
-    this.setState({ uploadedFiles: alteredArray });
+
+    var listofproject = alteredArray.filter(x => x.name === name);
+    alteredArray = alteredArray.filter(function(name) {
+      return listofproject.indexOf(name) === -1;
+    });
+
+    let oldformData = formData;
+    formData = new FormData();
+    for(var pair of oldformData.entries()) {
+      if(name !== pair[1].name) {
+          
+        formData.append(pair[0],pair[1],pair[2]); 
+      }
+   }
+
+    if (alteredArray.length > 0) {
+      this.setState({ uploadedFiles: alteredArray });
+      files = alteredArray;
+
+      for (let index = 0; index < alteredArray.length; index++) {
+        let file = alteredArray[index];
+          
+        filesSize =  (parseFloat(filesSize) + parseFloat(file.size))  ;
+      }
+        
+      totalSizeInMB = docSize + filesSize;
+    } else {
+      this.setState({ uploadedFiles: [] });
+      files = [];
+      formData = new FormData();
+      totalSizeInMB = docSize;
+    }
   }
 
-  onUpload = (acceptedFiles) => {
+onUpload = acceptedFiles => {
+      
+    docSize = totalSizeInMB;
+    this.setState({fileValidation:""})
     let documents = acceptedFiles.target.files;
     for (let index = 0; index < documents.length; index++) {
       let file = documents[index];
-      if(!files.some(item => file.name === item.name && file.type === item.type)){
-        debugger
-        formData.append('files', file, file.name);
-        files.push({
-          "name": file.name, "lastModified": file.lastModified, "lastModifiedDate": file.lastModifiedDate
-          , "size": file.size, "type": file.type, "comment": ""
-        });
-      }
+      var fileSize = ((file.size / (1000000)).toFixed(2));
+      totalSizeInMB = (parseFloat(totalSizeInMB) + parseFloat(fileSize));
+           
+          if (!files.some(item => file.name === item.name && file.type === item.type)) {
+            formData.append("files", file, file.name);
+            files.push({
+              name: file.name,
+              lastModified: file.lastModified,
+              lastModifiedDate: file.lastModifiedDate,
+              size: fileSize,
+              type: file.type,
+              comment: ""
+            });
+          }
     }
-  
     this.setState({ uploadedFiles: files });
-  }
+  };
+    async handleSaveDocuments() {
+      
+    this.setState({fileValidation:""})
+    const SUPPORTED_DOCUMENT_FORMATS = process.env.REACT_APP_SUPPORTED_DOCUMENT_FORMATS;
+    var documentFormats = SUPPORTED_DOCUMENT_FORMATS.split(',');
+    const MAX_DOCUMENTS_SIZE = process.env.REACT_APP_MAX_DOCUMENTS_SIZE;
+    let invalidFileType = "";
+    let hasSupportedDocumentsFormat = true;
+    {this.state.uploadedFiles.map((data, key) => {
+        
+      var fileData = data.name.split('.');
+      var index = (fileData.length - 1);
+      var extension = fileData[index];
+      
+      if (!documentFormats.includes(extension)){
+          
+        invalidFileType = extension;
+        hasSupportedDocumentsFormat = false;
+        return invalidFileType;
+      }
 
-  async handleSaveDocuments() {
-    if (formData !== null) {
+    })}
+
+    if (formData !== null && totalSizeInMB < MAX_DOCUMENTS_SIZE && hasSupportedDocumentsFormat) {
 
       Documents = await DocumentService.POST(formData)
       for (let index = 0; index < Documents.length; index++) {
         Documents[index].comment = DocComments[index];
       }
       formData = new FormData()
-    }
-
-
-    let id = this.state.editRequestData.id;
+      let id = this.state.editRequestData.id;
     const bodyDocuments = JSON.stringify({ "requestId": id, "documents": Documents });
     const message1 = await DocumentService.Upload(bodyDocuments)
     const message = await BFLOWDataService.post("Documents", bodyDocuments)
@@ -1766,7 +2032,20 @@ debugger
     files = [];
     DocComments = [];
     this.handleCloseDocUpload();
-    this.GetRequestById(this.state.requestId,this.state.isWatcher);
+    this.GetRequestById(this.state.requestId, this.state.isWatcher);
+    } else if(!hasSupportedDocumentsFormat){  
+      const DOCUMENTS_FORMAT_VALIDATION = process.env.REACT_APP_DOCUMENTS_FORMAT_VALIDATION;
+      this.setState({fileValidation:'.' + invalidFileType + ' ' + DOCUMENTS_FORMAT_VALIDATION});
+      totalSizeInMB = docSize;
+    } else{
+        
+      const DOCUMENTS_SIZE_VALIDATION = process.env.REACT_APP_DOCUMENTS_SIZE_VALIDATION;
+      this.setState({fileValidation:DOCUMENTS_SIZE_VALIDATION + ', while the selected attachment size is '+ totalSizeInMB.toFixed(2) + ' MB.'});
+      totalSizeInMB = docSize;
+    }
+
+
+    
     //this.setState({editRequestDocumentsData:this.state.uploadedFiles})
 
     //uploadedFiles
@@ -1808,13 +2087,11 @@ debugger
       body
     );
     console.log(this.state.documentComment)
-    this.GetRequestById(this.state.requestId,this.state.isWatcher);
+    this.GetRequestById(this.state.requestId, this.state.isWatcher);
   }
 
   async onDownload(file) {
-    let fileUrl = file.path;
-
-    const attachment = await DocumentService.Get(file)
+    const attachment = await DocumentService.Get(file.path,file.name)
   }
 
   //-----------------------
@@ -1826,7 +2103,9 @@ debugger
 
     const attachment = await DocumentService.GetAll(fileUrl)
   }
-  async DeleteDocument(documentId) {
+  async DeleteDocument(documentId,size) {
+      
+    totalSizeInMB = (totalSizeInMB - size).toFixed(2);
     const message = await BFLOWDataService.Delete("Documents", documentId);
 
     const documents = this.state.editRequestDocumentsData.filter(x => x.id !== documentId);
@@ -1852,26 +2131,28 @@ debugger
 
         <label
           className={Class}
-    
+
         >
-          <i className='fas fa-star' style={{fontSize:"15px",paddingTop:"5px"}} />
+          <i className='fas fa-star' style={{ fontSize: "15px", paddingTop: "5px" }} />
         </label>
 
       );
     }
     if (this.state.Rating === null) {
       return (
-        <i class="far fa-star  mr-3"  disabled={this.state.isWatcher} style={{ color: "#75787B" ,paddingTop:"10px" }} id="btnSubmitfeedback" onClick={this.FeedBackShow}>
-          <p1 class="ml-1">Submit feedback</p1></i>
+        <span class="mr-2" disabled={this.state.isWatcher} style={{ color: "#55565a", paddingTop: "5px" ,fontSize:".875rem"}} id="btnSubmitfeedback" onClick={this.FeedBackShow}>
+        <i class="far fa-star" ></i>
+          <p1 class="ml-1">Submit feedback</p1>
+          </span>
         /* <i className="far fa-star d-inline float-right" style={{ cursor: 'pointer' }} id="btnSubmitfeedback" onClick={this.FeedBackShow}>Submit Feedback</i> */
       )
     }
     else {
       return (
         <>
-<div class="tooltiP">{stars}
- <span class="tooltiptext feedback-comment">{this.state.FeedBackComments}</span>
- </div>
+          <div class="tooltiP">{stars}
+            <span class="tooltiptext feedback-comment">{this.state.FeedBackComments}</span>
+          </div>
         </>
 
 
@@ -1894,7 +2175,7 @@ debugger
 
   FeedbackSubmit() {
 
-    this.GetRequestById(this.state.requestId,this.state.isWatcher);
+    this.GetRequestById(this.state.requestId, this.state.isWatcher);
     this.setState({ showFeedBack: "FeedBackThanks" })
   }
   /**Feedback End */
@@ -1906,10 +2187,11 @@ debugger
       return ("");
     }
     else {
-      return (Intl.DateTimeFormat("default", {
-        hour: "numeric",
-        minute: "numeric"
-      }).format(date !== null ? date : ""));
+      // return (Intl.DateTimeFormat("default", {
+      //   hour: "numeric",
+      //   minute: "numeric"
+      // }).format(date !== null ? date : ""));
+      return moment.utc(date).format('h:mm A')
     }
   }
 
@@ -1918,336 +2200,509 @@ debugger
       return ("");
     }
     else {
-      return (Intl.DateTimeFormat("en-Gb", {
+      // return (Intl.DateTimeFormat("en-Gb", {
 
-        year: "numeric",
-        month: "short",
-        day: "2-digit"
-      }).format(date));
+      //   year: "numeric",
+      //   month: "short",
+      //   day: "2-digit"
+      // }).format(date));
+      return moment.utc(date).format('DD MMM YYYY')
     }
   }
   /**Time Formating end */
 
- /*Method to user roles for feature accessibility */
- getUserAccessibility(featureGroupName,feature) {
-  return RoleBFLOWDataService.getUserAccessibility(this.props.globalState.features, featureGroupName,feature);
-} 
-/**Method to show/hide add button based on permission */
-showRequestAddButton(){
-  if(this.state.showRequestAddButton===true){
-    return(
-      <button
-      type="button"
-      class="rounded-circle btn add-button-list-view common-button"
-      name="btnAddRequest"
-      style={{
-        boxShadow:
-          " 8px 4px 8px 0 rgba(0, 0, 0, 0.2), 8px 6px 20px 0 rgba(0, 0, 0, 0.19)"
-      }}
-      onClick={this.showpop.bind(this)}
-    >
-      {" "}
-      <i class="fa fa-plus text-white" aria-hidden="true" />
-    </button>
-    );
+  /*Method to user roles for feature accessibility */
+  getUserAccessibility(featureGroupName, feature) {
+    return RoleBFLOWDataService.getUserAccessibility(this.props.globalState.features, featureGroupName, feature);
   }
-}
-/**Method to show/hide update button based on permission */
-showRequestEditButton(){
-  if(this.state.showRequestEditButton===true){
-    return(
-     <> 
-    <button
-      type="button"
-      class="common-button btn btn-dark float-right mr-2 mb-2"
-      onClick={this.SubmitEditRequestData.bind(this)}
-      name="AddUpdate"
-      disabled={this.state.isWatcher}
-    >
-      Update
-    </button>
-    <button
-      type="button"
-      class=" btn btn-light float-right mr-4 mb-2"
-      onClick={this.ResetEditBlockData.bind(this)}
-    >
-      Reset
-    </button>
-    </>
-    );
+  /**Method to show/hide add button based on permission */
+  showRequestAddButton() {
+    if (this.state.showRequestAddButton === true) {
+      return (
+        <button
+          type="button"
+          class="rounded-circle btn add-button-list-view"
+          name="btnAddRequest"
+          style={{
+            boxShadow:
+              " 8px 4px 8px 0 rgba(0, 0, 0, 0.2), 8px 6px 20px 0 rgba(0, 0, 0, 0.19)"
+          }}
+          onClick={this.showpop.bind(this)}
+        >
+          {" "}
+          <i class="fa fa-plus text-white" aria-hidden="true" />
+        </button>
+      );
+    }
   }
-}
-/**Method to show/hide delete button based on permission */
-showRequestDeleteButton(){
-  if(this.state.showRequestDeleteButton===true){
-    //Need to add delete method
+  /**Method to show/hide update button based on permission */
+  showRequestEditButton() {
+    if (this.state.showRequestEditButton === true) {
+      return (
+        <>
+          <button
+            type="button"
+            class="default-button  btn-dark float-right mr-2 "
+            onClick={this.SubmitEditRequestData.bind(this)}
+            name="AddUpdate"
+            disabled={this.state.isWatcher}
+          >
+            Update
+    </button>
+          <button
+            type="button"
+            class=" btn-light float-right default-button-secondary"
+            onClick={this.ResetEditBlockData.bind(this)}
+            name="ResetReq"
+          >
+            Reset
+    </button>
+        </>
+      );
+    }
   }
-}
-/**Method to show/hide Assignee based on permission */
-showRequestAssignee(){
-  if(this.state.showRequestAssignee===true){
-    return(
-      <div class="col-sm-12">
-                <div class="form-group border-top-0 border-right-0 border-left-0 rounded-0 ">
-                  <label class="m-0" style={{ color: "#ababab", fontSize: ".80rem" }}> Assignee </label>
-                  <Chips
-                    onChange={this.handleAssignee.bind(this)}
-                    name="Assignee"
-                    id="Assignee"
-                    value={this.state.Assignee}
-                    suggestions={this.state.ChipsItems}
-                    className="border-top-0 border-right-0 border-left-0 rounded-0"
-                    chipTheme={chipTheme}
-                    theme={theme}
-                    shouldRenderSuggestions={value => value.length >= 1}
-                    fetchSuggestionMin={5}
-                  />
-                </div>
+  /**Method to show/hide delete button based on permission */
+  showRequestDeleteButton() {
+    if (this.state.showRequestDeleteButton === true) {
+      const navDropdownTitle = (<i
+        class="fas fa-ellipsis-v ml-2 mr-2"
+        style={{ color: "#75787B" }}
+        name="EllipsisRequest"
+      />);
+      return (
+        <NavDropdown title={navDropdownTitle} id="basic-nav-dropdown" class="dropdown-toggle mr-5">
+          <NavDropdown.Item name="DeleteReq" onClick={this.handleShowdel}>Delete</NavDropdown.Item>
+          <Modal aria-labelledby="contained-modal-title-vcenter" centered show={this.state.showdel} onHide={this.handleClosedel}>
+          <Modal.Header closeButton>
+            <Modal.Title id="contained-modal-title-vcenter">Delete Request</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>Are you sure you want to delete the request?
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" id="btnCloseReq" onClick={this.handleClosedel}>
+              Close
+            </Button>
+            <Button variant="primary" id="btnDeleteReq" onClick={this.DeleteRequest.bind(this)}>
+              Delete
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        </NavDropdown>
+      );
+    }
+  }
+  /**Method to show/hide Assignee based on permission */
+  showRequestAssignee() {
+    if (this.state.showRequestAssignee === true) {
+      return (
+        <div class="col-sm-12" style={{paddingLeft:"1.188rem"}}>
+          <div class="form-group border-top-0 border-right-0 border-left-0 rounded-0 ">
+            <label class="m-0 details-label" > Assignee </label>
+            <Chips
+              onChange={this.handleAssignee.bind(this)}
+              name="Assignee"
+              id="Assignee"
+              value={this.state.Assignee}
+              suggestions={this.state.ChipsItems}
+              className="border-top-0 border-right-0 border-left-0 rounded-0"
+              
+              chipTheme={chipTheme}
+              theme={theme}
+              shouldRenderSuggestions={value => value.length >= 1}
+              fetchSuggestionMin={5}
+            />
+          </div>
+        </div>
+      );
+    }
+  }
+  /**Method to show/hide request button based on permission */
+  showRequestFeedbackButton() {
+    if (this.state.showRequestFeedbackButton === true) {
+      return (
+        this.showFeedBackButton()
+      );
+    }
+  }
+  /**Method to show/hide Link Request Tab based on permission */
+  showLinkRequestTab() {
+    if (this.state.showLinkRequestTab === true) {
+      return (
+        <Tab
+          className="tab-content-mapping"
+          eventKey="LinkedRequests"
+          title="Linked Requests"
+        >
+          {this.linkedRequest()}
+        </Tab>
+      );
+    }
+  }
+  /**Method to show/hide Link Request Tab based on permission */
+  showRecurrenceRequestTab() {
+    if (this.state.showRecurrenceRequestTab === true) {
+      return (
+        <Tab
+          className="tab-content-mapping"
+          eventKey="Recurrence"
+          title="Recurrence"
+        >
+          <Recurrence GetRequestByIdJson={this.state.GetRequestByIdJson} callRequestListFromRecurrence={this.callRequestListFromRecurrence.bind(this)} />
+        </Tab>
+      );
+    }
+  }
+  /**Method to show/hide Link Request Tab based on permission */
+  showHistoryTab() {
+    if (this.state.showHistoryTab === true) {
+      return (
+        <Tab
+          className="tab-content-mapping"
+          eventKey="History"
+          title="History"
+        >
+        </Tab>
+      );
+    }
+  }
+
+  showDocumentUpload() {
+    if (this.state.showDocumentUploadbutton === true) {
+      return (
+        <>
+          <span
+            class="input-group-text bg-white border-top-1"
+            id="upload"
+            style={{ padding: "0.5rem 1.063rem 0.75rem 0.75rem",height:"2.5rem" ,borderTop:"0" }}
+            onClick={this.handleShowDocUpload}
+          >
+            <i class="fa fa-upload" aria-hidden="true"  style={{ padding: "0.5rem 0.5rem 0.5rem 0"}} />
+            <label  style={{color:"#55565a",margin:"0",fontSize:"0.75rem"}}>Upload file </label>
+                </span>
+        </>
+      );
+    }
+  }
+
+
+  showDocumentUploadforempty() {
+    if (this.state.showDocumentUploadbutton === true) {
+      return (
+        <>
+           <div style={{paddingTop:"10px"}}>
+              <a onClick={this.handleShowDocUpload}
+              style={{paddingRight:"7px", color:"blue"}}
+              >Click here</a>
+              or tap on upload files to add documents
               </div>
-    );
+        </>
+      );
+    }
   }
-}
-/**Method to show/hide request button based on permission */
-showRequestFeedbackButton(){
-  if(this.state.showRequestFeedbackButton===true){
-    return(
-     this.showFeedBackButton()
-    );
+  showDocumentDownloadAll() {
+
+    if (this.state.showDocumentDownloadbutton === true) {
+      return (
+        <>
+          <span
+            class="input-group-text bg-white  border-top-1"
+            id="downloadAll"
+            style={{ padding: "0.5rem 1.063rem 0.75rem 0.75rem",height:"2.5rem" ,borderTop:"0" }}
+            onClick={this.allDownload.bind(this, this.state.editRequestDocumentsData)}
+          >
+            <i class="fa fa-download" aria-hidden="true" style={{ padding: "0.5rem 0.5rem 0.5rem 0"}} />
+            <label style={{color:"#55565a",margin:"0",fontSize:"0.75rem"}}>Download all</label>
+                </span>
+        </>
+      );
+    }
   }
-}
-/**Method to show/hide Link Request Tab based on permission */
-showLinkRequestTab(){
-  if(this.state.showLinkRequestTab===true){
-    return(
-      <Tab 
-      className="tab-content-mapping"
-      eventKey="LinkedRequests"
-      title="Linked Requests"
-    >
-      {this.linkedRequest()}
-    </Tab>
-    );
+
+  showDocumentDownload(id) {
+    if (this.state.showDocumentDownloadbutton === true) {
+      return (
+        <>
+        <span style={{color:"#dedfe0",width:"0"}}>|</span><i class="fas fa-download m-2" style={{ color: "#55565a", fontSize: "1rem" }} onClick={this.onDownload.bind(this, id)}></i>
+      </>
+      );
+    }
   }
-}
-/**Method to show/hide Link Request Tab based on permission */
-showRecurrenceRequestTab(){
-  if(this.state.showRecurrenceRequestTab===true){
-    return(
-      <Tab
-      className="tab-content-mapping"
-      eventKey="Recurrence"
-      title="Recurrence"
-    >
-    <Recurrence GetRequestByIdJson = {this.state.GetRequestByIdJson} />
-    </Tab>
-    );
+  showDocumentDelete(id, size) {
+    if (this.state.showDocumentDeletebutton === true) {
+      return (
+        <>
+        <i class={this.state.isWatcher !== true ? "far fa-trash-alt float-right m-2" : "far fa-trash-alt float-right m-2 disable-div"} style={{ color: "#55565a", fontSize: "1rem" }} onClick={this.DeleteDocument.bind(this, id, size)}></i>
+      </>
+      );
+    }
   }
-}
-/**Method to show/hide Link Request Tab based on permission */
-showHistoryTab(){
-  if(this.state.showHistoryTab===true){
-    return(
-      <Tab 
-      className="tab-content-mapping"
-      eventKey="History"
-      title="History"
-    >
-    </Tab>
-    );
-  }
-}
   render() {
     /**Html Cards Start */
+    const Loader = () => (
+      <ContentLoader 
+      height={80}
+      width={400}
+      speed={2}
+      primaryColor="#f3f3f3"
+      secondaryColor="#ecebeb"
+    >
+      <rect x="42" y="4" rx="4" ry="4" width="69" height="6" /> 
+      <circle cx="17" cy="17" r="17" /> 
+      <rect x="54" y="15" rx="4" ry="4" width="55" height="5" /> 
+      <circle cx="12" cy="26" r="0" /> 
+      <circle cx="46" cy="18" r="5" /> 
+      <rect x="43" y="33" rx="4" ry="4" width="355" height="8" /> 
+      <rect x="42" y="48" rx="4" ry="4" width="358" height="9" /> 
+      <rect x="341" y="2" rx="4" ry="4" width="57" height="7" /> 
+      <rect x="316" y="14" rx="4" ry="4" width="83" height="8" />
+    </ContentLoader>
+    )
+
+
+const RequestListLoader=() => (
+  <div class="list-card-Loading">
+<div class="p-2">
+    <Loader />
+</div>
+<div class="p-2">
+<Loader />
+
+</div>
+<div class="p-2">
+<Loader />
+
+</div>
+<div class="p-2">
+<Loader />
+
+</div>
+<div class="p-2">
+<Loader />
+
+</div>
+<div class="p-2">
+<Loader />
+
+</div>
+
+
+</div>
+)
+
+
+
+const RequestListData = () =>(
+
+  <div class="scrollbar" id="style-4"    >
+  {this.state.requestList.map((prop, key) => {
+
+    var date = null
+    if (prop.dueDateTime !== null) {
+      date = new Date(prop.dueDateTime);
+    }
+    /** making data of unassigned requests bold*/
+
+    let reqID;
+    let title;
+    let time;
+    let reqdate;
+
+    if (prop.isAssigned) {
+      reqID = <span style={{ color: "#75787B" }}>REQ{prop.id}</span>;
+      title = <span className="text-truncate test" style={{ color: "#75787B", width: "200px" ,fontSize:"0.75rem"}}>{prop.title}</span>;
+      time = <div style={{ fontSize: ".875rem", color: "#75787B",width:"100%!important" }} id={"reqTime" + prop.id}>
+        {this.formatTime(date)}
+      </div>
+      reqdate = <div class="row float-right" style={{ color: "#75787B", fontSize: ".75rem",width:"100%" }} id={"reqDate" + prop.id}>
+        {this.formatDate(date)}
+      </div>
+    } else {
+      reqID = <span style={{ color: "#00568f", fontWeight: "640" }}>REQ{prop.id}</span>;
+      title = <span className="text-truncate test" style={{ color: "#00568f", fontWeight: "540", width: "200px",fontSize:"0.875rem" }}>{prop.title}</span>;
+      time = <div
+        style={{ fontSize: ".75rem", color: "#75787B", fontWeight: "640",width:"100%"  }}
+        id={"reqTime" + prop.id}
+      >
+        {this.formatTime(date)}
+      </div>
+      reqdate = <div style={{ color: "#75787B", fontSize: ".75rem", fontWeight: "640",width:"100%" }} id={"reqDate" + prop.id}>
+        {this.formatDate(date)}
+      </div>
+    }
+
+    /** making data of unassigned requests bold*/
+
+    if (!prop.id !== null)
+      return (
+        <ul
+          class="list-group"
+          action
+          onClick={this.GetEditrequestData.bind(this, prop)}
+          name="RequestList"
+
+        >
+          <li
+            class=""
+            className={
+              this.state.requestId === prop.id
+                ? "list-group-item request-card list-view rounded-0 border-right-0 pl-2 pr-0 pt-2 pb-2 active"
+                : "list-group-item request-card list-view rounded-0 border-right-0 pl-2 pr-0 pt-2 pb-2 "
+            }
+            id={"req" + prop.id}
+            onClick={this.GetRequestById.bind(this, prop.id, prop.isWatcher)}
+          >
+            <div class="row">
+              <div  style={{paddingLeft:"1.25rem",paddingRight:"0.5rem",paddingTop:"0.25rem"}}>
+                <button
+                  type="button"
+                  class="rounded-circle float-right"
+                  disabled
+                  style={{
+                    backgroundColor: "#273a92",
+                    fontSize: "0.625rem",
+                    height: "1.5rem",
+                    width: "1.5rem",
+                    padding: "0",
+                    position:"relative",
+                    top:"0.25rem",
+                    border:"none"
+                  }}
+                >
+                  A
+              </button>
+              </div>
+
+              <div class="col-sm-10 mt-1">
+                <div class="row">
+                  <div class="col-sm-10">
+                    <div class="row" id={"lblReq" + prop.id} style={{ fontSize: ".75rem", color: "#7f7f7f", paddingLeft: "0" }}>
+                      {" "}
+                      {/* <i
+                      class="fas fa-tag pl-0 pt-2 pb-2 pr-2"
+                      style={{ fontSize: ".75rem", color: "#7f7f7f" }}
+                    /> */}
+                      {reqID}
+                    </div>
+                    <div
+                      class="row text-truncate mr-2"
+                      id={"pReqTitle" + prop.id}
+                      style={{
+                        fontWeight: "500",
+                        fontFamily: "Arial, Helvetica, sans-serif"
+                      }}
+                    >
+                      <i
+                        class="fas fa-circle pl-0 pt-2 pb-2 pr-2"
+                        style={{ fontSize: "0.5rem", color: "#75787b",position:"relative", bottom:"0.125rem" }}
+                      />{" "}
+                      {title}
+                    </div>
+                  </div>
+                  <div class=" col-sm-2 pr-2">
+
+                    <div class="row text-right"
+                      style={{ fontSize: ".75rem", color: "#ababab" }}
+                      id={"reqTime" + prop.id}
+                    >
+                      {time}
+                    </div>
+
+                    <div
+                      class="row text-right"
+                      style={{ fontSize: ".75rem", color: "#7f7f7f" }}
+                      id={"reqDate" + prop.id}
+                    >{reqdate}
+                      </div>
+                      
+                    
+                  </div>
+                </div>
+                <div class="row ">
+                  <div
+                    class=""
+                    style={{ fontSize: ".75rem", color: "#ababab" }}
+                    id={"pReqDescription" + prop.id}
+                  >
+                    <LinesEllipsis
+text={prop.description}
+maxLine='2'
+ellipsis='...'
+trimRight
+basedOn='letters'
+/>
+                    
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      );
+  })}
+  <>{this.showRequestAddButton()}</>
+</div>
+
+)
+
+
     // Request List
     const requestListCard = (
-      <div class="card rounded-0 border-top-0" style={{ height: "90vh" }}>
-        <nav class="navbar navbar-expand navbar-light p-0 ">
+      <div class="card rounded-0 border-top-0 list-card-common" >
+      <nav class="navbar navbar-expand navbar-light p-0 ">
 
-          <div class="input-group  RequestSerchborder ">
-            {/*  <input
-              placeholder="Search"
-              aria-describedby="inputGroupPrepend"
-              name="username"
-              type="text"
-              class=" search-textbox form-control rounded-0 border-right-0 border-left-0 border-top-0"
-              onChange={this.search.bind(this)}
-            />
-            <div class="input-group-prepend">
-              <span
-                class="search-icon input-group-text bg-white border-left-0  border-top-0"
-                id="inputGroupPrepend"
-              >
-                <i
-                  class="fa fa-search text-muted"
-                  aria-hidden="true"
-                  onClick={this.search.bind(this)}
-                />
-              </span>
-            </div> */}
+        <div class="input-group  RequestSerchborder ">
+          {/*  <input
+            placeholder="Search"
+            aria-describedby="inputGroupPrepend"
+            name="username"
+            type="text"
+            class=" search-textbox form-control rounded-0 border-right-0 border-left-0 border-top-0"
+            onChange={this.search.bind(this)}
+          />
+          <div class="input-group-prepend">
+            <span
+              class="search-icon input-group-text bg-white border-left-0  border-top-0"
+              id="inputGroupPrepend"
+            >
+              <i
+                class="fa fa-search text-muted"
+                aria-hidden="true"
+                onClick={this.search.bind(this)}
+              />
+            </span>
+          </div> */}
 
-            <input placeholder="Search" onChange={this.search.bind(this)} aria-describedby="inputGroupPrepend" name="username" type="text"  class=" search-textbox form-control rounded-0 border-right-0 border-left-0 border-bottom-0  pt-1 border-top-0" />
-            <div class="input-group-prepend ">
-              <span class="search-icon input-group-text bg-white border-right-0 border-left-0 border-bottom-0 border-top-0" id="inputGroupPrepend">
-                <i class="fa fa-search text-muted" aria-hidden="true"></i>
-              </span>
-            </div>
-
-            <div class="input-group-prepend Latestborder" >
-              <div class="center" style={{ padding: "5px", color: "grey" }}>
-                Latest
-              </div>
-              <div
-                class="center"
-                style={{ padding: "5px", paddingTop: "10px" }}
-              >
-                <label class="switch float-right">
-                  <input
-                    type="checkbox"
-                    onChange={this.handleCheck.bind(this)}
-                    checked={this.state.isLatest}
-                  />
-                  <span class="slider round" />
-                </label>
-              </div>
-            </div>
-
+          <input placeholder="Search" onChange={this.search.bind(this)} aria-describedby="inputGroupPrepend" name="username" type="text" class=" search-textbox form-control rounded-0 border-right-0 border-left-0 border-bottom-0  pt-1 border-top-0 w-10" />
+          <div class="input-group-prepend ">
+            <span class="search-icon input-group-text bg-white border-right-0 border-left-0 border-bottom-0 border-top-0" id="inputGroupPrepend">
+              <i class="fa fa-search text-muted" aria-hidden="true"></i>
+            </span>
           </div>
-        </nav>
-        <div class="scrollbar" id="style-4"    >
-          {this.state.requestList.map((prop, key) => {
 
-            var date = null
-            if (prop.dueDateTime !== null) {
-              date = new Date(prop.dueDateTime);
-            }
-            /** making data of unassigned requests bold*/
+          <div class="input-group-prepend Latestborder" >
+            <div class="center" style={{ padding: "5px", color:"#55565a;" }}>
+              Latest
+            </div>
+            <div
+              class="center"
+              style={{ padding: "5px", paddingTop: "10px" }}
+            >
+              <label class="switch float-right" style={{height:"14px",width:"30px"}}>
+                <input
+                  type="checkbox"
+                  onChange={this.handleCheck.bind(this)}
+                  checked={this.state.isLatest}
+                  name="LatstTogg"
+                />
+                <span class="slider round" />
+              </label>
+            </div>
+          </div>
 
-            let reqID;
-            let title;
-            let time;
-            let reqdate;
-
-            if (prop.isAssigned) {
-              reqID = <span style={{ color: "#75787B" }}>REQ{prop.id}</span>;
-              title = <span style={{ color: "#75787B" }}>{prop.title}</span>;
-              time = <div style={{ fontSize: ".75rem", color: "#75787B" }} id={"reqTime" + prop.id}>
-                {this.formatTime(date)}
-              </div>
-              reqdate = <div class="row" style={{ color: "#75787B", fontSize: ".75rem" }} id={"reqDate" + prop.id}>
-                {this.formatDate(date)}
-              </div>
-            } else {
-              reqID = <span style={{ color: "#00568f", fontWeight: "640" }}>REQ{prop.id}</span>;
-              title = <span style={{ color: "#00568f", fontWeight: "540" }}>{prop.title}</span>;
-              time = <div
-                style={{ fontSize: ".75rem", color: "#75787B", fontWeight: "640" }}
-                id={"reqTime" + prop.id}
-              >
-                {this.formatTime(date)}
-              </div>
-              reqdate = <div class="row" style={{ color: "#75787B", fontSize: ".75rem", fontWeight: "640" }} id={"reqDate" + prop.id}>
-                {this.formatDate(date)}
-              </div>
-            }
-
-            /** making data of unassigned requests bold*/
-
-            if (!prop.id !== null)
-              return (
-                <ul
-                  class="list-group"
-                  action
-                  onClick={this.GetEditrequestData.bind(this, prop)}
-                  name="RequestList"
-
-                >
-                  <li
-                    class=""
-                    className={
-                      this.state.requestId === prop.id
-                        ? "list-group-item rounded-0 border-right-0 pl-2 pr-0 pt-2 pb-2 active"
-                        : "list-group-item rounded-0 border-right-0 pl-2 pr-0 pt-2 pb-2 "
-                    }
-                    id={"req" + prop.id}
-                    onClick={this.GetRequestById.bind(this, prop.id, prop.isWatcher)}
-                  >
-                    <div class="row">
-                      <div class="col-sm-2">
-                        <button
-                          type="button"
-                          class="btn btn-primary rounded-circle float-right"
-                          disabled
-                          style={{
-                            backgroundColor: "#000080",
-                            borderColor: "#000080",
-                            fontSize: ".75rem"
-                          }}
-                        >
-                          A
-                      </button>
-                      </div>
-
-                      <div class="col-sm-10 mt-1">
-                        <div class="row">
-                          <div class="col-sm-9">
-                            <div class="row" id={"lblReq" + prop.id}>
-                              {" "}
-                              {/* <i
-                              class="fas fa-tag pl-0 pt-2 pb-2 pr-2"
-                              style={{ fontSize: ".75rem", color: "#7f7f7f" }}
-                            /> */}
-                              {reqID}
-                            </div>
-                            <div
-                              class="row text-truncate mr-2"
-                              id={"pReqTitle" + prop.id}
-                              style={{
-                                fontWeight: "500",
-                                fontFamily: "Arial, Helvetica, sans-serif"
-                              }}
-                            >
-                              <i
-                                class="fas fa-circle pl-0 pt-2 pb-2 pr-2"
-                                style={{ fontSize: ".75rem", color: "#75787B" }}
-                              />{" "}
-                              {title}
-                            </div>
-                          </div>
-                          <div class="col-sm-3 float-right pr-0">
-
-                            <div class="row"
-                              style={{ fontSize: ".75rem", color: "#ababab" }}
-                              id={"reqTime" + prop.id}
-                            >
-                              {time}
-                            </div>
-
-                            <div
-                              class="row"
-                              style={{ fontSize: ".75rem", color: "#7f7f7f" }}
-                              id={"reqDate" + prop.id}
-                            >
-                              {reqdate}
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row mr-2">
-                          <p
-                            class="text-truncate test "
-                            style={{ fontSize: ".75rem", color: "#ababab" }}
-                            id={"pReqDescription" + prop.id}
-                          >
-                            {prop.description}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-              );
-          })}
-          <>{this.showRequestAddButton()}</>
         </div>
+      </nav>
+        
+{(this.props.globalState.IsLoadingActive)?  <RequestListLoader /> : <RequestListData /> }
       </div>
     );
     //End of Request List
@@ -2259,19 +2714,36 @@ showHistoryTab(){
         <AlertBanner onClose={this.handleCloseErrorMessage} Message={this.state.errorMessage} visible={this.state.showErrorMesage} Type={this.state.errorMessageType}>
         </AlertBanner>
         <CreateRequest show={this.state.show} create={this.create.bind(this)} hide={this.handleClose.bind(this, "show")} ParentId={this.state.ParentId} ></CreateRequest>
-        <div class="container-fluid pl-0">
-          <div class="row">
-            <div class="col-sm-4 pr-0">{requestListCard}</div>
-            <div class="col-sm-8 pl-4  ">
+        <div class="container-fluid pl-0 ">
+          <div class="row ">
+
+
+            <div class="col-sm-4 pr-0 ">
+
+            {requestListCard}
+          
+            
+            
+            </div>
+
+
+
+            <div class="col-sm-8 pl-4  "  style={{ backgroundColor: "#FAFAFB" }} >
               <div class="row pl-0 pt-3 pb-3">
                 <div class="col-sm-4">
                   <select
-                    style={{ backgroundColor: "#FAFAFB" }}
+                  ref={(node) => {
+                    if (node) {
+                      node.style.setProperty("border", '0.0625rem solid #dedfe0 ', 'important');
+                      node.style.setProperty("border-radius", '0.25rem ', 'important');                    
+
+                    }
+                  }}
+                    style={{ backgroundColor: "#FAFAFB"}}
                     class="form-control w-100"
                     name="drpWorkflow" onChange={this.bindWorkflow.bind(this)}
                     value={this.state.Workflow}
                   >
-
                     {this.state.StatsData.map((data, key) => {
                       if (data.type == 1)
                         return (
@@ -2285,33 +2757,22 @@ showHistoryTab(){
                   </select>
                 </div>
                 <div class="col-sm-8 mr-0 mt-1">
-                  <div class="row" style={{ float: "right" }}>
-                    <div  className= {this.state.isWatcher!==true?"d-inline  align-items-center  mr-3":"d-inline  align-items-center  mr-3 disable-div"}>
-                      <i class="far fa-clock mr-3" style={{ color: "#75787B" }} onClick={this.showTimeTracking.bind(this)}>
+                <div class="row" style={{ float: "right",alignItems:"center" }}>
+                    <div className={this.state.isWatcher !== true ? "d-inline  align-items-center  mr-3" : "d-inline  align-items-center  mr-3 disable-div"}>
+                    <span style={{ color: "#55565a",fontSize:".875rem" }} id="btnTimeTrack" onClick={this.showTimeTracking.bind(this)}>
+                    <i class="far fa-clock" />
                         <p1 class="ml-1">Time tracker</p1>
-                      </i>
+                     
+                      </span>
                     </div>
                     {" "}
-                    <div    className= {this.state.isWatcher!==true?"d-inline  align-items-center  mr-3":"d-inline  align-items-center  mr-3 disable-div"} >
+                    <div className={this.state.isWatcher !== true ? "d-inline  align-items-center  mr-2" : "d-inline  align-items-center  mr-2 disable-div"} >
                       {this.showRequestFeedbackButton()}
                     </div>{" "}
-                    {/* | {" "} */}
-                    {/* <div className="d-inline">
-                    <i
-                      class="fas fa-ellipsis-v ml-2 mr-2"
-                      style={{ color: "#75787B" }}
-                    />
-                      </div> */}
-                    {/* <div class="d-inline">
-                      <i
-                        class="fas fa-ellipsis-v ml-2 mr-2" onClick={this.showRequestAction.bind(this)}
-                        style={{ color: "#75787B" }}
-                      />
-                    </div> */}
-                    <div id="myDropdown" class={this.state.RequestActionClassName}>
-                      <a>Delete</a>
+                    {/* <label className="px-4" style={{height:"24px",fontSize:"24px",color:"#dedfe0"}}> | </label> {" "}
 
-                    </div>
+                    {this.showRequestDeleteButton()} */}
+
                   </div>
                 </div>
               </div>

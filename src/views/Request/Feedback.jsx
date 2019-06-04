@@ -24,8 +24,6 @@ class Feedback extends Component {
     if (Feedbackvalue !== null || Feedbackvalue !== undefined) {
       this.setState({ rating: Feedbackvalue, isShowButton: Feedbackvalue })
     }
-
-
   }
   async Feedback() {
     const responseJson = await BFLOWDataService.get("Feedback");
@@ -40,14 +38,8 @@ class Feedback extends Component {
       Value: this.state.rating,
     });
     const response = await BFLOWDataService.post('Feedback', body);
-
     this.props.submitFeedBack()
-
-
   }
-
-
-
   starRating(rating) {
     this.setState({
       rating: rating,
@@ -69,18 +61,17 @@ class Feedback extends Component {
     this.setState({ rating: this.state.rating });
   }
   back() {
-
     this.props.href()
   }
 
   showSubmit() {
-    
     const { submitFeedBack } = this.props;
     if (this.state.isShowButton === null) {
       return (
         <button
           type="button"
           class="common-button btn btn-dark float-right mr-2 mb-2"
+          id="btnFeedback"
           onClick={this.AddFeedback.bind(this)}
           disabled={this.state.rating<1} 
         >
@@ -98,7 +89,6 @@ class Feedback extends Component {
   }
   render() {
     var stars = [];
-    debugger
     for (var i = 1; i <= 5; i++) {
       var klass = 'star-rating__star';
       if (this.state.rating >= i && this.state.rating != null ) {
@@ -120,7 +110,7 @@ class Feedback extends Component {
     return (
       <>
         <div class="card rounded-0 border-0 shadow-sm p-1 bg-white" style={{ height: "70vh" }}>
-          <div className="padding123" style={{ height: "12vh" }}>
+          <div className="padding123" style={{ height: "12vh"}}>
             <a onClick={href} class="fa fa-arrow-left" id="btnSubmitfeedback" style={{ cursor: 'pointer' }} >Submit feedback</a>
           </div>
           <div class="text-center" style={{ height: "15vh" }}>
@@ -154,6 +144,7 @@ class Feedback extends Component {
             type="button"
             class=" btn btn-light float-right mr-4 mb-2"
             onClick={this.back.bind(this)}
+            id="FeedbackCancel"
           >
             Cancel
           </button>
