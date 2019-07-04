@@ -169,10 +169,10 @@ class Status extends Component {
     if (this.state.updateButton === true) {
       return (
 
-        <>  <Button variant="outline-secondary" name="btnClose" onClick={this.handleClose.bind(this)}>
+        <>  <Button className="btn-light float-right default-button-secondary" name="btnClose" onClick={this.handleClose.bind(this)}>
           Close
 </Button>
-          <Button variant="primary" name="btnAdd" className="common-button" onClick={this.CreateStatus.bind(this)} >
+          <Button  name="btnAdd" className="default-button  btn-dark float-right mr-2 p-0" onClick={this.CreateStatus.bind(this)} >
             Add
 </Button>
         </>
@@ -181,10 +181,10 @@ class Status extends Component {
     }
     else {
       return (
-        <>  <Button variant="outline-secondary" name="btnClose" onClick={this.handleClose.bind(this)}>
+        <>  <Button className="btn-light float-right default-button-secondary" name="btnClose" onClick={this.handleClose.bind(this)}>
           Close
 </Button>
-          <Button variant="primary" name="btnUpdate" onClick={this.UpdateStatus.bind(this)} >
+          <Button className="default-button  btn-dark float-right mr-2 p-0" name="btnUpdate" onClick={this.UpdateStatus.bind(this)} >
             Update
 </Button>
         </>
@@ -302,12 +302,12 @@ class Status extends Component {
                     <div className="d-inline float-right">
                       <i className="text-muted cursor-pointer" name="DltCustomDates" onClick= {this.handleShowdel}><img src={DeleteIcon} /></i>
                       <Modal aria-labelledby="contained-modal-title-vcenter" centered show={this.state.showdel} onHide={this.handleClosedel}>
-                        <Modal.Header closeButton>
+                        <Modal.Header closeButton className="pop-Header">
                           <Modal.Title id="contained-modal-title-vcenter">Delete Custom Dates</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>Are you sure you want to delete the field?
                         </Modal.Body>
-                        <Modal.Footer>
+                        <Modal.Footer className="pop-footer">
                           <Button variant="secondary" id="btnCloseDate" onClick={this.handleClosedel}>
                             Close
                           </Button>
@@ -373,12 +373,12 @@ class Status extends Component {
     // }
     const createStatusModal = (
       <Modal name="addStatusModel" show={this.state.show} onHide={this.handleClose.bind(this)}>
-        <Modal.Header closeButton>
+        <Modal.Header closeButton className="pop-Header">
           <Modal.Title id="contained-modal-title-vcenter "><label className="text-truncate" >{(this.state.updateButton === true) ? "Create" : "Edit"} Custom Date</label></Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <form onSubmit={this.handleSubmit} >
-            <div className="container">
+            <div className="container w-100">
               <div className="row" style={{ paddingLeft: "10px" }}>
                 <div className="col-12">
                   <label className={this.state.errorStatusName === "" ? "mandatory" : "error-label mandatory"}>Custom Date Name</label>
@@ -399,7 +399,7 @@ class Status extends Component {
             </div>
           </form>
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer className="pop-footer">
           {this.moderPopButton()}
         </Modal.Footer>
       </Modal>

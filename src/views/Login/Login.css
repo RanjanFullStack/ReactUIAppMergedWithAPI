@@ -12,7 +12,7 @@
   border: 1px solid lightgray;
   padding: 40px;
   background: #fff;
-  height: 430px;
+  height: 450px;
   width: 400px;
 }
 .login-container .login-responsive {
@@ -20,8 +20,13 @@
 }
 .div-login-form{
   height: 400px;
-  margin-top: 32px;
+  width: 100%;
 }
+.div-login-form .errorMsg{
+ color: #C62828;
+}
+
+
 @media only screen and (min-width: 768px) {
   .login-container .login-responsive {
     width: 25%;
@@ -62,9 +67,9 @@
 }
 
 .login-button {
-  margin: 20px auto;
+  /* margin: 20px auto; */
   min-width: auto;
-  width: 80.5%;
+  width: 90%;
   background: #00568F !important;
 }
 
@@ -124,8 +129,10 @@
 
 
 .forgot-password-text{
-color: #77777d;
-font-size: 18px;
+  color: #77777d;
+  font-size: 18px;
+  margin-bottom: 10px;
+  font-weight: bold;
 }
 .forgot-password-desc{
 color: lightslategray;
@@ -139,11 +146,13 @@ cursor: pointer;
 .div-product-logo{
 display: flex;
 justify-content: center;
-margin-bottom: 35px;
+margin-bottom: 10px;
 }
 .div-product-logo > img{
-width: 76%;
-height: 86%;
+  width: auto;
+  height: 64px;
+  margin-left: 0px;
+  margin-right: 24px;
 }
 .div-brand-log{
 display: flex;
@@ -152,7 +161,7 @@ justify-content: center;
 .btn-login-secondary{
   margin: 20px auto;
   min-width: auto;
-  width: 80.5%;
+  width:90%;
   border-color: #adb7c1;
   background-color: #f8f9fa;
   color: #212529;
@@ -160,6 +169,7 @@ justify-content: center;
 .div-forgot-password-form{
   height: 450px;
   margin-top: 32px;
+  width: 100%;
 }
 .forgot-password-email{
   margin-top: 40px;
@@ -173,11 +183,12 @@ justify-content: center;
 }
 .reset-password{
   height: 400px;
-  width: 137%;
+  width: 100%;
 }
 
 .div-reset-password-btn{
-  width: 123%;
+  width: 110%;
+  margin-top: 20px;
 }
 .check-icon{
   color: #77777d;
@@ -195,4 +206,14 @@ justify-content: center;
     background: #fff;
     height: 487px;
     width: 400px;
+}
+
+.ContactUs{
+  padding-top: 20px;
+  padding-left: 35px;
+  padding-right: 25px
+}
+.reset-password-row
+{
+  margin-bottom: 32px;
 }

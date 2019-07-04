@@ -30,9 +30,9 @@ async function getUserRoles() {
 }
 
 //get: get the user accessbality based on user mapping
-function getUserAccessibility(availableFeatures, featureGroupName, feature)
+function getUserAccessibility(availabelFeatures, featureGroupName, feature)
 {
-   if(availableFeatures.length > 0 && availableFeatures.filter(x=> x.featureGroupName === featureGroupName && x.feature === feature).length > 0)
+   if(availabelFeatures.length > 0 && availabelFeatures.filter(x=> x.featureGroupName === featureGroupName && x.feature === feature).length > 0)
    {
        return true;
    }

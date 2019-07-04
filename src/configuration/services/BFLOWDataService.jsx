@@ -18,7 +18,9 @@ export const BFLOWDataService = {
     post,
     Delete,
     put,
-    getbyid
+    getbyid,
+    logout,
+    login
 
 };
 /**constant end */
@@ -54,6 +56,14 @@ async function Delete(method, Id) {
 async function put(method, Id, body) {
     const url = ApiURL + method + "/" + Id
     return await GenericRepository.put(url, body);
+}
+async function logout() {
+    const url = ApiURL + "Users/Logout"
+    return await GenericRepository.put(url,"");
+}
+async function login() {
+    const url = ApiURL + "Users/Login"
+    return await GenericRepository.put(url,"");
 }
 
 /**Transaction Method end */

@@ -99,6 +99,7 @@ border-right:0px ;;
   top: 0;
   left: 0;
   z-index: 2;
+  cursor: pointer
 }
 
 .checkbox_wrapper input[type="checkbox"] + label{

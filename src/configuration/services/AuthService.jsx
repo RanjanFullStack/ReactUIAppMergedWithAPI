@@ -8,7 +8,8 @@ export const AuthService = {
     getbyid,
     changePassword,
     resetPassword,
-    forgotPassword
+    forgotPassword,
+    checkResetPasswordLinkExpiry
 };
 
 function header() {
@@ -136,4 +137,17 @@ function handleResponse(response) {
 
         return data;
     });
+}
+function checkResetPasswordLinkExpiry(body) {
+    const URL = ApiURL + "User/CheckResetPasswordLinkExpiry"
+    const requestOptions = {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        body: body
+    };
+    
+    return fetch(`${URL}`, requestOptions).then(handleResponse);
 }

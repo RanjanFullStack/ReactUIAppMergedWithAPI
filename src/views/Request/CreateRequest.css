@@ -1,0 +1,41 @@
+  .tooltiP {
+    position: relative;
+    display: inline-block;
+   
+  }
+  
+  .tooltiP .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    height: auto;
+    background-color:#75787B;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    top: 100%;
+    left: 50%;
+    margin-left: -60px;
+  }
+  
+  .tooltiP:hover .tooltiptext {
+    visibility: visible;
+  }
+  
+  .addDoc{
+  border-radius: 3.5px;
+  border: 1px solid #cac9c7;
+  width: 94px;
+  height: 31px;
+  overflow: hidden;
+  color: #55565a;
+  font-weight: 450
+  }
+
+  .display-none{
+    display: none;
+  }

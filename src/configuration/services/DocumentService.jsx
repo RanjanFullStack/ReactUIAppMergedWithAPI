@@ -1,17 +1,59 @@
 const ApiURL = process.env.REACT_APP_DOCUMENT_URL + "Document/";
+let token = "";
 export const DocumentService = {
     POST,
     Upload,
     Get,
-    GetAll
+    GetAll,
+    DocumentSearch,
+    Delete
 };
 
+/**
+ * header method
+ */
+function headerWithPlaintext() {
+    token = localStorage.getItem("Token");
+    const TokenExpiry = localStorage.getItem("TokenExpiry");
+    const CurrentDateTime = new Date();
+    if (token === null || token === undefined || TokenExpiry ===undefined || CurrentDateTime >= Date.parse(TokenExpiry)) {
+        
+        let url =process.env.REACT_APP_Logout_Url;
+        window.location.href = (url);
+    }
+    return ({
+
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': token
+    });
+
+}
+
+function headerToken() {
+    
+        token = localStorage.getItem("Token");
+        const TokenExpiry = localStorage.getItem("TokenExpiry");
+        const CurrentDateTime = new Date();
+        if (token === null || token === undefined || TokenExpiry ===undefined || CurrentDateTime >= Date.parse(TokenExpiry)) {
+            
+            let url =process.env.REACT_APP_Logout_Url;
+            window.location.href = (url);
+        }
+        return ({
+            'Authorization': token
+        });
+    
+    }
+    
 
 function POST(formData) {
-     
+    
+
     const URL = ApiURL
     const requestOptions = {
         method: 'POST',
+        headers: headerToken(),
         body: formData
     };
     return fetch(`${URL}`, requestOptions).then(handleResponse);
@@ -23,6 +65,9 @@ function Get(fileUrl,filename) {
   
     const requestOptions = {
         method: 'GET',
+        headers: {
+            'Authorization': token
+        }
     };
     return fetch(`${URL}`, requestOptions)
     .then(response => {
@@ -52,10 +97,7 @@ function GetAll(files) {
     
     const requestOptions = {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        },
+        headers: headerWithPlaintext(),
         body: JSON.stringify(files),
     };
     return fetch(`${URL}`, requestOptions)
@@ -82,15 +124,32 @@ function Upload(body) {
     const URL = ApiURL+"Upload" 
     const requestOptions = {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        },
+        headers: headerWithPlaintext(),
         body: body
     };
     return fetch(`${URL}`, requestOptions).then(handleResponse)
   
     
+}
+
+function DocumentSearch(keyWord) {
+    const URL = ApiURL + "DocumentSearch/" + keyWord
+    const requestOptions = {
+        method: 'POST',
+        headers: headerToken()
+    };
+    return fetch(`${URL}`, requestOptions).then(handleResponse);
+}
+
+function Delete(body) {
+    
+    const URL = ApiURL + "DeleteDoc"
+    const requestOptions = {
+        method: 'POST',
+        headers: headerWithPlaintext(),
+        body: body 
+    };
+    return fetch(`${URL}`, requestOptions).then(handleResponse);
 }
 
 function handleResponse(response) {

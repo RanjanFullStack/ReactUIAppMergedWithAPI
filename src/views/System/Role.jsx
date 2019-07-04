@@ -41,6 +41,7 @@ class Role extends Component {
       ErrorMesageType: '',
       showRoleTextbox: false,
       show: false,
+      isDefault: false,
       Name: '',
       SelectAll: false,
       disableButton: false,
@@ -80,6 +81,7 @@ class Role extends Component {
       this.setState({ isRoleActive: responseJson[0].isActive })
       this.getRoleByID(responseJson[0].id);
       this.setState({isNotifiedOnCreateRequestupdate:responseJson[0].isNotifiedOnCreateRequest})
+      this.setState({isDefault:responseJson[0].isDefault})
       this.setState({ disableButton: false })
     }
     else if(this.state.RoleId!==0){
@@ -91,17 +93,18 @@ class Role extends Component {
 
   }
 
-  SetRoleIdandName(id, name, isActive,isNotified) {
+  SetRoleIdandName(id, name, isActive,isNotified,_isDefault) {
     UserMappedId = [];
     MapUserWithRoles = [];
     //this.setState({FeaturesList:[]})
     this.getFeatures();
-    this.setState({ RoleName: name })
-    this.setState({ RoleId: id })
-    this.setState({ isRoleActive: isActive })
-    this.setState({ RoleValue: name })
-    this.setState({ SelectAll: false})
+    this.setState({RoleName:name})
+    this.setState({RoleId:id})
+    this.setState({isRoleActive:isActive})
+    this.setState({RoleValue:name})
+    this.setState({SelectAll: false})
     this.setState({isNotifiedOnCreateRequestupdate:isNotified})
+    this.setState({isDefault:_isDefault})
     //this.getFeatures();
     this.getRoleByID(id);
     this.GetUser();
@@ -201,6 +204,18 @@ class Role extends Component {
     })
   }
 
+  ShowDeleteIcon() {
+    if (this.state.isDefault === false) {
+      return (  
+        <>
+      <div className="d-inline float-right">
+      <i className="text-muted cursor-pointer" onClick={this.DeleteRole.bind(this)} ><img src={DeleteIcon} /></i> </div>
+      <label className="px-1 text-secondary float-right"> | </label>
+      </>
+    )
+    }
+  }
+
   showFeatures(name) {
     if (this.state.showFeaturesView === name) {
       this.setState({ showFeaturesView: '' })
@@ -245,11 +260,10 @@ class Role extends Component {
 
 
           <h5 class="text-truncate text-muted d-inline pl-2">{this.state.RoleName}</h5>
-          <div className="d-inline float-right">
-            <i className="text-muted cursor-pointer" onClick={this.DeleteRole.bind(this)} ><img src={DeleteIcon} /></i> </div>
+          {this.ShowDeleteIcon()}
           <div className="d-inline float-right">
 
-            <label className="px-1 text-secondary float-right"> | </label>
+           
             <div className="d-inline float-right">
               <i className="text-muted cursor-pointer" onClick={this.ShowRoletextEdit.bind(this)} ><img src={editIcon} /></i> </div>
             <div className="d-inline float-right"></div>
@@ -769,7 +783,9 @@ class Role extends Component {
 
                     return (
                       //  <ListGroup.Item   action className="list-item-listview"><i class="fas fa-circle" style={{color: 'green', paddingRight:'10px',fontSize:'10px'}}></i>{data.name}</ListGroup.Item>
-                      <li onClick={this.SetRoleIdandName.bind(this, data.id, data.name, data.isActive,data.isNotifiedOnCreateRequest)} name={data.id} id={data.id} action className={this.state.RoleId === data.id ? 'list-group-item rounded-0 pl-2 pt-3 pb-3 text-muted text-truncate  border-left-0 border-right-0 cursor-default bf-minheight-60 active' : 'list-group-item rounded-0 pl-2 pt-3 pb-3 text-muted text-truncate  border-left-0 border-right-0 cursor-default bf-minheight-60'}><i class="fas fa-circle text-success mr-2" style={{ fontSize: ".75rem" }}></i>{data.name}</li>
+                      <li onClick={this.SetRoleIdandName.bind(this, data.id, data.name, data.isActive,data.isNotifiedOnCreateRequest,data.isDefault)} name={data.id} id={data.id} action className={this.state.RoleId === data.id ? 'list-group-item rounded-0 pl-2 pt-3 pb-3 text-muted text-truncate  border-left-0 border-right-0 cursor-default bf-minheight-60 active' : 'list-group-item rounded-0 pl-2 pt-3 pb-3 text-muted text-truncate  border-left-0 border-right-0 cursor-default bf-minheight-60'}><i class="fas fa-circle text-success mr-2" style={{ fontSize: ".75rem" }}></i>{data.name}
+                         <label className="float-right" >{data.isDefault === true ? "Default" : ""}</label>
+                      </li>
                     );
 
                   })}
@@ -827,12 +843,13 @@ class Role extends Component {
                         <thead>
                           <tr>
 
-                            <th scope="col" className="border-th"> <div class="custom-control-lg custom-control   custom-checkbox pl-5">
-                              <input type="checkbox" class="custom-control-input" id="customCheck1" onChange={this.SelectAllUser.bind(this)} checked={this.state.SelectAll} />
+                            <th scope="col" className="border-th border-top-0"> <div class="custom-control-lg custom-control   custom-checkbox pl-5">
+                              <input type="checkbox" disabled={this.state.isDefault === true} class="custom-control-input" id="customCheck1" onChange={this.SelectAllUser.bind(this)} checked={this.state.SelectAll} />
                               <label class="custom-control-label" for="customCheck1"></label>
                               <span className="">UserName</span>
                             </div> </th>
-                            <th scope="col" className="pr-10 border-th">Email</th>
+                            <th scope="col" className="pr-5 border-th border-top-0">Email</th>
+                             <th scope="col" className="pr-5 border-th border-top-0">Manager</th>
 
                           </tr>
                         </thead>
@@ -853,13 +870,15 @@ class Role extends Component {
                             return (
                               <tr>
                                 <td> <div class="custom-control-lg custom-control custom-checkbox  pl-5">
-                                  <input type="checkbox" name={data.id} checked={checkedlist} name={data.id} id={data.id} onChange={this.handleCheck.bind(this)} class="custom-control-input" id={data.id} />
+                                  <input type="checkbox" name={data.id} disabled={this.state.isDefault === true} checked={checkedlist} name={data.id} id={data.id} onChange={this.handleCheck.bind(this)} class="custom-control-input" id={data.id} />
                                   <label class="custom-control-label" for={data.id}></label>
-                                  <span className="text-truncate "><i class="fas fa-circle text-success mr-2" style={{ fontSize: ".75rem" }} name={data.userName} id={data.userName}></i>{data.userName}</span>
+                                  <span className="text-truncate "><i class="fas fa-circle text-success mr-2" style={{ fontSize: ".75rem" }} name={data.userName} id={data.userName}></i>{data.firstName + " " + data.lastName}</span>
                                 </div>
 
                                 </td>
-                                <td className="pr-10"><lable className="text-truncate" name={data.email} id={data.email}>{data.email}</lable></td>
+                                <td className="pr-5"><label className="text-truncate">{data.email}</label></td>
+
+                           <td className="pr-5"><label className="text-truncate">{data.managerId!==null?data.manager.firstName + " "+ data.manager.lastName:"-"}</label></td>
 
                               </tr>
                             )
@@ -886,7 +905,7 @@ class Role extends Component {
                   eventKey="Features"
                   title="Features"
                 >
-                  <div class="container pt-2 bg-white scrollbar" style={{ height: '56vh' }}>
+                  <div class="container pt-2 bg-white scrollbar " style={{ height: '56vh' }}>
 
                     <div id="accordion">
                       {this.state.FeaturesList.map((data, key) => {
@@ -919,11 +938,11 @@ class Role extends Component {
 
 
                           return (
-                            <div className={this.state.showFeaturesView === data.name ? "card" : "card"}>
-                              <div class="card-header bg-white scrollbar" onClick={this.showFeatures.bind(this, data.name)}>
+                            <div className={this.state.showFeaturesView === data.name ? "card mt-2" : "card mt-2"}>
+                              <div class="card-header bg-white scrollbar  border-bottom-0 cursor-pointer   Pointer-hover" onClick={this.showFeatures.bind(this, data.name)}>
                                 <a class="card-link " data-toggle="collapse"  >
                                   <i className="text-muted cursor-pointer"  ><img src={image} /></i>
-                                  <label className="pl-3 text-bold-500"> {data.name}</label>
+                                  <label className="pl-3 text-bold-500 cursor-pointer"> {data.name}</label>
 
 
                                 </a>
@@ -933,7 +952,7 @@ class Role extends Component {
                                 />
                               </div>
                               <div id="collapseOne" class={this.state.showFeaturesView === data.name ? "collapse show" : "collapse"}>
-                                <div class="card-body">
+                                <div class="card-body bordertop">
                                   <ul class="list-group scrollbar" name="AttributesList">
 
 
@@ -945,7 +964,7 @@ class Role extends Component {
                                         //  <ListGroup.Item   action className="list-item-listview"><i class="fas fa-circle" style={{color: 'green', paddingRight:'10px',fontSize:'10px'}}></i>{data.name}</ListGroup.Item>
                                         <li name={featuresdata.name} className="list-group-item rounded-0 pl-2 pt-2 pb-2 text-muted text-truncate  border-left-0 border-right-0  border-top-0 border-bottom-0 cursor-default bf-minheight-30"><label>{featuresdata.name}</label>
                                           <label class="switch float-right">
-                                            <input type="checkbox" name={featuresdata.id} onChange={this.handlefeaturesCheck.bind(this)} checked={featuresdata.isMapped} />
+                                            <input type="checkbox" name={featuresdata.id} disabled={this.state.isDefault === true} onChange={this.handlefeaturesCheck.bind(this)} checked={featuresdata.isMapped} />
                                             <span class="slider round"></span>
                                           </label>
                                         </li>
@@ -980,8 +999,8 @@ class Role extends Component {
 
 
         <Modal aria-labelledby="contained-modal-title-vcenter" centered show={this.state.show} onHide={this.handleClose.bind(this)} >
-          <Modal.Header closeButton>
-            <Modal.Title id="contained-modal-title-vcenter "><lable className="text-truncate" >Add  Role</lable></Modal.Title>
+          <Modal.Header closeButton className="pop-Header">
+            <Modal.Title id="contained-modal-title-vcenter "><label  className="text-truncate" >Add  Role</label ></Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <form class="form-horizontal">
@@ -1009,11 +1028,11 @@ class Role extends Component {
             </form>
 
           </Modal.Body>
-          <Modal.Footer>
-            <Button variant="outline-secondary" name="btnClose" onClick={this.handleClose.bind(this)}>
+          <Modal.Footer className="pop-footer">
+            <Button  className="btn-light float-right default-button-secondary"  name="btnClose" onClick={this.handleClose.bind(this)}>
               Close
   </Button>
-            <Button variant="primary" name="btnAdd" onClick={this.AddRole.bind(this)}>
+            <Button className="default-button  btn-dark float-right mr-2 p-0"  name="btnAdd" onClick={this.AddRole.bind(this)}>
               Add
   </Button>
 

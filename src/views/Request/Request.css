@@ -56,7 +56,7 @@
   }
 
   /* The switch - the box around the slider */
-  .switch {
+  .Latestborder .switch {
     position: relative;
     display: inline-block;
     width: 30px;
@@ -64,14 +64,14 @@
   }
 
 /* Hide default HTML checkbox */
-.switch input {
+.Latestborder .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
 /* The slider */
-.slider {
+.Latestborder .slider {
   position: absolute;
   cursor: pointer;
   top: 0;
@@ -83,7 +83,7 @@
   transition: .4s;
 }
 
-.slider:before {
+.Latestborder .slider:before {
   position: absolute;
   content: "";
   height: 12px;
@@ -95,26 +95,26 @@ bottom: 1px;
   transition: .4s;
 }
 
-input:checked + .slider {
+.Latestborder input:checked + .slider {
   background-color: #00568F;
 }
 
-input:focus + .slider {
+.Latestborder input:focus + .slider {
   box-shadow: 0 0 1px #00568F;
 }
 
-input:checked + .slider:before {
+.Latestborder input:checked + .slider:before {
   -webkit-transform: translateX(16px);
 -ms-transform: translateX(16px);
 transform: translateX(16px);
 }
 
 /* Rounded sliders */
-.slider.round {
+.Latestborder .slider.round {
   border-radius: 34px;
 }
 
-.slider.round:before {
+.Latestborder .slider.round:before {
   border-radius: 50%;
 }
 .RequestSerchborder{
@@ -160,7 +160,7 @@ transform: translateX(16px);
   
   /* Position the tooltip */
   position: absolute;
-  z-index: 1;
+  z-index: 10;
   top: 100%;
   left: 50%;
   margin-left: -60px;
@@ -236,4 +236,24 @@ transform: translateX(16px);
   font-weight: 500;
   padding-left: 1.188rem;
   font-size: 0.875rem;
+}
+
+.attachmentCards{
+background-color: #ffffff;
+border-radius: 3.5px;
+border: 1px solid #cac9c7;
+
+height: 110px;
+overflow: hidden;
+}
+
+.infinite-scroll-component
+{
+  overflow-x: hidden  !important;
+}
+
+.lbl-wrkflow{
+  margin-left: 9px;
+  font-weight: bold;
+  color: #55565A;
 }

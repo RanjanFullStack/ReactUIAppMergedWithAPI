@@ -5,9 +5,10 @@ import '../assets/css/app.min.css';
 import '../App.css'
 import { withGlobalState } from 'react-globally'
 import LoadingOverlay from 'react-loading-overlay';
-const Header = React.lazy(() =>import ( '../components/Header/Header'));
-const Sidebar = React.lazy(() =>import ( '../components/Sidebar/Sidebar'));
-const ContentArea = React.lazy(() =>import ( '../components/ContentArea/ContentArea'));
+import {SharedServices} from '../configuration/services/SharedService';
+const Header = React.lazy(() => SharedServices.retry(() =>import ( '../components/Header/Header')));
+const Sidebar = React.lazy(() => SharedServices.retry(() =>import ( '../components/Sidebar/Sidebar')));
+const ContentArea = React.lazy(()  => SharedServices.retry(()=>import ( '../components/ContentArea/ContentArea')));
 
 class Layout extends Component {
    constructor(props, context) {

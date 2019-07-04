@@ -3,8 +3,9 @@ import React, { Component } from 'react';
 import { NotificationsBFLOWDataService } from "../../configuration/services/NotificationsDataService";
 import editIcon from '../../assets/fonts/edit.svg';
 
+import {SharedServices} from '../../configuration/services/SharedService';
 import './EmailNotifications.css'
-const AlertBanner = React.lazy(() => import('../../components/AlertBanner/index'))
+const AlertBanner = React.lazy(() => SharedServices.retry(()=> import('../../components/AlertBanner/index')))
 
 let EmailNotificationsList=[];
 class EmailNotifications extends Component {
@@ -173,7 +174,7 @@ this.setState({eventList:eventtypelist})
 
       return(
         <tr className="pt-4">
-        <td className="col-sm-4"><label className="pl-5 pt-2" style={{ fontSize:"1rem", fontWeight: "400"}}> {item.name}</label>
+        <td className="col-sm-4"><label className="pl-2 pt-2" style={{ fontSize:"1rem", fontWeight: "400"}}> {item.name}</label>
   
         </td>
         <td className="col-sm-3">
@@ -223,8 +224,8 @@ this.setState({eventList:eventtypelist})
 
 
     </div>
-    <div class="pt-3 w-100"  style={{fontSize:"1.25rem",borderRadius:"8px", marginLeft:"15rem"  ,marginRight:"15rem"}}>
-                           <div class="card-footer bg-white">
+    <div class="pt-3 w-100 border-0 shadow-sm"  style={{fontSize:"1.25rem",borderRadius:"8px", marginLeft:"15rem"  ,marginRight:"15rem" , height:"150%"}}>
+                           <div class="card-footer bg-white border-0 shadow-sm" style={{height:"80px"}}  >
                            <button type="button" class="default-button btn btn-dark float-right mr-2 mb-0 mt-2 p-0" name="AddMap"  onClick={this.mapNotification.bind(this)}>Save</button>
                               {/* <button  type="button"  class=" btn btn-light float-right mr-4 mb-2">Remove</button> */}
                            </div>

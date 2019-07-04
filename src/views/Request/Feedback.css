@@ -1,28 +1,28 @@
-.star-rating__star{
+.feedbackstar .star-rating__star{
     display: center;
     padding: 3px;
     vertical-align: center;
     line-height: 1;
-    font-size: 2em;
+    font-size: 2.5rem;
     color:white;
     transition: color 0.2s ease-out;
   }
-  .star-rating__star:hover {
+  .feedbackstar .star-rating__star:hover {
     cursor: pointer;
   }
-  .star-rating__star.is-selected {
+  .feedbackstar .star-rating__star.is-selected {
     color: #ebcb1a;
   }
-  .star-rating__star.is-disabled:hover {
+  .feedbackstar .star-rating__star.is-disabled:hover {
     cursor: default;
   }
   .rounded-div{
     display: inline-block;
-    border-radius: 7rem !important;
-    border: 1px solid rgb(223, 219, 219);
-    width:180px;
-    padding-bottom: 5px;
-    background-color: rgb(223, 219, 219);
+    border-radius: 3rem;
+    width:13.5625rem;
+    height: 3.5625rem;
+    background-color: #fafafa;
+    overflow: hidden;
   }
  .padding123{
      padding:.5rem;

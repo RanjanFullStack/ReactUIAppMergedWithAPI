@@ -4,7 +4,8 @@ export const CustomHighCharts = {
     getStockedChart,
     getAreaChart,
     getcolumnChart,
-    getlineChart
+    getlineChart,
+    getpieChart
 
 };
 
@@ -101,8 +102,19 @@ plotOptions: {
 
 function getAreaChart(chartType, title, xAxisData, yAxisData) {
     let firstDate = xAxisData[0]; 
-    let chartOptions =  {chart: {
-        type: 'area'
+    let chartOptions =  {
+        chart: 
+        {
+            zoomType: 'x',
+        // resetZoomButton: {
+        //     position: {
+        //         // align: 'right', // by default
+        //         // verticalAlign: 'top', // by default
+        //         x: 0,
+        //         y: -30
+        //     }
+        // },
+        type: 'areaspline'
     },
     title: {
         text: ''
@@ -158,7 +170,7 @@ function getAreaChart(chartType, title, xAxisData, yAxisData) {
       },
 
       plotOptions: {
-        area: {
+        areaspline: {
             fillColor: {
                 linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
                 stops: [
@@ -185,7 +197,7 @@ function getAreaChart(chartType, title, xAxisData, yAxisData) {
          //linear-gradient(179.96deg, #b5ffed 0%, #a7e5ff 100%)
 
     series: [{
-        showInLegend: true,
+        showInLegend: false,
         data: yAxisData,
         pointStart: Date.UTC(xAxisData[0], xAxisData[1], xAxisData[2]),
         pointInterval: 7 * 24 * 3600 * 1000
@@ -283,7 +295,12 @@ function getcolumnChart(chartType, title, xAxisData, yAxisData) {
 function getlineChart(chartType, title, xAxisData, yAxisData) {
     let chartOptions = {
         chart: {
-            type: 'line'
+            zoomType: 'x',
+            type: 'spline',
+            scrollabelPlotArea: {
+                minWidth: 600,
+                scrollPositionX: 1
+            }
         },
        
     title: {
@@ -336,8 +353,10 @@ function getlineChart(chartType, title, xAxisData, yAxisData) {
         allowDecimals: false,
         title: {
             text: title,
-           
         },
+        minorGridLineWidth: 0,
+        gridLineWidth: 0,
+        alternateGridColor: null,
      
     },
     legend: {
@@ -348,6 +367,16 @@ function getlineChart(chartType, title, xAxisData, yAxisData) {
     },
 
     plotOptions: {
+
+        spline: {
+            lineWidth: 1.5,
+            states: {
+                hover: {
+                    lineWidth: 1.5
+                }
+            },
+           
+        },
         series: {
             pointStart: Date.UTC(2019, 0, 1),
             pointIntervalUnit: 'month',
@@ -374,8 +403,8 @@ function getlineChart(chartType, title, xAxisData, yAxisData) {
               y2: 1
             },
             stops: [
-              [0, '#5c6bc0'],
-              [1, '#5c6bc0']
+              [0, '#0277bd'],
+              [1, '#0277bd']
             ]
           }
        
@@ -399,6 +428,99 @@ function getlineChart(chartType, title, xAxisData, yAxisData) {
     }
     return chartOptions;
 }
+
+
+
+function getpieChart(chartType, title, xAxisData, yAxisData) {
+
+    let chartOptions = {
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false,
+            type: 'pie'
+        },
+       
+    title: {
+        text: ''
+    },
+
+    subtitle: {
+        text: ''
+    },
+   
+    exporting: {
+        buttons: {
+          contextButton: {
+            menuItems: [ 
+                 {
+                textKey: 'downloadPNG',
+                onclick: function () {
+                    this.exportChart();
+                }
+            },{
+                textKey: 'downloadPDF',
+                onclick: function () {
+                    this.exportChart({
+                        type: 'application/pdf'
+                    });
+                }
+            }, ]
+          }
+        }
+      },
+    tooltip: {
+        enabled: false,
+        headerFormat: '',
+        pointFormat: '{series.name}'+title+': {point.y}'
+    },
+
+    legend: {
+        enabled: false,
+        layout: '',
+        align: '',
+        verticalAlign: ''
+    },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.y} %',
+               
+            }
+        }
+    },
+    credits: {
+        enabled: false
+      },
+      
+
+    series: [{
+        name: '',
+        data: yAxisData,
+    }],
+
+    responsive: {
+        rules: [{
+            condition: {
+                maxWidth: 500
+            },
+            chartOptions: {
+                enabled: false,
+                legend: {
+                    layout: '',
+                    align: '',
+                    verticalAlign: ''
+                }
+            }
+        }]
+    }
+    }
+    return chartOptions;
+}
+
 
 
 

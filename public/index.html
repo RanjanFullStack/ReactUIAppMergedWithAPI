@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <meta name="theme-color" content="#000000" />
-    <!--
+
+<head>
+  <meta charset="utf-8" />
+  <!-- <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico" /> -->
+  <link rel="shortcut icon" href="%PUBLIC_URL%/BEAT_Flow_Favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="theme-color" content="#000000" />
+  <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  <!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
       Only files inside the `public` folder can be referenced from the HTML.
@@ -22,12 +21,13 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>BEATFlow-MAKS Operating System</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
+  <title>BEATFlow-MAKS Operating System</title>
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+  <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
 
@@ -37,5 +37,45 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
-  </body>
+</body>
+<script>
+  (function (timer) {
+    window.addEventListener('mouseover', function () {
+      var elements = document.getElementsByClassName('scrollbar');
+      document.onmouseover = function (e) {
+      for (var length = 0; length < elements.length; length++) {
+        var el = elements[length];
+      
+          var currnetscroll = getScrollbar(e.target);
+         // console.log("***" );
+         // console.log( currnetscroll);
+         // console.log(currnetscroll.className);
+         // console.log(el.className);
+          if (currnetscroll.className == el.className) {
+           // console.log(el);
+            el.addEventListener('scroll', function (e) {
+              (function (el) {
+                el.classList.add('scroll');
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                  el.classList.remove('scroll');
+                }, 500);
+              })(el);
+            });
+            length = 1000;
+          }
+        }
+      }
+    })
+  })();
+
+  function getScrollbar(el) {
+    if (el.className !== undefined && el.className.toLowerCase().includes("scrollbar")) {
+      return el;
+    } else {
+      return getScrollbar(el.parentNode);
+    }
+  }
+</script>
+
 </html>

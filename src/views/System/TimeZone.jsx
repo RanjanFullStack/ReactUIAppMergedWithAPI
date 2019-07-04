@@ -20,16 +20,13 @@ class TimeZone extends Component {
          showErrorMesage: false,
          errorMessageType: '',
          errorMessage: '',
+      
       }
       this.searchHandler = this.searchHandler.bind(this);
    }
 
    componentDidMount() {
-      this.GetTimeZone()
-
-      var usaTime = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
-      usaTime = new Date(usaTime);
-      console.log('USA time: ' + usaTime.toLocaleString())
+      this.GetTimeZone();
    }
 
    async GetTimeZone() {
@@ -241,6 +238,7 @@ class TimeZone extends Component {
                                  <td>{this.state.systemTimeZoneId}</td>
                               </tr>
 
+                          
                            </tbody>
                         </table>
                      </div>

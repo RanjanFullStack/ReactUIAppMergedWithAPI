@@ -111,22 +111,38 @@ class Feedback extends Component {
       <>
         <div class="card rounded-0 border-0 shadow-sm p-1 bg-white" style={{ height: "70vh" }}>
           <div className="padding123" style={{ height: "12vh"}}>
-            <a onClick={href} class="fa fa-arrow-left" id="btnSubmitfeedback" style={{ cursor: 'pointer' }} >Submit feedback</a>
+            {/* <a onClick={href} class="fa fa-arrow-left" id="btnSubmitfeedback" style={{ cursor: 'pointer' }} >Submit feedback</a> */}
+
+
+            <span
+                class="card-header border-0"
+                style={{
+                  fontWeight: "500",
+                  color: "#55565a",
+                  fontSize:".875rem",
+                  backgroundColor: "white"
+                }}
+                id="btnSubmitfeedback"
+                onClick={href}
+              >
+                <i class="fas fa-arrow-left mr-3 cursor-pointer" />
+                Submit feedback
+              </span>
           </div>
           <div class="text-center" style={{ height: "15vh" }}>
             <div >
-              <label>
+              <label class="default-font" style={{color:"#55565a"}}>
                 Please rate my work related to this request </label>
             </div>
-            <div className="rounded-div" >
+            <div className="rounded-div feedbackstar" >
               {stars}
             </div>
           </div>
           <div className="padding123" >
-            <div class="form-group">
-              <label for="textAreaDescription1" >Comments or Suggestions if any</label>
+            <div class="form-group pl-2">
+              <label for="textAreaDescription1" style={{color:" #00568f" , fontSize:"0.75rem"}}>Comments or Suggestions if any</label>
               <textarea
-                class="form-control"
+                class="form-control comment-box-feedback textAreaCustom"
                 maxLength="250"
                 placeholder="Enter Your Comments here"
                 onChange={this.handleChange.bind(this)}

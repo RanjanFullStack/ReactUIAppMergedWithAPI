@@ -157,16 +157,16 @@ class KeyValue extends Component {
         if (this.state.updateButton === true) {
             return (
                 <>
-                    <Button variant="outline-secondary" name="btnClose" onClick={this.handleClose}> Close</Button>
-                    <Button variant="primary" name="btnAdd" className="common-button" onClick={this.addKey.bind(this)} >Add</Button>
+                    <Button name="btnClose" className="btn-light float-right default-button-secondary" onClick={this.handleClose}> Close</Button>
+                    <Button  name="btnAdd" className="default-button  btn-dark float-right mr-2 p-0" onClick={this.addKey.bind(this)} >Add</Button>
                 </>
             )
         }
         else {
             return (
                 <>
-                    <Button variant="outline-secondary" name="btnClose" onClick={this.handleClose}>Close</Button>
-                    <Button variant="primary" name="btnUpdate" onClick={this.updateKey.bind(this)} >Update</Button>
+                    <Button  name="btnClose" className="btn-light float-right default-button-secondary" onClick={this.handleClose}>Close</Button>
+                    <Button className="default-button  btn-dark float-right mr-2 p-0" name="btnUpdate" onClick={this.updateKey.bind(this)} >Update</Button>
                 </>
             )
         }
@@ -263,8 +263,8 @@ class KeyValue extends Component {
                                                 //  <ListGroup.Item   action className="list-item-listview"><i className="fas fa-circle" style={{color: 'green', paddingRight:'10px',fontSize:'10px'}}></i>{data.name}</ListGroup.Item>
                                                 <li className='list-group-item rounded-0 pl-2 m-2 pt-3 pb-3 text-muted text-truncate  border-bottom border-top-0 border-left-0 border-right-0 cursor-default bf-minheight-60' Id={data.id} name={data.name} >
                                                     {data.name}
-                                                    <i className="text-muted float-right mb-1" name="dltCustomFields" onClick={this.keyDelete.bind(this, data.id)} ><img src={DeleteIcon} alt="Delete" /></i>
-                                                    <i className="text-muted d-inline float-right mb-1" name="editCustomFields" onClick={this.keyValue.bind(this, data.id, data.name, data.isActive, data.isRequired)}> <img src={editIcon} alt="Edit" /></i>
+                                                    <i className="text-muted float-right mb-1 cursor-pointer" name="dltCustomFields" onClick={this.keyDelete.bind(this, data.id)} ><img src={DeleteIcon} alt="Delete" /></i>
+                                                    <i className="text-muted d-inline float-right mb-1 cursor-pointer" name="editCustomFields" onClick={this.keyValue.bind(this, data.id, data.name, data.isActive, data.isRequired)}> <img src={editIcon} alt="Edit" /></i>
                                                 </li>
                                             );
                                         }
@@ -288,7 +288,7 @@ class KeyValue extends Component {
                     </button>
                 </div>
                 <Modal aria-labelledby="contained-modal-title-vcenter" centered show={this.state.show} onHide={this.handleClose} >
-                    <Modal.Header closeButton>
+                    <Modal.Header closeButton className="pop-Header">
                         <Modal.Title id="contained-modal-title-vcenter "><label className="text-truncate" >{(this.state.updateButton === true) ? "Add" : "Edit"} Custom Field</label></Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
@@ -330,7 +330,7 @@ class KeyValue extends Component {
                         </form>
 
                     </Modal.Body>
-                    <Modal.Footer>
+                    <Modal.Footer className="pop-footer">
                         {this.moderPopButton()}
 
                     </Modal.Footer>

@@ -15,7 +15,7 @@ import './dragdrop.css';
 import AlertBanner from '../../components/AlertBanner/index';
 import LoadingOverlay from 'react-loading-overlay';
 import { withGlobalState } from 'react-globally'
-
+import ContentLoader, { Facebook } from "react-content-loader";
 let SuccessorEventId = [];
 let eventArray = [];
 class Events extends Component {
@@ -38,7 +38,8 @@ class Events extends Component {
       errorEventName: '',
       showErrorMesage: false,
       errorMessageType: '',
-      errorMessage: ''
+      errorMessage: '',
+      dropclass:false
     };
     // this.handleShow = this.handleShow.bind(this);
     this.handleClose = this.handleClose.bind(this);
@@ -47,6 +48,8 @@ class Events extends Component {
     this.ShowEditEvent = this.ShowEditEvent.bind(this);
     this.UpdateEvent = this.UpdateEvent.bind(this);
     this.BuildWorkFlow = this.BuildWorkFlow.bind(this);
+    this.ResetEditBlockData = this.ResetEditBlockData.bind(this);
+    
   }
 
   //Drag and Drop start
@@ -56,18 +59,28 @@ class Events extends Component {
   }
 
   onDragStart = (ev, id) => {
+    
     ev.dataTransfer.setData("id", id);
+   
   }
 
-  onDragOver = (ev) => {
+  onDragOver = (ev,cat) => {
 
     ev.preventDefault();
+    if(cat !==null){
+      this.setState({dropclass:true})
+    }
+    
+   
   }
 
   onDrop = (ev, cat) => {
-
+    debugger
     let id = ev.dataTransfer.getData("id");
-
+    
+    if(cat ==="unselected"){
+      this.setState({dropclass:false})
+    }
     let tasks = this.state.tasks.map((task) => {
       if (task.name === id) {
         task.category = cat;
@@ -89,7 +102,7 @@ class Events extends Component {
     this.setState({
       ...this.state,
       tasks,
-
+      dropclass:false
     });
   }
 
@@ -150,11 +163,13 @@ class Events extends Component {
     this.setState({ eventList: responseJson });
     //this.GetEventData(responseJson[0]);
     if(this.state.eventId>0){
-      this.GetEventsbyId(this.state.eventId)
+      this.GetEventsbyId(this.state.eventId,this.state.eventdata)
     }
     else{
       this.GetEventsbyId(responseJson[0].id)
-      this.setState({eventName:responseJson[0].name,eventId:responseJson[0].id})
+      this.setState({eventName:responseJson[0].name,eventId:responseJson[0].id, eventpopName: responseJson[0].name,
+        eventdata: responseJson[0],
+        isDefault: responseJson[0].isDefault})
     }
     responseJson.map((data, key) => {
       if (data.id !== this.state.eventId) {
@@ -224,6 +239,7 @@ class Events extends Component {
           });
         }
         else {
+          this.setState({eventName:this.state.eventpopName, eventpopName: this.state.eventpopName })
           this.setState({
             showErrorMesage: true,
             errorMessage: response,
@@ -313,12 +329,16 @@ class Events extends Component {
     }
     this.GetEventsbyId(eventData.id, eventData)
   }
+
+
   async BuildWorkFlow() {
+    //this.props.setGlobalState({ IsLoadingActive: true });
     if (SuccessorEventId.length === 0) {
       SuccessorEventId.push({ "EventId": this.state.eventId, "SuccessorEventId": 0 });
     }
     const body = JSON.stringify(SuccessorEventId);
     const response = await EventBFLOWDataService.mapUserWithEvents(body);
+   
     if (response.Code === false && response.Code !== undefined) {
       this.setState({
         showErrorMesage: true,
@@ -334,6 +354,7 @@ class Events extends Component {
       });
     }
     this.setTimeOutForToasterMessages();
+    //this.props.setGlobalState({ IsLoadingActive: false });
   }
   ShowDeleteIcon() {
     if (this.state.isDefault === false) {
@@ -354,21 +375,67 @@ class Events extends Component {
       15000
     );
   }
+
+
+  
+  ResetEditBlockData(){
+  debugger
+
+  this.GetEventsbyId(this.state.eventId, null)
+    
+ 
+   }
   render() {
+
+
+    const DragLoader = () => (
+      <ContentLoader 
+      height={1000}
+      width={500}
+      speed={2}
+      primaryColor="#f3f3f3"
+      secondaryColor="#ecebeb"
+    >
+      <rect x="15" y="29" rx="4" ry="4" width="80" height="30" /> 
+      <rect x="273" y="29" rx="4" ry="4" width="80" height="30" /> 
+      <rect x="185" y="29" rx="4" ry="4" width="80" height="30" /> 
+      <rect x="100" y="29" rx="4" ry="4" width="80" height="30" /> 
+      <rect x="361" y="29" rx="4" ry="4" width="80" height="30" /> 
+      <rect x="15" y="70" rx="4" ry="4" width="430" height="6" />
+      <rect x="15" y="145" rx="4" ry="4" width="430" height="6" />
+      <rect x="15" y="160" rx="4" ry="4" width="80" height="30" /> 
+      <rect x="273" y="160" rx="4" ry="4" width="80" height="30" /> 
+      <rect x="185" y="160" rx="4" ry="4" width="80" height="30" /> 
+      <rect x="100" y="160" rx="4" ry="4" width="80" height="30" /> 
+      <rect x="361" y="160" rx="4" ry="4" width="80" height="30" />
+    </ContentLoader>
+    );
+
+   
+
+    const DragListLoader = () => (
+      <div class="list-card-Loading">
+        <div class="p-2">
+          <DragLoader />
+        </div>
+      
+      </div>
+    );
+
     //Drag and drop start
     var tasks = {
       unselected: [],
       selected: []
     }
     this.state.tasks.map((t) => {
-   console.log(tasks);
+ 
       tasks[t.category].push(
         <div name="eventsGroup" class="btn-group paddingtop rounded-0" style={{ paddingLeft: "10px" }}>
           <div key={t.name}
             onDragStart={(e) => this.onDragStart(e, t.name)}
             draggable
-            className="btn btn-secondary backgroundcolour  rounded-0" style={{ paddingLeft: "10px", width: "100px" }}>
-         <span className="badge badge-light" name ="badgeWorkflow">  <i class="fas fa-ellipsis-v  mr-1"></i> {t.name}</span>
+            className="btn btn-secondary backgroundcolor  rounded-2  dragdropcolor" style={{ paddingLeft: "10px", width: "auto" }}>
+         <span className="badge badge-light align-middle "  name ="badgeWorkflow">  <i class="fas fa-ellipsis-v  mr-1"></i> {t.name}</span>
           </div>
         </div>
       );
@@ -378,14 +445,14 @@ class Events extends Component {
     if (this.state.isEdit === false) {
       submitButton = <button type="submit"
         name="createEvent"
-        className="btn btn-primary"
+        className="default-button  btn-dark float-right mr-2"
         closeButton
         onClick={this.CreateEvent.bind(this)}
       >Create</button>;
     } else {
       submitButton = <button type="submit"
         name="createEvent"
-        className="btn btn-primary"
+        className="default-button  btn-dark float-right mr-2"
         closeButton
         onClick={this.UpdateEvent.bind(this)}
       >Update</button>;
@@ -428,6 +495,17 @@ class Events extends Component {
                 </nav>
                 <ul class="list-group scrollbar" name="EventList">
                   {this.state.eventList.map((data, key) => {
+                   var value='';
+                   if(data.isStart===true){
+                    value="Start"
+                   }
+                   if(data.isEnd===true){
+                    value="End"
+                   }
+                   if(data.isCancel===true){
+                    value="Cancel"
+                   }
+
                     if (data.id !== null && data.type === 1) {
                       return (
                         //  <ListGroup.Item   action className="list-item-listview"><i class="fas fa-circle" style={{color: 'green', paddingRight:'10px',fontSize:'10px'}}></i>{data.name}</ListGroup.Item>
@@ -435,7 +513,7 @@ class Events extends Component {
                           this.state.eventId === data.id
                             ? 'list-group-item rounded-0 pl-2 pt-3 pb-3 text-muted text-truncate  border-left-0 border-right-0 cursor-default bf-minheight-60 active' : 'list-group-item rounded-0 pl-2 pt-3 pb-3 text-muted text-truncate  border-left-0 border-right-0 cursor-default bf-minheight-60'
                         }><label>{data.name}</label>
-                          <label className="float-right" >{data.isDefault === true ? "Default" : ""}</label>
+                          <label className="float-right" >{value}</label>
                         </li>
                       );
                     }
@@ -465,7 +543,7 @@ class Events extends Component {
                   <i className="text-muted cursor-pointer" name="editWorkflow" onClick={this.ShowEditEvent.bind(this)} ><img src={editIcon} alt="editIcon" /></i>
                 </div>
               </div>
-              <LoadingOverlay
+              {/* <LoadingOverlay
   active={this.props.globalState.IsLoadingActive}
   spinner
   text='Loading Events...'
@@ -484,56 +562,87 @@ class Events extends Component {
 },
   
   }}
-  >
-              <div class="card rounded-0 border-0 shadow-sm scrollbar" style={{ height: '65vh' }}>
-                <div class="card-body p-0 bordercolour" >
-                  <div className="col-sm-12 pl-5 pr-5">
+  > */}
+      
+              <div class="card rounded-0 border-0 shadow-sm scrollbar" style={{ height: '70vh' }}>
+              {this.props.globalState.IsLoadingActive ? (
+          <DragListLoader />
+        ) : (
+                <div class="card-body p-0 bordercolor" >
+                  <div className="col-sm-12">
                     {/* _______________________________________________________ */}
+                   
                     <div name="DragAndDrop" className="">
                       {/* <div className="container-drag"> */}
+                   
                       <div className="row">
-                        <div className="wip_drag w-90 active "
-                          onDragOver={(e) => this.onDragOver(e)}
+                    
+                        <div className="wip_drag W-100 active"
+                          onDragOver={(e) => this.onDragOver(e,"unselected")}
                           onDrop={(e) => { this.onDrop(e, "unselected") }} name="dragWorkflow">
                           {tasks.unselected}
                         </div>
+                          
                       </div>
+                      
                       <div className="marginTop">
                         <label>Workflow status after  </label><label className="pl-1" style={{fontStyle:"italic"}}> {this.state.eventName}:</label>
                       </div>
-
-                      {/* </div> */}
-                      <div className="row pt-3" >
-                        <div className="droppable w-91"
-                          onDragOver={(e) => this.onDragOver(e)}
+               
+                        
+                         
+                    
+                      <div class="card border-0 test">
+                     
+                     
+                        <div className= {this.state.dropclass===true?"droppable W-100 rounded-3  dropclass":"droppable W-100 rounded-3"}
+                        style={{borderRadius:"5px"}}
+                          onDragOver={(e) => this.onDragOver(e,null)}
                           onDrop={(e) => this.onDrop(e, "selected")} name="dropWorkflow">
 
                           {tasks.selected.length===0?"Drag and drop the status here which can occur after "+ this.state.eventName +" state.":tasks.selected}
+                        
                         </div>
+                        
                       </div>
+                      
                     </div>
+                   
                   </div>
-
+                  
                 </div>
 
+)}
               </div>
-              </LoadingOverlay>
-              <div class="bg-white" >
-                <div class="card-footer bg-white">
+        
+              {/* </LoadingOverlay>
+             */}
+            
+              <div class="bg-white bordercolor" style={{height: "100px"}}>
+              <hr class="mb-0 mt-4 ml-0 mr-0" />
                 <button type="button"
-                    className="default-button btn btn-dark float-right mr-2 mb-2 p-0" name="AddBuild"
+                    className="default-button btn btn-dark float-right mr-3 mb-2 p-0 bf-mt-20" name="AddBuild"
                     id="Build" onClick={this.BuildWorkFlow.bind(this)} >Build</button>
+                     <button
+            type="button"
+            class=" btn-light float-right default-button-secondary bf-mt-20"
+            onClick={this.ResetEditBlockData.bind(this)}
+            name="ResetReq"
+          >
+            Reset
+          </button>
                   {/* <button  type="button"  class=" btn btn-light float-right mr-4 mb-2">Remove</button> */}
                 </div>
-              </div>
+
+            
 
             </div>
           </div>
         </div>
         <Modal name="addeventModel" show={this.state.show} onHide={this.handleClose}>
-          <Modal.Header closeButton>
+          <Modal.Header closeButton className="pop-Header">
             <Modal.Title name="addEventModelTitle">{this.state.isEdit === false ? "Add" : "Edit"} Workflow</Modal.Title>
-          </Modal.Header>
+          </Modal.Header >
           <Modal.Body>
             <form onSubmit={this.handleSubmit}>
               <div className="container">
@@ -553,7 +662,7 @@ class Events extends Component {
                 </div>
                 <br />
                 <div className="row" style={{ paddingLeft: "10px" }}>
-                  <div className="col-6">
+                  {/* <div className="col-6">
                     <div id="formGridCheckbox" className="form-group">
                       <div className="form-check">
                         <input
@@ -574,11 +683,11 @@ class Events extends Component {
                   </label>
                       </div>
                     </div>
-                  </div>
-                  <div className="col-6">
+                  </div> */}
+                  {/* <div className="col-6">
                     <div id="formGridCheckbox" className="form-group">
                       <div className="form-check">
-                        <input
+                        {/* <input
                           type="checkbox"
                           label="Is mapped to request"
                           className="form-check-input"
@@ -591,19 +700,19 @@ class Events extends Component {
                           }
                           name="eventIsMappedToRequest"
                           value={this.state.eventIsMappedToRequest}
-                        />
-                        <label class="form-check-label">
+                        /> 
+                        {/* <label class="form-check-label">
                           IsMappedToRequest
-                  </label>
+                  </label> 
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </form>
           </Modal.Body>
-          <Modal.Footer>
-            <button name="closeEventModal" type="button" className="btn btn-secondary" onClick={this.handleClose}>Close</button>
+          <Modal.Footer className="pop-footer">
+            <button name="closeEventModal" type="button" className="btn-light float-right default-button-secondary" onClick={this.handleClose}>Close</button>
             {submitButton}
           </Modal.Footer>
         </Modal>

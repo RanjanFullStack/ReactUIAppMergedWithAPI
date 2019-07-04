@@ -25,8 +25,10 @@ async function getMasterMapping(id) {
 }
 
 //Get: Master  to Master Mapping with Attribute
-async function getRequestList() {
-    const method = "Request/GetRequestList"
+async function getRequestList(body) {
+
+    const method = "Request/GetRequestList" + body
+
     return await BFLOWDataService.get(method);
 }
 

@@ -299,11 +299,11 @@ DeleteUserModal()
   return(
 <>
     <Modal show={this.state.showDeleteModal} onHide={this.handleCloseDelete}>
-    <Modal.Header closeButton>
+    <Modal.Header closeButton className="pop-Header">
       <Modal.Title>Modal heading</Modal.Title>
     </Modal.Header>
     <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
-    <Modal.Footer>
+    <Modal.Footer className="pop-footer">
       <Button variant="secondary" onClick={this.handleCloseDelete}>
         Close
       </Button>
@@ -444,7 +444,7 @@ DeleteUserModal()
                 >
                   <option>Select Manager </option>
                   {this.state.userList.map((data, index) => {
-                    if (data.id !== this.state.userId) {
+                    if (data.id !== this.state.userId && data.managerId!==this.state.userId) {
                       return <option value={data.id}>{data.userName}</option>;
                     }
                   })}
@@ -462,13 +462,10 @@ DeleteUserModal()
       <>
          <div className="">
           <div className="add-user-heading" />
-          <div class="border-0 " style={{ fontWeight:"500", fontSize: "1rem", lineHeight: "1rem"}}>
-          Basic Details
-          </div>
-          <hr />
+         
           <div class="row pl-3 pr-3 pt-0 pb-0">
             <div>
-              <div class="row " style={{padding: "1.25rem"}}>
+              <div class="row " style={{padding: "0.25rem"}}>
                 <div class="col-sm-12">
                   {/* <Form.Label>First Name</Form.Label> */}
                   <label className={this.state.errorFName === "" ? "mandatory" : "error-label mandatory"} 
@@ -547,7 +544,7 @@ DeleteUserModal()
             <hr />
 
             <div class="row pl-3 pr-3 pt-0 pb-0">
-              <div class="col-sm-5">
+              <div class="col-sm-6">
                 <label className={this.state.errorTimeZoneid === "" ? "mandatory" : "error-label mandatory"} 
                 style={{color: "#ababab",fontSize: "0.75rem", marginBottom:"0px"}}>Time Zone</label>
                 <select
@@ -570,7 +567,7 @@ DeleteUserModal()
 
                 <div className="errorMsg">{this.state.errorTimeZoneid}</div>
               </div>
-              <div class="col-sm-5  ">
+              <div class="col-sm-6  ">
                 <label class="label m-0" style={{fontSize:"0.75rem",color: "#ababab", marginBottom:"0px"}}>Manager</label>
                 <select
                      style={{ color: "#55565a", padding: "0" }}
@@ -582,9 +579,7 @@ DeleteUserModal()
                 >
                   <option>Select Manager </option>
                   {this.state.userList.map((data, index) => {
-                    if (data.id !== this.state.userId) {
                       return <option value={data.id}>{data.userName}</option>;
-                    }
                   })}
                 </select>
               </div>
@@ -677,17 +672,17 @@ showUserEditButton(){
     <>
        <button
                   type="button"
-                  class="common-button btn-dark float-right mr-2 mb-2"
+                  class="default-button  btn-dark float-right mr-2"
                   id="Update"
                   name="AddUpdate"
                   onClick={this.updateUser.bind(this)}
-                  style={{ borderRadius: "0.25rem", width: "5.25rem", height: "2rem",  border: "0.0625rem solid transparent"}}
+                
                 >
                   Update
                 </button>
                 <button
                   type="button"
-                  class=" btn-light float-right mr-4 mb-2"
+                  class=" btn-light float-right default-button-secondary"
                   id="Reset"
                   name="btnReset"
                   variant="outline-secondary"
@@ -695,7 +690,7 @@ showUserEditButton(){
                           this.getUserById(this.state.userId)
                       })
                     }
-                    style={{ borderRadius: "0.21875rem",width: "4.1875rem",height: "1.9375rem",border: "0.0625rem solid #dedfe0"}}
+                  
                 >
                   Reset
                 </button>
@@ -710,7 +705,7 @@ return(
   <>
   <>|</>
   <i
-      class="far fa-trash-alt d-inline float-right  mt-1 ml-3"
+      class="far fa-trash-alt d-inline float-right  mt-1 ml-3 cursor-pointer"
       aria-hidden="true"
       onClick={this.handleShowDelete}
      
@@ -778,6 +773,10 @@ const UserListLoader=() => (
 const UserList=()=>(    <div class="scrollbar">
 <ul class="list-group scrollbar" name="UserList">
   {this.state.userList.map((data, index) => {
+    let usernameInitials;
+      if(data.firstName!==null && data.lastName!==null){
+        usernameInitials=(data.firstName.substring(0,1)).toUpperCase() + (data.lastName.substring(0,1)).toUpperCase();
+      }
     return (
       <>
     
@@ -800,7 +799,7 @@ const UserList=()=>(    <div class="scrollbar">
                 style={{ backgroundColor: "#273a92", borderRadius: "50%",width: "1.5rem",height: "1.5rem",borderColor: "#000080",fontSize: "0.625rem",
                   padding: "0",position: "relative",bottom: "0.25rem",border:" 1px solid transparent" }}
               >
-                A
+                {usernameInitials}
               </button>
             </div>
 
@@ -988,25 +987,25 @@ const UserList=()=>(    <div class="scrollbar">
                 show={this.state.modalShow}
                 onHide={this.handleClose.bind(this)}
               >
-                <Modal.Header closeButton>
+                <Modal.Header closeButton className="pop-Header">
                   <Modal.Title id="contained-modal-title-vcenter card-header">
                     Add User
                   </Modal.Title>
                 </Modal.Header>
                 <Modal.Body >{this.addUserHtml()}</Modal.Body>
               
-                <div class="card-footer bg-white">
+                <div class="card-footer bg-white pop-footer" >
                   <button
                     type="button"
-                    class="common-button btn-dark float-right mr-2 mb-2"
+                    class="default-button  btn-dark float-right mr-2"
                     onClick={this.addUser.bind(this)}
                     name="AddSave"
-                  style={{borderRadius: "0.25rem",width: "7.5rem",height: "2rem",border: "0.0625rem solid transparent"}}>
+                 >
                     Save
                   </button>
                   <button
                     type="button"
-                    class=" btn-light float-right mr-4 mb-2"
+                    class=" btn-light float-right default-button-secondary mr-1 mb-0"
                     onClick={this.handleClose.bind(this)}
                   style={{ borderRadius: "0.21875rem",width: "4.1875rem",height: "1.9375rem",border: "0.0625rem solid rgb(222, 223, 224)"}}>
                     Cancel
@@ -1018,23 +1017,23 @@ const UserList=()=>(    <div class="scrollbar">
         </div>
         <>
     <Modal show={this.state.showDeleteModal} onHide={this.handleCloseDelete}>
-    <Modal.Header closeButton>
+    <Modal.Header closeButton className="pop-Header">
       <Modal.Title>Delete User</Modal.Title>
     </Modal.Header>
     <Modal.Body>
     <div class="ml-5">
-      <div>You have requested to reset the password for</div>
-      <div> <b>{this.state.firstName} {this.state.lastName}</b>. Upon conï¬rmation, the user will</div>
-      <div>receive an email with a link to a form to reset</div>
-      <div>his own password. </div>
+      <div>Are you really sure you want to delete the BEATFlow user </div>
+      <div> <b>{this.state.firstName} {this.state.lastName}</b>? Note that this action cannot be undone and will affect the details associated with the user.</div>
+      <div>You cannot create new user with same email ID.</div>
+    
 
-
+{/* 
       <div class="mt-2">Please make sure that the email address </div>
       <div><b>{this.state.email}</b> is correct before </div>
-      <div>continuing. Are you sure you want to continue ?</div>
+      <div>continuing. Are you sure you want to continue ?</div> */}
       </div>
  </Modal.Body>
-    <Modal.Footer>
+    <Modal.Footer className="pop-footer">
       <Button variant="secondary" onClick={this.handleCloseDelete}>
         Cancel
       </Button>

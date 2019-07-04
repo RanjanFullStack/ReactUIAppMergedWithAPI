@@ -1,7 +1,7 @@
 .App {
   text-align: center;
   width: 100%;
-  margin: 15px auto;
+
 }
 
 .container-drag {
@@ -13,13 +13,21 @@
 
 .wip_drag {
   position: absolute;
-  width: 400px;
+  width: 100%;
   height: 14vh;
   background-color: white;
   border: 0px solid rgba(0,0,0,.125);
-  padding-left: 25px;
-   
+  padding: 10px
 }
+
+.dropclass{
+  border: 1px solid #00568F !important;
+  background-color: rgb(54, 175, 255,0.08) !important;
+ 
+}
+
+
+
 
 .header {
   display: inline-block;
@@ -37,24 +45,25 @@
 
 .droppable {
   position: absolute;
-  /* width: 570px; */
-  height: 43vh;
-  background-color: #FAFAFB !important;
+  width: 100%;
+  height: 48vh;
+  background-color: #FAFAFB ;
   border: 0px solid rgba(0,0,0,.125);
-   padding-left: 20px;
-   padding-right: 20px;
+  padding: 15px;
+  padding-bottom: 10px;
 }
 
-.draggable {
-  width: 100px;
-  height: 100px;
-  background-color: yellow;
-  margin: 5px auto;
 
+.test:focus > .extra {
+  display: block;
 }
+
+
 
 .marginTop {
-  margin-top: 120px
+  margin-top: 120px;
+  margin-left: 10px;
+  
 }
 .w-91{
 width: 91% !important;
@@ -69,18 +78,52 @@ width: 91% !important;
  
 }
 
+.bf-mt-20{
+  margin-top: 20px !important
+}
+
+
 
 .paddingtop{
   padding-top: 10px !important
 }
 
 
-.backgroundcolour{
+.wip_drag .backgroundcolor{
   background-color: #ffff !important;
-  border: 1px solid rgba(0,0,0,.125);
+  border: 2px solid rgba(0,0,0,.125);
 }
 
-.bordercolour{
+
+.droppable .backgroundcolor{
+  background-color: #00568F !important;
+  border: 2px solid #00568F !important;
+}
+
+
+.droppable .backgroundcolor span{
+  background-color: #00568F !important;
+  color: #ffff !important;
+}
+
+.droppable:focus{
+  border: 1px solid #00568F !important;
+}
+
+
+.backgroundcolor:hover {
+
+ 
+  border: 1px solid #00568F !important;
+   
+}
+
+.wip_drag .backgroundcolor span:hover {
+  
+  color: #00568F !important;
+}
+
+.bordercolor{
   border: 1px solid rgb(171, 171, 171) !important;
 }
 

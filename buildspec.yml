@@ -1,0 +1,32 @@
+version: 0.2
+
+# Using the node alpine image to build the React app
+image: node:alpine
+
+variables:
+  CI: "false"
+  NODE_TLS_REJECT_UNAUTHORIZED: "0"
+
+# Cache node modules - speeds up future builds
+cache:
+  paths:
+  - node_modules
+
+phases:
+ build:
+    commands:
+
+      - Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+      - choco install nodejs -y --version 10.15.3
+      - echo Entered the pre_build phase...
+      - npm install
+      - echo Entered the build phase...
+      - npm run build:IRUAT
+      - dir
+artifacts:
+  files:
+    - ./build/**/*
+    - ./appspec.yml
+    - ./BeforeInstall.ps1
+    - ./AfterInstall.ps1
+    - ./AfterInstall.ps1

@@ -1,18 +1,23 @@
 import React from 'react';
 
-const Dashboard = React.lazy(() => import ("../../views/Dashboard/Dashboard"));
-const UserList = React.lazy(() =>  import ("../../views/User/UserList"));
-const Master = React.lazy(() => import ("../../views/Masters/Master"));
-const Request = React.lazy(() => import ('../../views/Request/Request'));
-const TimeZone = React.lazy(() => import ( '../../views/System/TimeZone'));
-const Events = React.lazy(() =>import ('../../views/Settings/Events'));
-const KeyValue = React.lazy(() =>import ('../../views/Settings/KeyValue'));
-const Role = React.lazy(() =>import ( '../../views/System/Role'));
-const Status = React.lazy(() =>import ('../../views/Settings/Status'));
-const EmailNotifications = React.lazy(() =>import ( '../../views/System/EmailNotifications'));
-const AccountSettings = React.lazy(() =>import ('../../views/User/AccountSettings'));
-const DocumentRepository = React.lazy(() => import ("../../views/DocumentRepository/DocumentRepository"));
-const Reports = React.lazy(() =>import ('../../views/Reports/Reports'));
+import {SharedServices} from '../../configuration/services/SharedService';
+
+const Dashboard = React.lazy(()=> SharedServices.retry(() => import ("../../views/Dashboard/Dashboard")));
+const UserList = React.lazy(() => SharedServices.retry(()=>  import ("../../views/User/UserList")));
+const Master = React.lazy(() => SharedServices.retry(()=> import ("../../views/Masters/Master")));
+const Request = React.lazy(() => SharedServices.retry(()=> import ('../../views/Request/Request')));
+const TimeZone = React.lazy(() => SharedServices.retry(()=> import ( '../../views/System/TimeZone')));
+const Events = React.lazy(() => SharedServices.retry(()=>import ('../../views/Settings/Events')));
+const KeyValue = React.lazy(() => SharedServices.retry(()=>import ('../../views/Settings/KeyValue')));
+const Role = React.lazy(() => SharedServices.retry(()=>import ( '../../views/System/Role')));
+const Status = React.lazy(() => SharedServices.retry(()=>import ('../../views/Settings/Status')));
+const EmailNotifications = React.lazy(() => SharedServices.retry(()=>import ( '../../views/System/EmailNotifications')));
+const AccountSettings = React.lazy(() => SharedServices.retry(()=>import ('../../views/User/AccountSettings')));
+const DocumentRepository = React.lazy(()=> SharedServices.retry(() => import ("../../views/DocumentRepository/DocumentRepository")));
+const Reports = React.lazy(() => SharedServices.retry(()=>import ('../../views/Reports/Reports')));
+const RequestPreferences = React.lazy(() => SharedServices.retry(()=>import ('../../views/Settings/RequestPreferences')));
+
+
 
 const Routes = [
   {
@@ -50,6 +55,7 @@ const Routes = [
    
     childrenData: [
       { path: "/Workflow", name: "Workflow", icon: "far fa-snowflake sidebar-list-item-icon", component: Events },
+   
       { path: "/CustomFields", name: "Custom Fields", icon: "far fa-snowflake sidebar-list-item-icon", component: KeyValue },
       { path: "/CustomDates",name : "Custom Dates" ,icon:"far fa-snowflake sidebar-list-item-icon", component:Status},
       { path: "/EmailNotifications",name : "Email Notifications" ,icon:"far fa-snowflake sidebar-list-item-icon", component:EmailNotifications}
@@ -81,6 +87,19 @@ const Routes = [
   },
 
   {
+    path: null,
+    name: "Options",
+    icon: "fas fa-user-friends sidebar-list-item-icon",
+    component: null,
+    children: true,
+  
+    childrenData: [
+      { path: "/RequestOptions", name: "Request Options", icon: "far fa-snowflake sidebar-list-item-icon", component: RequestPreferences },
+      // { path: "/user/AccountSettings", name: "Change Password", icon: "far fa-snowflake sidebar-list-item-icon", component: AccountSettings }
+    ]
+  },
+
+  {
     path: "/Reports",
     name: "Reports",
     icon: "fas fa-chart-bar sidebar-list-item-icon",
@@ -96,7 +115,9 @@ const Routes = [
     component: DocumentRepository,
     children: false,
    
-  }
+  },
+  
+ 
 ];
 
 export default Routes;

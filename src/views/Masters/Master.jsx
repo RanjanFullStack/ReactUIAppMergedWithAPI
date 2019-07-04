@@ -22,7 +22,8 @@ import editIcon from '../../assets/fonts/edit.svg';
 import confirmIcon from '../../assets/fonts/confirm.svg';
 import cancelIcon from '../../assets/fonts/cancel.svg';
 import DeleteIcon from '../../assets/fonts/Delete_icon.svg';
-const AlertBanner = React.lazy(() => import('../../components/AlertBanner/index'));
+import {SharedServices} from '../../configuration/services/SharedService';
+const AlertBanner = React.lazy(()=> SharedServices.retry(() => import('../../components/AlertBanner/index')));
 
 /**import end*/
 
@@ -293,9 +294,11 @@ class Masters extends Component {
 
       if (this.state.showMasterDeleteButton === true) {
          return (
-            <div className="d-inline float-right">
-               <label className="px-1 text-secondary float-right"> | </label>
-               <i className="text-muted cursor-pointer float-right iconhover" name="DeleteMaster" onClick={this.deleteMaster.bind(this)} ><img src={DeleteIcon} /></i>
+            <div className="float-left pl-4">
+               {/* <label className="px-1 text-secondary float-right"> | </label>
+               <i className="text-muted cursor-pointer float-right iconhover" name="DeleteMaster" onClick={this.deleteMaster.bind(this)} ><img src={DeleteIcon} /></i> */}
+               <button type="button" class="btn btn-danger" name="DeleteMaster" onClick={this.deleteMaster.bind(this)}>Delete</button>
+            
             </div>
          )
       }
@@ -367,14 +370,14 @@ class Masters extends Component {
       }
       else {
          return (
-            <div class="w-100 pt-2">
+            <div class="w-100 pt-2 masterswitch">
                <h5 class="card-title ml-4 d-inline text-truncate mt-4">{this.state.masterValues}</h5>
                <i class={this.state.open === true ? "fas fa-angle-up float-right sidebar-list-item-arrow d-inlin openMaster" : "fas fa-angle-down float-right sidebar-list-item-arrow d-inlin closeMaster"}
                   onClick={() => this.setState({ open: !open })}
                   aria-controls="example-collapse-text"
                // aria-expanded={open}
                />
-               {this.showMasterDeleteButton()}
+            
                {this.showMasterEditButton()}
                <label className="px-1 text-secondary float-right"> | </label>
                <label class="switch float-right mt-1" title="is User OnBoarding Required">
@@ -440,9 +443,14 @@ class Masters extends Component {
             return (
                <div class="card shadow-sm w-100 border-bottom mt-0 border-top-0 border-right-0 border-left-0 rounded-0 pt-0  h-220">
                   <div className="col-sm-12 pl-0">
-                     <div class="col-sm-6 pl-0 float-left ">
+                  
+                     <div class="col-sm-6 pl-0 float-left h-100  ">
+                     <div className="h-120">
+                      </div>
+                     {this.showMasterDeleteButton()}
                      </div>
-                     <div class="col-sm-6 p-4 float-right ">
+                    
+                     <div class="col-sm-6 pl-4 float-right  pt-4">
                         <div className="h-120 scrollbar">
                            {this.state.mapmasterList.map((data, key) => {
                               let className = '';
@@ -462,8 +470,8 @@ class Masters extends Component {
                               }
                            })}
                         </div>
-                        <div class="card-footer bg-white">
-                           <button type="button" class="common-button btn btn-dark float-right" name="AddMap" onClick={this.mapMasterWithMaster.bind(this)}>Map</button>
+                        <div class="bg-white" style={{padding:"0px!important"}}>
+                           <button type="button" class="default-button btn btn-dark float-right p-0 mr-2 mb-2 mt-2" name="AddMap" onClick={this.mapMasterWithMaster.bind(this)}>Map</button>
                            {/* <button  type="button"  class=" btn btn-light float-right mr-4 mb-2">Remove</button> */}
                         </div>
                      </div>
@@ -577,7 +585,7 @@ class Masters extends Component {
                                        <li className='list-group-item rounded-0 pl-4 pt-2 pb-2 text-muted text-truncate  border-0  cursor-default' style={{ height: "40px" }}>
                                           <div class="custom-control-lg custom-control custom-checkbox  pl-4">
                                              <input type="checkbox" class="custom-control-input" checked={checkedlist} name={data.id} onChange={this.attributeToAttributeHanlder.bind(this)} id={data.id} />
-                                             <label class="custom-control-label" For={data.id}></label>
+                                             <label class="custom-control-label" For={data.id} name={"chk_"+data.name}></label>
                                              <span className="text-truncate ">{data.name}</span>
                                           </div>
 
@@ -591,12 +599,10 @@ class Masters extends Component {
                         </div>
                      </div>
 
-                     <div class="bg-white" >
-                        <div class="card-footer bg-white">
-                           <button type="button" class="common-button btn btn-dark float-right mr-2 mb-0 mt-2" name="AddMap" disabled={this.state.showErrorMesage === true} onClick={this.mapAttributes.bind(this)} >Map</button>
+                        <div class="bg-white">
+                           <button type="button" class="default-button btn btn-dark float-right p-0 mr-2 mb-2 mt-4" name="AddMap" disabled={this.state.showErrorMesage === true} onClick={this.mapAttributes.bind(this)} >Map</button>
                            {/* <button  type="button"  class=" btn btn-light float-right mr-4 mb-2">Remove</button> */}
                         </div>
-                     </div>
                   </div>
                </div>
             </>
@@ -1175,13 +1181,19 @@ class Masters extends Component {
                                           <input type="checkbox" class="custom-control-input" id="customCheck1" disabled={!this.state.isUserOnBoardingRequired} onChange={this.SelectALLUsers.bind(this)} checked={this.state.SelectALLUsers} />
                                           <label class="custom-control-label" for="customCheck1"></label>
                                           <span className="">UserName</span>
-                                       </div> </th>
-                                       <th scope="col" className="pr-10 border-th">Email</th>
+                                          {/* <span className="">(FirstName  LastName)</span> */}
+                                       </div> 
+                                       </th>
+                                       <th scope="col" className="pr-5 border-th">Email</th>
+                                       <th scope="col" className="pr-5 border-th">Manager</th>
+                                       
                                     </tr>
                                  </thead>
                                  <tbody>
                                     {this.state.UserList.map((data, key) => {
+                                       debugger
                                        let checkedlist = false;
+                                    
                                        data.mapMasterAttributesWithUsers.filter((item) => {
                                           let id = this.state.attributesId;
                                           let attributeId = item.attributeId
@@ -1193,12 +1205,14 @@ class Masters extends Component {
                                           <tr>
                                              <td> <div class="custom-control-lg custom-control custom-checkbox  pl-5">
                                                 <input type="checkbox" class="custom-control-input" disabled={!this.state.isUserOnBoardingRequired} checked={checkedlist} name={data.id} onChange={this.attributeToAttributeHanlderUsers.bind(this)} id={data.id} />
-                                                <label class="custom-control-label" for={data.id}></label>
-                                                <span className="text-truncate "><i class="fas fa-circle text-success mr-2" style={{ fontSize: ".75rem" }}></i>{data.userName}</span>
+                                                <label class="custom-control-label" for={data.id} name={"chk_"+data.userName}></label>
+                                                <span className="text-truncate "><i class="fas fa-circle text-success mr-2" style={{ fontSize: ".75rem" }}></i>{data.firstName + " " + data.lastName}</span>
                                              </div>
 
                                              </td>
-                                             <td className="pr-10"><label className="text-truncate">{data.email}</label></td>
+                                             <td className="pr-5"><label className="text-truncate">{data.email}</label></td>
+
+                                             <td className="pr-5"><label className="text-truncate">{data.managerId!==null?data.manager.firstName + " "+ data.manager.lastName:"-"}</label></td>
 
                                           </tr>
                                        )
@@ -1208,12 +1222,10 @@ class Masters extends Component {
                               </table>
                            </div>
                         </div>
-                        <div class="bg-white" >
-                           <div class="card-footer bg-white">
+                           <div class="bg-white mr-2">
                            <button type="button" class="default-button btn btn-dark float-right p-0 mr-2 mb-2 mt-2" name="AddMap" disabled={this.state.disableButton} onClick={this.MapUser.bind(this)}>Map</button>
                               {/* <button  type="button"  class=" btn btn-light float-right mr-4 mb-2">Remove</button> */}
                            </div>
-                        </div>
                      </div>
                   </Tab>
                   <Tab
@@ -1332,7 +1344,7 @@ class Masters extends Component {
                </div>
             </div>
             <Modal aria-labelledby="contained-modal-title-vcenter" centered show={this.state.show} onHide={this.handleClose} >
-               <Modal.Header closeButton>
+               <Modal.Header closeButton  className="pop-Header">
                   <Modal.Title id="contained-modal-title-vcenter "><label title={this.state.masterValues} className="text-truncate" >Add  {this.state.masterValues}</label></Modal.Title>
                </Modal.Header>
                <Modal.Body>
@@ -1353,11 +1365,11 @@ class Masters extends Component {
                      </div>
                   </form>
                </Modal.Body>
-               <Modal.Footer>
-                  <Button variant="outline-secondary" name="btnClose" onClick={this.handleClose}>
+               <Modal.Footer className="pop-footer">
+                  <Button name="btnClose" className="btn-light float-right default-button-secondary"  onClick={this.handleClose}>
                      Close
   </Button>
-                  <Button variant="primary" name="btnAdd" className="common-button" onClick={this.AddAttributes}>
+                  <Button  name="btnAdd" className="default-button btn-dark float-right mr-2 p-0"  onClick={this.AddAttributes}>
                      Add
   </Button>
 

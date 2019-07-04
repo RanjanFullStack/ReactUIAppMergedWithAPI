@@ -29,7 +29,7 @@ class Reports extends Component {
     const body = JSON.stringify({ "group": "ResourceReport","StartDate":"2019-01-01","EndDate":"2019-12-31"});
     
     const message = await BFLOWDataService.post("Report", body)
-    debugger
+
     let ResourceReportSummary=message["Resource Report Summary"].Results;
     let ResourceReportSummarydate = ResourceReportSummary.map(a => a.date);
     let ResourceReportSummaryuserCount = ResourceReportSummary.map(a => a.userCount);
@@ -45,7 +45,21 @@ class Reports extends Component {
        let mastername=ResourceReport.filter(x => x.masterName === a);
        ResourceReportlist.push(mastername);
      });
-     this.setState({ResourceReportchart:ResourceReportlist})
+
+
+     let  ResourceReportpiechart=[];
+     let  ResourceReportpiechartlist=[];
+     ResourceReportlist.map((data, key) => {
+       
+      ResourceReportpiechart=[];
+        data.map((dataitem, key) => {
+       
+          ResourceReportpiechart.push({"name":dataitem.attributeName,"y":dataitem.userCount})
+        })
+        ResourceReportpiechartlist.push({ ResourceReportpiechart,"Master":data[0].masterName})
+      })
+
+     this.setState({ResourceReportchart:ResourceReportpiechartlist})
   }
 
 
@@ -83,7 +97,7 @@ class Reports extends Component {
     const body = JSON.stringify({ "group": "UtilisationReport","StartDate":"2019-01-01","EndDate":"2019-12-31"});
     
     const message = await BFLOWDataService.post("Report", body)
-
+  
     let utlisationReportSummary=message["Utlisation Report Summary"].Results;
     let utlisationReportSummarydate = utlisationReportSummary.map(a => a.date);
     let utlisationReportSummaryutilisation = utlisationReportSummary.map(a => a.utilisation);
@@ -104,7 +118,22 @@ class Reports extends Component {
      });
 
     
-     this.setState({UtilizationReportchart:utlisationReportlist})
+     
+         
+     
+     let utlisationReportpiechart=[];
+     let utlisationReportpiechartlist=[];
+      utlisationReportlist.map((data, key) => {
+       
+        utlisationReportpiechart=[];
+        data.map((dataitem, key) => {
+       
+          utlisationReportpiechart.push({"name":dataitem.attributeName,"y":dataitem.utilisation})
+        })
+        utlisationReportpiechartlist.push({utlisationReportpiechart,"Master":data[0].masterName})
+      })
+
+      this.setState({UtilizationReportchart:utlisationReportpiechartlist})
      this.RequestReport();
      this.ResourceReport();
 
@@ -151,7 +180,7 @@ return(
 
       <Tabs defaultActiveKey="Utilization" id="uncontrolled-tab-example" >
                   <Tab
-                     className="tab-content-mapping"
+                     className="tab-content-mapping paddingtabs"
                      eventKey="Utilization"
                      title="Utilization"
                      name="Utilization"
@@ -175,17 +204,15 @@ return(
 
 <div class="row pl-4 pr-4">
 {this.state.UtilizationReportchart.map((data, key) => {
- 
-  let attributeData = data.map(x=> x.attributeName)
-  let utlizationData = data.map(x=> x.utilisation)
+ debugger
   return(
         
    <div class="col-xl-6">
        <div class="card border-0 shadow-sm  mb-4">
          <div class="card-body" style={{height:"380px"}}>
-           <label class="m-0 text-truncate" style={{fontWeight:"500", color: "#55565a"}}>{data[0].masterName}</label>
+           <label class="m-0 text-truncate" style={{fontWeight:"500", color: "#55565a"}}>{data.Master}</label>
            <div class="chart-area">
-           <HighchartsReact highcharts={Highcharts} options={CustomHighCharts.getcolumnChart('','Utilization %',attributeData, utlizationData)}     containerProps={{ style: { height: "300px", "margin-top": "30px" ,"margin-left": "0px" } }} />
+           <HighchartsReact highcharts={Highcharts} options={CustomHighCharts.getpieChart('','Utilization',null, data.utlisationReportpiechart)}     containerProps={{ style: { height: "300px", "margin-top": "30px" ,"margin-left": "0px" } }} />
            </div>
          </div>
          </div>
@@ -267,6 +294,7 @@ return(
  
     
     <div class="card-body" style={{height:"231px"}}>
+    <label class="m-0 text-truncate" style={{fontWeight:"500", color: "#55565a"}}>Resource trend</label>
       <div class="chart-area">
   {this.ResourceReportSummary()}
       </div>
@@ -278,17 +306,14 @@ return(
 
 <div class="row  pl-4 pr-4">
 {this.state.ResourceReportchart.map((data, key) => {
-  let attributeData = data.map(x=> x.attributeName)
-  let userData = data.map(x=> x.userCount)
- 
   return(
         
    <div class="col-xl-6">
        <div class="card border-0 shadow-sm  mb-4">
          <div class="card-body" style={{height:"380px"}}>
-         <label class="m-0 text-truncate" style={{fontWeight:"500", color: "#55565a"}}>{data[0].masterName}</label>
+         <label class="m-0 text-truncate" style={{fontWeight:"500", color: "#55565a"}}>{data.Master}</label>
            <div class="chart-area">
-           <HighchartsReact highcharts={Highcharts} options={CustomHighCharts.getcolumnChart('','Resource',attributeData, userData)}     containerProps={{ style: { height: "300px", "margin-top": "30px" ,"margin-left": "0px" } }} />
+           <HighchartsReact highcharts={Highcharts} options={CustomHighCharts.getpieChart('','Resource',null,  data.ResourceReportpiechart)}     containerProps={{ style: { height: "300px", "margin-top": "30px" ,"margin-left": "0px" } }} />
            </div>
          </div>
          </div>

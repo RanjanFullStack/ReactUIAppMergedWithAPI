@@ -17,6 +17,7 @@
     border-color: white !important;
     border-bottom-color: #dee2e6 !important;
     padding-top: 20px;
+    padding-left: 20px;
     font-size: 14px;
   }
    
@@ -25,5 +26,7 @@
      border-bottom-color: #CAC9C7 !important;
      background-color: white;
      height: 60px;
+     padding-left: 20px;
    }
+
    

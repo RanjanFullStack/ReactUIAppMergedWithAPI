@@ -9,8 +9,8 @@ class Recurrence extends Component {
   constructor(props, context) {
     super(props, context);
     this.state = {
-      StartDate: new Date(),
-      EndBy: new Date(),
+      StartDate: moment(new Date()).format("YYYY-MM-DD HH:mm:ss"),
+      EndBy: moment(new Date()).format("YYYY-MM-DD HH:mm:ss"),
       Mode: 'Daily',
       SelectedMonth: 1,
       Sunday: false,
@@ -26,7 +26,7 @@ class Recurrence extends Component {
       YearlyInterval: 1,
       DayOfMonth: 1,
       Occurrences:1,
-      EndAfterRadio:true,
+      EndAfterRadio:false,
       EndByRadio:false,
       MonthNames: [
         { name: 'January', id: 1 },
@@ -77,13 +77,19 @@ class Recurrence extends Component {
   handleOccurrences(e) {
 
     this.setState({ Occurrences: e.target.value});
+    this.setState({ EndByRadio: false});
+    this.setState({ EndAfterRadio: true});
+    //document.EndAfterRadio.checked = true;
   }
   handleEndAfterRadio(e) {
-    
-    this.setState({ EndAfterRadio: e.target.checked, EndByRadio: false});
+    debugger
+    this.setState({ EndAfterRadio: e.target.checked });
+    this.setState({ EndByRadio: false});
   }
   handleEndByRadio(e) {
-    this.setState({ EndByRadio: e.target.checked, EndAfterRadio:false});
+    debugger;
+    this.setState({ EndByRadio: e.target.checked});
+    this.setState({ EndAfterRadio: false});
   }
 
 
@@ -108,15 +114,17 @@ class Recurrence extends Component {
   }
 
   handleDateForStartDate(date) {
-    date = moment(date).format('MMMM DD YYYY');
+    date = moment(date).format("YYYY-MM-DD HH:mm:ss");
     this.setState({ StartDate: date })
 
   }
 
   handleDateForEndByDate(date) {
-    date = moment(date).format('MMMM DD YYYY');
+    date = moment(date).format("YYYY-MM-DD HH:mm:ss");
     this.setState({ EndBy: date })
-
+    this.setState({ EndByRadio: true});
+    this.setState({ EndAfterRadio: false});
+    //document.EndByRadio.checked = true;
   }
 
   handleMonthChange(e) {
@@ -156,10 +164,50 @@ class Recurrence extends Component {
     this.setState({ DayOfMonth: e.target.value });
   }
 
+  getValidTimes(dateTime) {
+    var hours = moment(new Date())
+      .format("HH");
+
+    var minutes = moment(new Date())
+      .format("mm");
+    // var date = moment(new Date())
+    //   .format("MMMM DD YYYY")
+    if (moment(new Date()).isSame(dateTime, 'day')) {
+
+      return {
+        hours: {
+          min: hours,
+          max: 23,
+          step: 1,
+        },
+        minutes: {
+          min: minutes,
+          max: 59,
+          step: 1,
+        },
+      };
+    }
+
+    // date is in the future, so allow all times
+    return {
+      hours: {
+        min: 0,
+        max: 23,
+        step: 1,
+      },
+      minutes: {
+        min: 0,
+        max: 59,
+        step: 1,
+      },
+    };
+
+  }
+
 
   /** Request Details Start */
  async handleSave() {
-   
+   debugger;
     //this.setState({ show: false });
     var value = false;//this.ValidateForm();
     if (value === false) {
@@ -225,9 +273,9 @@ class Recurrence extends Component {
   }
 
   ResetStateValues() {
-
-    this.setState({ StartDate: new Date(),
-      EndBy: new Date(),
+debugger
+    this.setState({ StartDate: moment(new Date()).format("YYYY-MM-DD HH:mm:ss"),
+      EndBy: moment(new Date()).format("YYYY-MM-DD HH:mm:ss"),
       Mode: 'Daily',
       SelectedMonth: 1,
       Sunday: false,
@@ -285,10 +333,10 @@ class Recurrence extends Component {
                    </label>
                   </div>
                   <div class="form-check">
-                    {/* <input class="form-check-input" type="radio" style={{width:"20px",height:"20px"}} name="RadioInterval" id="YearlyRadio" value="option4" onClick={this.handleYearly.bind(this)} />
+                    <input class="form-check-input" type="radio" style={{width:"20px",height:"20px"}} name="RadioInterval" id="YearlyRadio" value="option4" onClick={this.handleYearly.bind(this)} />
                     <label class="form-check-label labelColor ml-3 pt-1" for="YearlyRadio">
                       Yearly
-                    </label> */}
+                    </label>
                   </div>
                 </div>
                 <div class="col-sm-1 vl m-0"> </div>
@@ -329,7 +377,7 @@ class Recurrence extends Component {
                         return (
                           <div>
                             <span class="labelColor">Day</span>
-                            <input name="yearlyDayOfMonthInterval" class="ml-3 mt-3 mb-3 mr-1 p-1 labelColor numberInputCustom" style={{width:"3.625rem ",height:"2rem !important"}} value={1}   type="number" min="1" max="999" onChange={this.handleDayOfMonth.bind(this)}></input>
+                            <input name="yearlyDayOfMonthInterval" class="ml-3 mt-3 mb-3 mr-1 p-1 labelColor numberInputCustom" style={{width:"3.625rem ",height:"2rem !important"}} value={this.state.DayOfMonth}   type="number" min="1" max="999" onChange={this.handleDayOfMonth.bind(this)}></input>
                             <span class="labelColor"> Month</span>
                             <label>
                               <select name="MonthSelection" class="p-1 ml-2 labelColor numberInputCustom" value={this.state.SelectedMonth} onChange={this.handleMonthChange.bind(this)} >
@@ -379,25 +427,39 @@ class Recurrence extends Component {
                     <label class="m-0 mb-2" style={{ color: "#ababab", fontSize: "0.75rem" }}>
                       Start Date
                     </label>
-<div class="w-75">
+                  <div class="w-75">
                     <DateTime
-                    
-                    viewMode='days'
-                      timeFormat={false}
-                      defaultValue={new Date()}
-                      viewDate={this.state.StartDate === null ? moment(new Date()).format('MMMM DD YYYY') : this.state.StartDate}
-                      dateFormat='MMMM DD YYYY'
-                      isValidDate={current => current.isAfter(DateTime.moment(new Date()).startOf('day') - 1)}
-                      // timeConstraints={hours{min:9, max:15, step:2}
-                      onChange={this.handleDateForStartDate.bind(this)}
-                      name="StartDate"
-                      id="StartDate"
-                      value={this.state.StartDate !== null ? moment(this.state.StartDate).format('MMMM DD YYYY') : ''}
-                      selected={this.state.StartDate}
-                      //timeConstraints={{ hours: { min: this.state.StartDate !== null ? new Date(this.state.StartDate).getHours() : new Date().getHours(), max: 23, step: 1 }, minutes: { min: this.state.StartDate !== null ? new Date(this.state.StartDate).getMinutes() : new Date().getMinutes(), max: 59, step: 1 } }}
-                      inputProps={{ readOnly: true }}
-                      
-                    /></div>
+                        viewMode="days"
+                        timeFormat="HH:mm"
+                        viewDate={
+                          this.state.StartDate === null ? new Date() : this.state.StartDate
+                        }
+                        dateFormat="MMMM DD YYYY"
+                        isValidDate={current =>
+                          current.isAfter(
+                            DateTime.moment(new Date()).startOf("day") - 1
+                          )
+                        }
+                        // timeConstraints={hours{min:9, max:15, step:2}
+                        onChange={this.handleDateForStartDate.bind(this)}
+                        name="StartDate"
+                        id="StartDate"
+                        value={
+                          this.state.StartDate !== null ? moment.utc(this.state.StartDate).format("MMMM DD YYYY HH:mm") : ""
+                        }
+                        selected={this.state.StartDate}
+                        //timeConstraints={this.getValidTimes(this.state.StartDate)}
+                        inputProps={{
+                          readOnly: true,
+                          disabled: false,
+                          style: {
+                            color: "rgb(85, 86, 90)",
+                            padding: "0px",
+                            fontSize: "0.875rem"
+                          }
+                        }}
+                    />
+                  </div>
                     <br></br>
                     <div class="row">
                       <div class="col-sm-3" style={{paddingLeft:"none !important"}}>
@@ -427,21 +489,37 @@ class Recurrence extends Component {
                         </div>
                       </div>
                       <div class="col-sm-6 mt-3 labelColor umberInputCustom w-75">
-                        <DateTime
-                          viewMode='days'
-                          timeFormat={false}
-                          defaultValue={new Date()}
-                          class="umberInputCustom w-50"
-                          viewDate={this.state.EndBy === null ? moment(new Date()).format('MMMM DD YYYY') : this.state.EndBy}
-                          dateFormat='MMMM DD YYYY'
-                          isValidDate={current => current.isAfter(DateTime.moment(new Date()).startOf('day') - 1)}
-                          onChange={this.handleDateForEndByDate.bind(this)}
-                          name="EndBy"
-                          id="EndBy"
-                          value={this.state.EndBy !== null ? moment(this.state.EndBy).format('MMMM DD YYYY') : ''}
-                          selected={this.state.EndBy}
-                          inputProps={{ readOnly: true }}
-                        />
+                      <DateTime
+                        viewMode="days"
+                        timeFormat="HH:mm"
+                        viewDate={
+                          this.state.EndBy === null ? new Date() : this.state.EndBy
+                        }
+                        dateFormat="MMMM DD YYYY"
+                        isValidDate={current =>
+                          current.isAfter(
+                            DateTime.moment(new Date()).startOf("day") - 1
+                          )
+                        }
+                        // timeConstraints={hours{min:9, max:15, step:2}
+                        onChange={this.handleDateForEndByDate.bind(this)}
+                        name="EndBy"
+                        id="EndBy"
+                        value={
+                          this.state.EndBy !== null ? moment.utc(this.state.EndBy).format("MMMM DD YYYY HH:mm") : ""
+                        }
+                        selected={this.state.EndBy}
+                        //timeConstraints={this.getValidTimes(this.state.StartDate)}
+                        inputProps={{
+                          readOnly: true,
+                          disabled: false,
+                          style: {
+                            color: "rgb(85, 86, 90)",
+                            padding: "0px",
+                            fontSize: "0.875rem"
+                          }
+                        }}
+                    />
                       </div>
                     </div>
                   </div>

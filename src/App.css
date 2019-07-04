@@ -20,11 +20,29 @@ html,body{
  }
 
  .list-group-item.active {
+  z-index: 2;
+  color: black!important;
+  background-color: #e5f5fc!important;
+  border-color: #e5f5fc!important;
+  }
+
+
+  .list-group-item:hover {
    z-index: 2;
    color: black!important;
-   background-color: #e5f5fc!important;
-   border-color: #e5f5fc!important;
+   background-color: #f0f0f1!important;
+   border-color: #f0f0f1!important;
    }
+ /* --------------------- */
+
+
+.sidenav.active {
+ z-index: 2;
+ color: black!important;
+ background-color: #e5f5fc!important;
+ border-color: #e5f5fc!important;
+ }
+ /* --------------------- */
  
    .list-view{
     height: 6.875rem!important;
@@ -187,13 +205,29 @@ html,body{
  
 
  .default-button-secondary{
-  height:1.938rem;
-  width:4.188rem;
+  height: 2rem !important;
+  width:5.25rem !important;
   border:0.0625rem solid #dedfe0 !important;
-  margin-top:0.75rem;
-  margin-bottom:0.75rem;
-  border-radius:0.1875rem;
+  border-radius: 0.25rem !important;
+  margin-left: 0.75rem;
+  margin-bottom: 0.75rem;
+  margin-top: 0.75rem;
   padding: 0 !important;
+ }
+
+
+ .default-button-danger
+ {
+ 
+  height: 2rem !important;
+  text-align: center;
+  border-radius: 0.25rem !important;
+  outline: none;
+  border: none;
+  width:5.25rem !important;
+  margin-left: 0.75rem;
+  margin-bottom: 0.75rem;
+  margin-top: 0.75rem;
  }
 
  .common-color
@@ -341,27 +375,38 @@ max-width: 100% !important;
    border: 0.125rem solid #CAC9C7;
  }
  
- .scrollbar:hover {
-  overflow-y: overlay;
-}
-
-.scrollbar
-{  
-   background: #FFFFFF;
-    overflow: hidden; 
-   /* overflow-y: inherit!important;
-   overflow-x: hidden!important; */
-}
- 
+   /*-----------------------scrollbar changes---------------------*/
+   .scrollbar
+   {  
+     overflow: hidden;
+     background: #FFFFFF;
+     
+   }
+   .scrollbar:hover{
+     overflow-y: overlay;
+   }
+   .scrollbar:hover::-webkit-scrollbar {
+     width: 0;
+   }
+   .scrollbar.scroll{
+     overflow-y: overlay;
+     background: #FFFFFF;
+   }
+   .scrollbar.scroll::-webkit-scrollbar {
+     overflow-y: overlay;
+     width: 5px;
+   }
+  /*-----------------------scrollbar changes ends---------------------*/
  
  .star-rating__star{
    display: center;
-   padding: 0.1875rem;
+  
    vertical-align: center;
    line-height: 1;
-   font-size: 1.5em;
+   font-size: 1rem;
    color: #ababab;
    transition: color 0.2s ease-out;
+
  }
  .star-rating__star:hover {
    cursor: pointer;
@@ -599,3 +644,74 @@ height:  calc(100vh - 122px);
     height:  calc(100vh - 160px )!important;
     
     }
+
+    .create-request-modal
+    {
+      min-height: 43vh!important;
+      max-height: 73vh!important;
+    }
+     
+
+    .default-font{
+font-size: .875rem!important;
+    }
+
+    .comment-box-feedback::placeholder
+    {
+      font-size: 0.875rem!important;
+    }
+
+    .form-control{
+      font-size: 0.875rem !important;
+      color: rgb(85, 86, 90);
+     
+    }
+
+    .pop-Header{
+      height: 68px !important;
+       background: #fafafb !important ;
+    }
+
+    .pop-footer{
+      height: 72px !important;
+      background: #fafafb !important;
+    }
+
+
+    .btn:focus,.btn:active {
+      outline: none !important;
+      box-shadow: none !important;
+   }
+
+   
+input[type="password"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, .uneditable-    input:focus {
+  border-bottom: 0.0625rem solid #dee2e6 !important;
+    
+}
+
+.form-control textarea:focus{
+  border-bottom: 0.0625rem solid #dee2e6 !important;
+}
+
+.form-control input[type="text"]:focus{
+  border-bottom: 0.0625rem solid #dee2e6 !important;
+}
+
+
+    
+.details-label{
+  font-size: 0.75rem;
+  color: #ababab;
+  margin-bottom: 0;
+}
+
+
+.Pointer-hover:hover{
+  background-color: #f0f0f1 !important;
+}
+
+
+.div-disabled-content
+{
+ pointer-events: none;
+}

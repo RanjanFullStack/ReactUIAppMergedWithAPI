@@ -19,7 +19,7 @@ render()
     aria-labelledby="contained-modal-title-vcenter"
     centered
   >
-    <Modal.Header closeButton>
+    <Modal.Header closeButton className="pop-Header">
       <Modal.Title id="contained-modal-title-vcenter">
         Add User
       </Modal.Title>
@@ -130,7 +130,7 @@ render()
         </Row>
       </>
     </Modal.Body>
-    <Modal.Footer>
+    <Modal.Footer className="pop-footer">
       <Button>Save</Button>
       <Button variant="outline-secondary" name="btnCancel" onClick={this.props.onHide}>Cancel</Button>
     </Modal.Footer>

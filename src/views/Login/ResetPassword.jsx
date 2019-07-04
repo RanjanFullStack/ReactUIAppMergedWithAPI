@@ -15,23 +15,42 @@ class ResetPassword extends Component {
             newPassword: '',
             confirmPassword: '',
             errorMessage: '',
-            errorNewPassword:'',
-            errorConfirmPassword:'',
-            ConfirmMessage:'',
+            errorNewPassword: '',
+            errorConfirmPassword: '',
+            ConfirmMessage: '',
         }
     }
 
     componentDidMount() {
-        debugger;
         let url = this.props.location.search;
         let params = queryString.parse(url);
+      
         if (params.url !== undefined) {
             this.setState({
-                resetPasswordUrl: params.url,
                 showLoginPage: false
             });
+            this.checkResetPasswordLinkExpiry(params.url);
         }
-        console.log(params.url);
+        // console.log(params.url);
+        // console.log(this.state.resetPasswordUrl);
+        // this.checkResetPasswordLinkExpiry(params.url);
+    }
+    /*Method to check Reset Password Link Expiry*/
+    async checkResetPasswordLinkExpiry(url) {
+        debugger;
+        this.setState({
+            resetPasswordUrl: url
+        });
+        const body = JSON.stringify({
+            ResetPasswordToken: url,
+            App: process.env.REACT_APP_APP_NAME,
+            BaseUrl: process.env.REACT_APP_API_BASE_Reset_NAME
+        });
+        const response = await AuthService.checkResetPasswordLinkExpiry(body);
+        debugger
+        if (response.Code === false && response.Code !== undefined) {
+            this.props.history.push("/Login/TokenExpired");
+        } 
     }
     /*Method to handle change event of all elements*/
     handleChange(event) {
@@ -53,7 +72,7 @@ class ResetPassword extends Component {
             blnError = true;
         }
         else if (!pattern.test(String(newPassword))) {
-            this.setState({ errorNewPassword: "Password doesnot match the policy." });
+            this.setState({ errorNewPassword: "The password you entered does not meet the password policy" });
             blnError = true;
         }
         if (confirmPassword === "" || confirmPassword === null || confirmPassword === undefined) {
@@ -67,9 +86,9 @@ class ResetPassword extends Component {
         return blnError;
     }
 
+    
     /*Method to call api to reset password*/
-    async forgotPassword() {
-        debugger;
+    async resetPassword() {
         var value = this.validateResetPasswordForm();
         if (value === false) {
             const body = JSON.stringify({
@@ -78,25 +97,19 @@ class ResetPassword extends Component {
                 App: process.env.REACT_APP_APP_NAME,
                 BaseUrl: process.env.REACT_APP_API_BASE_Reset_NAME
             });
-            const response = await AuthService.forgotPassword(body);
+            const response = await AuthService.resetPassword(body);
             if (response.Code === false && response.Code !== undefined) {
                 this.setState({
                     errorMessage: response.Message,
                 });
             } else {
-
-               
-              
                 this.setState({
                     ConfirmMessage: 'Your password have been changed successfully.'
                 })
                 setTimeout(
                     function () {
                         window.location.href = process.env.REACT_APP_Logout_Url;
-                    }
-                       .bind(this),
-                    2000
-                 );
+                    }.bind(this), 2000);
             }
         }
     }
@@ -104,14 +117,14 @@ class ResetPassword extends Component {
     renderResetPassword() {
         if (this.state.resetPasswordUrl !== undefined) {
             return (
-                <div>
-                    <div className={this.state.errorMessage!=""?"alert-danger":""} style={{ paddingTop: 10 ,fontSize:"12px"}} >{this.state.errorMessage}</div>
-                    <div className={this.state.ConfirmMessage!=""?"alert-success":""} style={{ paddingTop: 10, fontSize:"12px"}}>{this.state.ConfirmMessage}</div>
-                    <div className="reset-password" >
+                <div className="reset-password">
+                    <div className={this.state.errorMessage !== "" ? "alert-danger" : ""} style={{ paddingTop: 10, fontSize: 12, paddingLeft: 20, paddingBottom: 5 }} >{this.state.errorMessage}</div>
+                    <div className={this.state.ConfirmMessage !== "" ? "alert-success" : ""} style={{ paddingTop: 10, fontSize: 12, paddingLeft: 20, paddingBottom: 5 }}>{this.state.ConfirmMessage}</div>
+                    <div>
                         <div className="row mb-3">
                             <b className="forgot-password-text ml-3">Reset your Password</b>
                         </div>
-                        <div className="row">
+                        <div className="row mb-2">
                             <div className="col-sm-12">
                                 <div className="form-group">
                                     <input
@@ -140,7 +153,7 @@ class ResetPassword extends Component {
                                         onChange={this.handleChange.bind(this)}
                                     />
                                     <div className="errorMsg">{this.state.errorConfirmPassword}</div>
-                                 
+
                                 </div>
                             </div>
                         </div>
@@ -157,23 +170,16 @@ class ResetPassword extends Component {
                                 size="large"
                                 type="button"
                                 className="login-button mb-0"
-                                onClick={this.forgotPassword.bind(this)}
+                                onClick={this.resetPassword.bind(this)}
                                 label="Action"
                             > Reset Password </Button>
-                            {/* <Button
-                                size="large"
-                                type="button"
-                                className="btn btn-login-secondary"
-                                // onClick={this.handleLogin.bind(this)}
-                                label="Action"
-                            >Cancel
-              </Button> */}
                         </div>
                     </div>
                 </div>
             );
         }
     }
+
     render() {
         return (
             <div className="login-container">

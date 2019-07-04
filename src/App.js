@@ -2,15 +2,20 @@ import React, { Component,Suspense  } from 'react';
 import '../src/assets/css/app.min.css';
 import './App.css';
 import './index.css';
+import {SharedServices} from './configuration/services/SharedService';
+
 import '../src/assets/css/bootstrap-4.3.1-dist/bootstrap-4.3.1-dist/css/bootstrap.min.css'
 import { Provider } from 'react-globally'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import LoadingOverlay from 'react-loading-overlay';
 import Loading from './components/Loader/Loading';
-const login = React.lazy(() =>import ( '../src/views/Login/Login'));
-const Layout = React.lazy(() =>import ( './layouts/layout'));
-const AccountSettings = React.lazy(() =>import ( './views/User/AccountSettings'));
-const ResetPassword = React.lazy(() =>import ( './views/Login/ResetPassword'));
+
+const login = React.lazy(() => SharedServices.retry(() =>import ( '../src/views/Login/Login')));
+const Layout = React.lazy(() => SharedServices.retry(() =>import ( './layouts/layout')));
+const AccountSettings = React.lazy(() => SharedServices.retry(() =>import ( './views/User/AccountSettings')));
+const ResetPassword = React.lazy(() => SharedServices.retry(() =>import ( './views/Login/ResetPassword')));
+
+
 const initialState = {
   ConfigurationMenu: [],
    CreateRequestOnHideModal: false,
@@ -18,7 +23,7 @@ const initialState = {
    RequestModalOnHide: false,
    RequestData: null,
    EditRequestBlockId: null,
-   Features:[],
+   features:[],
    IsLoadingActive:false
 
 }
@@ -46,11 +51,13 @@ class App extends Component {
           <Switch basename= {process.env.REACT_APP_API_BASE_NAME}>
           <Route exact path="/" component={Layout} />
           
-          <Route  path="/login" component={login} />
+          <Route  exact={true} path="/login" component={login} />
           {/* <Route path="/app" component={Layout} /> */}
+       
         
-          <Route path='/user/AccountSettings' exact={true} component={AccountSettings} />
+          {/* <Route path='/user/AccountSettings' exact={true} component={AccountSettings} /> */}
           <Route path='/resetpassword'   component={ResetPassword} />
+          <Route  exact={true} path="/login/:tokenExpired" component={login} />
           <Route path='*' exact={true} component={Layout} />
           </Switch>
           {/* </Router> */}

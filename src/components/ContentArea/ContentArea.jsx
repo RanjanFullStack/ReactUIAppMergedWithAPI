@@ -10,55 +10,51 @@ class ContentArea extends Component {
     constructor(props) {
         super(props);
         this.state = {
-        availableRoute : []
+            availabelRoute: []
         };
     }
-        
+
     async componentDidMount() {
         // Arrange availble features
-  
+
         let features = this.props.globalState.features;
         let Accessablefeatures = [];
-        
-        if(features===undefined)
-        {
-           features = await RoleBFLOWDataService.getUserRoles();
-           this.props.setGlobalState({ features: features });
+
+        if (features.length === 0) {
+            features = await RoleBFLOWDataService.getUserRoles();
+            this.props.setGlobalState({ features: features });
         }
-      
-        
-        Routes.forEach((item)=>{
+
+
+        Routes.forEach((item) => {
             ;
             let modifieditem = [];
-         if(features.filter(x=> x.featureGroupName === item.name).length > 0)
-        {
-            ;
-            if(item.children === true)
-            {
-                item.childrenData.forEach((cData)=>{
-                    ;
-                    if(features.filter(x=> x.featureGroupName === item.name && x.feature === cData.name).length > 0)
-                    {
+            if (features.filter(x => x.featureGroupName === item.name).length > 0) {
+                ;
+                if (item.children === true) {
+                    item.childrenData.forEach((cData) => {
                         ;
-                        modifieditem = modifieditem.concat(cData); 
-                    }
-                    
-                });
-                item.childrenData =   modifieditem; 
+                        if (features.filter(x => x.featureGroupName === item.name && x.feature === cData.name).length > 0) {
+                            ;
+                            modifieditem = modifieditem.concat(cData);
+                        }
+
+                    });
+                    item.childrenData = modifieditem;
+                }
+
+                Accessablefeatures = Accessablefeatures.concat(item);
             }
-             
-           Accessablefeatures = Accessablefeatures.concat(item);
-        }
         });
-        
-        this.setState({availableRoute : Accessablefeatures});
+
+        this.setState({ availabelRoute: Accessablefeatures });
 
     }
 
     render() {
         return (
 
-           this.state.availableRoute.map((prop, key) => {
+            this.state.availabelRoute.map((prop, key) => {
                 if (prop.children === false && prop.name !== "Customization")
                     return (<Route path={prop.path} component={prop.component} key={key} />);
                 //-----------------------------------
@@ -68,7 +64,7 @@ class ContentArea extends Component {
                 }
                 //--------------------------
                 if (prop.children === true && prop.name !== "Customization") {
-                   
+
                     return (<SubMenuContentArea childrendata={prop.childrenData} />);
                 }
             })

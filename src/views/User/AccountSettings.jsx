@@ -272,7 +272,7 @@ class ChangePassword extends Component {
             blnError = true;
         }
         else if (!pattern.test(String(newPassword))) {
-            this.setState({ errorNewPassword: "Password should be minimum 8 and maximum 20 characters with atleast 1 uppercase letters, 1 lowercase letters, 1 numbers, and 1 special characters." });
+            this.setState({ errorNewPassword:"The password you entered does not meet the password policy"  });
             blnError = true;
         }
         if (confirmPassword === "" || confirmPassword === null || confirmPassword === undefined) {
@@ -344,7 +344,7 @@ class ChangePassword extends Component {
             <div className="change-password-card" >
                 <div className="card-header p-0 border-0 mb-4" >
                     <b className="change-password-text" >Change password</b>
-                    <div className="password-pattern-text">We recommend that you set a strong password that is at least 8 characters long and includes a mix of letters, numbers and symbols.</div>
+                    <div className="password-pattern-text">Our password policy requires you set a strong password that is 8 - 20 characters long, and includes a mix of letters, numbers and symbols. </div>
                 </div>
                 <div className="card-body p-0  border-0 pt-2 scrollbar" id="style-4"  >  {/*  style={{ height: "55.4vh" }} */}
 

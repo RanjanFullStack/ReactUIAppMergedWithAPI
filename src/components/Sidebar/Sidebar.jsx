@@ -9,9 +9,10 @@ import { MasterBFLOWDataService } from "../../configuration/services/MasterDataS
 import { RoleBFLOWDataService } from "../../configuration/services/RolesDataService";
 import confirmIcon from '../../assets/fonts/confirm.svg';
 import cancelIcon from '../../assets/fonts/cancel.svg';
+import {SharedServices} from '../../configuration/services/SharedService';
 
 import { withGlobalState } from 'react-globally'
-const AlertBanner = React.lazy(() => import('../../components/AlertBanner/index'));
+const AlertBanner = React.lazy(() => SharedServices.retry(()=> import('../../components/AlertBanner/index')));
 
 class Sidebar extends Component {
    constructor(props, context) {
@@ -27,7 +28,7 @@ class Sidebar extends Component {
          showErrorMesage: false,
          errorMessage: '',
          errorMessageType: '',
-         availableRoute: [],
+          availabelRoute: [],
          showMasterAddButton: false,
          isFirstLogin:false
       };
@@ -64,7 +65,7 @@ class Sidebar extends Component {
       let features = this.props.globalState.features;
       let Accessablefeatures = [];
 
-      if (features === undefined) {
+      if (features.length === 0) {
          features = await RoleBFLOWDataService.getUserRoles();
          this.props.setGlobalState({ features: features });
       }
@@ -75,7 +76,7 @@ class Sidebar extends Component {
          }
       });
 
-      this.setState({ availableRoute: Accessablefeatures });
+      this.setState({  availabelRoute: Accessablefeatures });
 
       if (this.state.ActiveSelectMenu === '') {
          const menuname = localStorage.getItem("MenuName")
@@ -102,7 +103,7 @@ class Sidebar extends Component {
             return (
                <>
 
-                  <li class="list-group-item rounded-0  border-right-0 border-left-0 w-100  border-top-0 common-default-color  sidebar-mainmenu ml-1 sidebar">
+                  <li class="sidenav rounded-0  border-right-0 border-left-0 w-100  border-top-0 common-default-color  sidebar-mainmenu ml-1 sidebar">
 
                      <div>
                         <input type="text"
@@ -111,7 +112,9 @@ class Sidebar extends Component {
                            name="MasterName"
                            ref={node => this.MasterName = node}
                            autoFocus={true}
+                           style={{color: "#fffff !important"}}
                            class="form-control form-control-no-border rounded-0 border-right-0 border-left-0 ml-0 border-top-0   d-inline pr-1 common-default-color sidebar" style={{ color: "white" }} />
+                    
                      </div>
                      <div className="h-30 w-100 pr-3">
                         <div className="float-left w-70 h-30">
@@ -123,7 +126,7 @@ class Sidebar extends Component {
 
                      </div>
                   </li>
-                  {/* <li class="list-group-item  common-default-color col-auto sidebar-mainmenu pt-0 sidebarbutton w-100 h-50" >
+                  {/* <li class="sidenav  common-default-color col-auto sidebar-mainmenu pt-0 sidebarbutton w-100 h-50" >
 
 
 </li> */}
@@ -134,7 +137,7 @@ class Sidebar extends Component {
          }
          else {
             return (
-               <li class="list-group-item border-0 common-default-color col-auto sidebar-mainmenu ml-4 text-truncate">
+               <li class="sidenav border-0 common-default-color col-auto sidebar-mainmenu ml-4 text-truncate">
                   <i onClick={this.ShowTextBox} aria-controls="configuration-collapse" class="fa fa-plus MasterAdd cursor-pointer text-truncate" aria-hidden="true" name="link_ShowText">Add to Preferences</i></li>
             )
          }
@@ -181,7 +184,7 @@ class Sidebar extends Component {
 
 
    async AddMaster() {
-      const body = JSON.stringify({ Name: this.MasterName.value });
+      const body = JSON.stringify({ Name: this.MasterName.value,order:0 });
       const message = await BFLOWDataService.post('Masters', body);
       if (message.Code === false && message.Code !== undefined) {
          this.setState({
@@ -232,10 +235,10 @@ class Sidebar extends Component {
             <div  className={this.state.isFirstLogin==="true" ?'disable-div ':' '} >
                <ul className="list-group" name="SideBarList">
                   <a href='#' className='header-logo'><img src={logo} /></a>
-                  {this.state.availableRoute.map((prop, key) => {
+                  {this.state. availabelRoute.map((prop, key) => {
                       if (!prop.redirect && prop.children === false && prop.IsInternal !== true)
                         return (
-                           <li key={key} class={prop.name === this.state.ActiveSelectMenu ? "list-group-item border-0 common-default-color p-1 Sidebaractive" : "list-group-item border-0 common-default-color p-1"}>
+                           <li key={key} class={prop.name === this.state.ActiveSelectMenu ? "sidenav border-0 common-default-color p-1 Sidebaractive" : "sidenav border-0 common-default-color p-1"}>
                               <Link to={prop.path}
                                  onClick={() => this.ShowSelectMenu(prop.name, prop.name)}
                                  className="sidebar-mainmenu"
@@ -248,7 +251,7 @@ class Sidebar extends Component {
                      //------------------------------------------
                      if (prop.name === "Customization")
                         return (
-                           <li key={key} class="list-group-item border-0 common-default-color pl-1  pt-2 pb-1 pr-1"  >
+                           <li key={key} class="sidenav border-0 common-default-color pl-1  pt-2 pb-1 pr-1"  >
                               <div className={prop.name === this.state.ActiveMenu ? "Sidebaractive h-35" : "h-35"}>
                                  <Link
                                     onClick={() => this.ToggleMenuCollapse(prop.name)}
@@ -274,7 +277,7 @@ class Sidebar extends Component {
                                        {this.props.globalState.ConfigurationMenu.map((data, key) => {
                                           if (!prop.redirect)
                                              return (
-                                                <li key={key} className={parseInt(this.state.ActiveSelectMenu) === data.id ? "list-group-item border-0 common-default-color pr-1 pb-1 pt-1 Sidebaractive" : "list-group-item border-0 common-default-color pr-1 pb-1 pt-1"} >
+                                                <li key={key} className={parseInt(this.state.ActiveSelectMenu) === data.id ? "sidenav border-0 common-default-color pr-1 pb-1 pt-1 Sidebaractive" : "sidenav border-0 common-default-color pr-1 pb-1 pt-1"} >
                                                    <Link to={`/Master/${data.id}`}
                                                       onClick={() => this.ShowSelectMenu(data.id, "Preferences")}
                                                       className="sidebar-mainmenu"
@@ -305,7 +308,7 @@ class Sidebar extends Component {
 
                      if (prop.children === true)
                         return (
-                           <li key={key} class="list-group-item border-0 common-default-color p-1 text-truncate" >
+                           <li key={key} class="sidenav border-0 common-default-color p-1 text-truncate" >
                               <div className={prop.name === this.state.ActiveMenu ? "Sidebaractive h-35" : "h-35"}>
                                  <Link to={prop.path}
                                     onClick={() => this.ToggleMenuCollapse(prop.name)}
@@ -327,7 +330,7 @@ class Sidebar extends Component {
                                        {prop.childrenData.map((data, key) => {
                                           if (!prop.redirect && prop.IsInternal!==true)
                                              return (
-                                                <li key={key} className={data.name === this.state.ActiveSelectMenu ? "list-group-item border-0 common-default-color  Sidebaractive pt-2 pb-2" : "list-group-item border-0 common-default-color pt-2 pb-2"}>
+                                                <li key={key} className={data.name === this.state.ActiveSelectMenu ? "sidenav border-0 common-default-color  Sidebaractive pt-2 pb-2" : "sidenav border-0 common-default-color pt-2 pb-2"}>
                                                    <Link to={data.path}
                                                       onClick={() => this.ShowSelectMenu(data.name, data.name)}
                                                       className="sidebar-mainmenu"
